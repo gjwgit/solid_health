@@ -14,9 +14,11 @@ pop out menu.
 
 The menu items include:
 
-+ Obs (A feature to record daily or regular observations like blood
-  pressure, physical activity, etc)
++ Obs (A feature to record daily or regular observations like
+  blood pressure, physical activity, etc)
   
++ Activity (A record of activities recording date, start, end, what)
+
 + Diary (A record of visits to doctors, dentists, pharmacy,
   vaccinations, etc. Each diary entry records: date, what, details,
   provider, professional, total, covered, cost)
