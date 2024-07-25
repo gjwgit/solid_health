@@ -35,7 +35,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:healthpod/main.dart';
-import 'package:healthpod/features/key_value_editor.dart.~1~';
+import 'package:healthpod/features/key_value_editor.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/rdf.dart';
 

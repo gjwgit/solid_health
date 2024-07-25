@@ -30,7 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/dialogs/alert.dart';
-import 'package:healthpod/dialogs/show_my_about.dart.~1~';
+import 'package:healthpod/dialogs/show_my_about.dart';
 import 'package:healthpod/main.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/rdf.dart';
