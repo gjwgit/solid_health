@@ -1,16 +1,33 @@
-# healthpod
+# Health Pod
 
-A new Flutter project.
+The Health Pod collects into one private and secure location all of
+your health data and medical records. You then decide if you want to
+share that data with anyone else.
 
-## Getting Started
+## Design Goals
 
-This project is a starting point for a Flutter application.
+The app works well on a desktop, web browsers, or on a mobile phone or
+tablet.
 
-A few resources to get you started if this is your first Flutter project:
+For desktop there is a left hand menu whereas for phone it becomes a
+pop out menu.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The menu items include:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
++ Obs (A feature to record daily or regular observations like blood
+  pressure, physical activity, etc)
+  
++ Diary (A record of visits to doctors, dentists, pharmacy,
+  vaccinations, etc. Each diary entry records: date, what, details,
+  provider, professional, total, covered, cost)
+  
++ Docs (A file browser type of thing where the user can arrange their
+  PDFs into appropriate folders as they like.)
+
+## Use Cases
+
++ I am visiting the doctor and I need to check when I last had a
+  vaccination
+
++ A LLM model runs over the whole contents of the Pod to then allow me
+  to interact with the data collection.
