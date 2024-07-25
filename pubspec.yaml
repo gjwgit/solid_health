@@ -1,0 +1,103 @@
+name: healthpod
+description: "Secure storage of Health and Medical Records in your Solid Pod."
+publish_to: "none"
+version: 0.0.1+1
+
+environment:
+  sdk: ">=3.2.3 <4.0.0"
+
+# Dependencies specify other packages that your package needs in order
+# to work.  To automatically upgrade your package dependencies to the
+# latest versions consider running `flutter pub upgrade
+# --major-versions`. Alternatively, dependencies can be manually
+# updated by changing the version numbers below to the latest version
+# available on pub.dev. To see which dependencies have newer versions
+# available, run `flutter pub outdated`.
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_launcher_icons: ^0.13.1
+  flutter_markdown: ^0.7.3
+  path: ^1.9.0
+  rdflib: ^0.2.9
+
+  solidpod:
+    git:
+      url: https://github.com/anusii/solidpod
+      ref: dev
+
+  universal_io: ^2.2.2
+  window_manager: ^0.3.9
+
+dev_dependencies:
+
+  dart_code_metrics:
+    git:
+      url: https://github.com/anusii/dart-code-metrics.git
+      ref: dev
+
+  flutter_test:
+    sdk: flutter
+
+  # Mockito is used for mock up testing. See `test/mocks.dart`.
+
+  mockito: ^5.4.4
+
+  ubuntu_lints: ^0.4.0
+
+dependency_overrides:
+  # TODO 20240710 gjw dart-code-metrics DEPENDENCY ON pub_updater PROBLEM
+  #
+  # If Zheyuan can fix his dart-code-metrics fork this can probably be
+  # removed.
+  
+  file: ^7.0.0 # Use only if necessary
+
+  # TODO 20240710 gjw solid-auth DEPENDS ON intl-0.19.0
+  #
+  # This may require Anushka's update. We will want to remove this
+  # override asap.
+  
+  intl: ^0.19.0 
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+
+  uses-material-design: true
+
+  # Add assets to the app.
+
+  assets:
+    - assets/images/healthpod_image.png
+    - assets/images/healthpod_logo.png
+
+# Define launcher icons for all platforms (except Linux) so icons for
+# the apps can be automatically updated.
+
+flutter_launcher_icons:
+  image_path: "assets/images/healthpod_logo.png"
+  android: true
+  min_sdk_android: 21
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#ffffff"
+  macos:
+    generate: true
+  web:
+    generate: true
+    background_color: "#ffffff"
+    theme_color: "#ffffff"
+  windows:
+    generate: true
+    icon_size: 48 # min:48, max:256, default: 48
+
