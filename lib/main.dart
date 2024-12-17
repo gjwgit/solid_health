@@ -1,6 +1,6 @@
 /// A template app to begin a Solid Pod project.
 //
-// Time-stamp: <Thursday 2024-07-25 19:44:49 +1000 Graham Williams>
+// Time-stamp: <Wednesday 2024-09-04 09:56:31 +1000 Graham Williams>
 //
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -94,7 +94,7 @@ class HealthPod extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Solid Key Pod',
+      title: 'Solid Health Pod',
       home: SelectionArea(
         // Wrap the whole app inside a SelectionArea to ensure we get selectable
         // text, for text that can be selected, as a default.
