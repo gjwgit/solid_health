@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/utils/show_comming_soon_dialog.dart';
+
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
     Icons.home,
@@ -18,56 +20,60 @@ class IconGridPage extends StatelessWidget {
 
   IconGridPage({super.key});
 
-  void _showComingSoonDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Coming Soon'),
-        content: const Text('This feature is coming soon.'),
-        actions: [
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Icon Grid'),
+        title: const Text('What would you like to do today ...'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
-            crossAxisSpacing: 10.0,
-            mainAxisSpacing: 10.0,
-          ),
-          itemCount: icons.length,
-          itemBuilder: (context, index) {
+        child: Wrap(
+          spacing: 10.0, // Space between icons horizontally
+          runSpacing: 10.0, // Space between icons vertically
+          children: icons.map((icon) {
             return GestureDetector(
-              onTap: () => _showComingSoonDialog(context),
+              onTap: () => showComingSoonDialog(context),
               child: Container(
+                width: 80.0, // Fixed width for each icon container
+                height: 80.0, // Fixed height for each icon container
                 decoration: BoxDecoration(
                   color: Colors.blue,
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Icon(
-                  icons[index],
+                  icon,
                   color: Colors.white,
                   size: 50.0,
                 ),
               ),
             );
-          },
+          }).toList(),
         ),
+        // child: GridView.builder(
+        //   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        //     crossAxisCount: 5,
+        //     crossAxisSpacing: 10.0,
+        //     mainAxisSpacing: 10.0,
+        //   ),
+        //   itemCount: icons.length,
+        //   itemBuilder: (context, index) {
+        //     return GestureDetector(
+        //       onTap: () => showComingSoonDialog(context),
+        //       child: Container(
+        //         decoration: BoxDecoration(
+        //           color: Colors.blue,
+        //           borderRadius: BorderRadius.circular(10.0),
+        //         ),
+        //         child: Icon(
+        //           icons[index],
+        //           color: Colors.white,
+        //           size: 50.0,
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // ),
       ),
     );
   }

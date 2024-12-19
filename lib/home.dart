@@ -1,6 +1,6 @@
 /// The home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2024-12-19 13:20:08 +1100 Graham Williams>
+// Time-stamp: <Thursday 2024-12-19 13:29:20 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -28,7 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/widgets/icon_grid_page.dart.~1~';
+import 'package:healthpod/widgets/icon_grid_page.dart';
 
 class HealthPodHome extends StatefulWidget {
   /// Constructor for the home screen.
@@ -49,7 +49,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Health Your Data... '),
+        title: const Text('Your Health - Your Data - You Decide ... '),
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
       ),
