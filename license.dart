@@ -1,12 +1,12 @@
-/// Color constants used throughout the app.
+/// <DESCRIPTION>
+//
+// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+//
+/// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
-// Time-stamp: <Thursday 2024-12-19 13:34:30 +1100 Graham Williams>
+/// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
-///
-/// Licensed under the GNU General Public License, Version 3 (the "License").
-///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -21,12 +21,6 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Graham Williams
+/// Authors: <AUTHORS>
 
 library;
-
-import 'package:flutter/material.dart';
-
-const titleBackgroundColor = Color(0xFFF0E4D7);
-
-const iconColor = Colors.orange;
