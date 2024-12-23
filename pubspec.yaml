@@ -78,7 +78,7 @@ flutter:
   # Add assets to the app.
 
   assets:
-    - assets/images/healthpod_image.png
+    - assets/images/healthpod_background.png
     - assets/images/healthpod_logo.png
 
 # Define launcher icons for all platforms (except Linux) so icons for

@@ -21,40 +21,56 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Kevin Wang, Graham Williams
-
-library;
+/// Authors: Kevin Wang, Graham Williams, Ashley Tang
 
 import 'package:flutter/material.dart';
-
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 
-class HealthPodHome extends StatefulWidget {
-  /// Constructor for the home screen.
+class HomeScreen extends StatelessWidget {
+  final String webId;
 
-  const HealthPodHome({super.key});
+  const HomeScreen({Key? key, required this.webId}) : super(key: key);
 
-  @override
-  HealthPodHomeState createState() => HealthPodHomeState();
-}
-
-class HealthPodHomeState extends State<HealthPodHome> {
-  @override
-  void initState() {
-    super.initState();
+  Future<void> logout(BuildContext context) async {
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Health - Your Data - You Decide ... '),
-        backgroundColor: titleBackgroundColor,
+        title: const Text('HealthPod Home'),
+        backgroundColor: Colors.lightGreen,
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => logout(context),
+          ),
+        ],
       ),
-      backgroundColor: titleBackgroundColor,
-      body: IconGridPage(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const Text(
+                  'Your Health - Your Data - You Decide ...',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          Expanded(
+            child: IconGridPage(), 
+          ),
+        ],
+      ),
     );
   }
 }
