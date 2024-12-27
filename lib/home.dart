@@ -22,6 +22,7 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Kevin Wang, Graham Williams, Ashley Tang
+library;
 
 import 'package:flutter/material.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
@@ -29,7 +30,7 @@ import 'package:healthpod/widgets/icon_grid_page.dart';
 class HomeScreen extends StatelessWidget {
   final String webId;
 
-  const HomeScreen({Key? key, required this.webId}) : super(key: key);
+  const HomeScreen({super.key, required this.webId});
 
   Future<void> logout(BuildContext context) async {
     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);

@@ -22,6 +22,7 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Ashley Tang
+library;
 
 
 import 'package:flutter/material.dart';
@@ -30,7 +31,9 @@ import 'package:healthpod/home.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController webIdController = TextEditingController()
-    ..text = 'https://pods.solidcommunity.au'; // Default WebID
+    ..text = 'https://pods.solidcommunity.au';
+
+  LoginScreen({super.key}); // Default WebID
 
   @override
   Widget build(BuildContext context) {
@@ -93,9 +96,12 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         onPressed: () async {
+                          final navigator = Navigator.of(context);
+                          final messenger = ScaffoldMessenger.of(context);
                           final webId = webIdController.text;
+                          
                           if (webId.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(
                                 content: Text('WebID cannot be empty'),
                               ),
@@ -104,23 +110,19 @@ class LoginScreen extends StatelessWidget {
                           }
 
                           try {
-                            final authData = await authenticate(
+                            await authenticate(
                               Uri.parse(webId),
                               ['openid', 'profile', 'offline_access'],
                               context,
                             );
 
-                            if (authData != null) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      HomeScreen(webId: webId),
-                                ),
-                              );
-                            }
+                            navigator.pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => HomeScreen(webId: webId),
+                              ),
+                            );
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(
                                 content: Text('Login failed: $e'),
                               ),

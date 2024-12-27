@@ -22,6 +22,7 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Ashley Tang
+library;
 
 
 import 'package:flutter/material.dart';
@@ -30,6 +31,9 @@ import 'package:solid_auth/solid_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<bool> logout(BuildContext context, String logoutUrl) async {
+  final navigator = Navigator.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+
   try {
     if (await canLaunchUrl(Uri.parse(logoutUrl))) {
       await launchUrl(
@@ -43,20 +47,17 @@ Future<bool> logout(BuildContext context, String logoutUrl) async {
     await Future.delayed(const Duration(seconds: 4));
 
     if (currPlatform.isWeb()) {
-      // Replace this with your specific web logout logic
       authManager.userLogout(logoutUrl);
     }
 
-    // Navigate to the login screen
-    Navigator.pushAndRemoveUntil(
-      context,
+    navigator.pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
 
     return true;
   } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(content: Text('Logout failed: $e')),
     );
     return false;

@@ -22,6 +22,7 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Graham Williams, Ashley Tang
+library;
 
 import 'package:flutter/material.dart';
 import 'package:healthpod/login/login_screen.dart';
@@ -35,7 +36,7 @@ void main() async {
 }
 
 class HealthPodApp extends StatelessWidget {
-  const HealthPodApp({Key? key}) : super(key: key);
+  const HealthPodApp({super.key});
 
   @override
   Widget build(BuildContext context) {
