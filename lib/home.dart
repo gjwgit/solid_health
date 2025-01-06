@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
+import 'package:healthpod/utils/handle_logout.dart';
 
 class HealthPodHome extends StatefulWidget {
   /// Constructor for the home screen.
@@ -52,6 +53,13 @@ class HealthPodHomeState extends State<HealthPodHome> {
         title: const Text('Your Health - Your Data - You Decide ... '),
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () => handleLogout(context),
+          ),
+        ],
       ),
       backgroundColor: titleBackgroundColor,
       body: IconGridPage(),
