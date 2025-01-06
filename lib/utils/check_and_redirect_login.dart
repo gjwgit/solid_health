@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:healthpod/home.dart';
-import 'package:solidpod/solidpod.dart' show SolidLogin, getWebId;
+import 'package:solidpod/solidpod.dart' show getWebId;
 import 'package:healthpod/utils/create_solid_login.dart';
 
 /// Checks if the user is logged in and navigates appropriately
