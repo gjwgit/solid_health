@@ -93,8 +93,10 @@ class HealthPod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    checkAndRedirectLogin(context); // Use the utility function
+    // Redirect the user to login if they are not logged in
+    checkAndRedirectLogin(context);
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Solid Health Pod',
       home: SelectionArea(
         // Wrap the whole app inside a SelectionArea to ensure we get selectable

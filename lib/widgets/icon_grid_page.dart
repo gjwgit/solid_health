@@ -1,4 +1,4 @@
-/// <DESCRIPTION>
+/// Icon grid page for the home screen.
 //
 // Time-stamp: <Thursday 2024-12-19 13:39:36 +1100 Graham Williams>
 //
@@ -21,13 +21,14 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: <AUTHORS>
+/// Authors: Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/dialogs/show_comming_soon.dart';
+import 'package:healthpod/features/file/service.dart';
 
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
@@ -43,6 +44,7 @@ class IconGridPage extends StatelessWidget {
     Icons.work,
     Icons.wifi,
     Icons.alarm,
+    Icons.folder,
   ];
 
   IconGridPage({super.key});
@@ -60,7 +62,17 @@ class IconGridPage extends StatelessWidget {
           runSpacing: 10.0, // Space between icons vertically
           children: icons.map((icon) {
             return GestureDetector(
-              onTap: () => showComingSoon(context),
+              onTap: () {
+                if (icon == Icons.folder) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FileService()),
+                  );
+                } else {
+                  showComingSoon(context); // For other icons.
+                }
+              },
               child: Container(
                 width: 80.0, // Fixed width for each icon container
                 height: 80.0, // Fixed height for each icon container

@@ -15,6 +15,7 @@ environment:
 # available, run `flutter pub outdated`.
 
 dependencies:
+  file_picker: ^8.1.7
   flutter:
     sdk: flutter
 
