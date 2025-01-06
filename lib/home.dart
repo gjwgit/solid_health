@@ -26,7 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/utils/session_utils.dart'; 
+import 'package:healthpod/utils/session_utils.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
@@ -55,7 +55,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            onPressed: () => handleLogout(context), 
+            onPressed: () => handleLogout(context),
           ),
         ],
       ),

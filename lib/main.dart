@@ -29,9 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:healthpod/home.dart';
 import 'package:healthpod/utils/is_desktop.dart';
-import 'package:healthpod/utils/session_utils.dart'; 
-
-
+import 'package:healthpod/utils/session_utils.dart';
 
 void main() async {
   if (isDesktop(PlatformWrapper())) {

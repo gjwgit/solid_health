@@ -4,7 +4,7 @@ import 'package:solidpod/solidpod.dart' show SolidLogin, getWebId, logoutPopup;
 
 /// Handles logout and navigates to the login screen
 Future<void> handleLogout(BuildContext context) async {
-  await logoutPopup(context, const HealthPodHome()); 
+  await logoutPopup(context, const HealthPodHome());
 
   // Check login status using getWebId
   final webId = await getWebId();
@@ -18,7 +18,7 @@ Future<void> handleLogout(BuildContext context) async {
           image: AssetImage('assets/images/healthpod_image.png'),
           logo: AssetImage('assets/images/healthpod_logo.png'),
           link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-          child: HealthPodHome(), 
+          child: HealthPodHome(),
         ),
       ),
     );
@@ -44,7 +44,7 @@ Future<void> checkAndRedirectLogin(BuildContext context) async {
               image: AssetImage('assets/images/healthpod_image.png'),
               logo: AssetImage('assets/images/healthpod_logo.png'),
               link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-              child: HealthPodHome(), 
+              child: HealthPodHome(),
             ),
           ),
         );
