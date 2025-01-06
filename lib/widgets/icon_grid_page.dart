@@ -28,21 +28,14 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/dialogs/show_comming_soon.dart';
+import 'package:healthpod/services/file_service.dart';
 
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
     Icons.home,
     Icons.star,
     Icons.settings,
-    Icons.phone,
-    Icons.email,
-    Icons.camera_alt,
-    Icons.map,
-    Icons.music_note,
-    Icons.shopping_cart,
-    Icons.work,
-    Icons.wifi,
-    Icons.alarm,
+    Icons.folder,
   ];
 
   IconGridPage({super.key});
@@ -60,7 +53,16 @@ class IconGridPage extends StatelessWidget {
           runSpacing: 10.0, // Space between icons vertically
           children: icons.map((icon) {
             return GestureDetector(
-              onTap: () => showComingSoon(context),
+              onTap: () {
+                if (icon == Icons.folder) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FileService()),
+                  );
+                }  else {
+                  showComingSoon(context); // For other icons.
+                }
+              },
               child: Container(
                 width: 80.0, // Fixed width for each icon container
                 height: 80.0, // Fixed height for each icon container

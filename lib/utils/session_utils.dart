@@ -13,6 +13,7 @@ Future<void> handleLogout(BuildContext context) async {
       context,
       MaterialPageRoute(
         builder: (context) => const SolidLogin(
+          appDirectory: 'healthpod/docs',
           required: false,
           title: 'HEALTH POD',
           image: AssetImage('assets/images/healthpod_image.png'),
@@ -44,7 +45,7 @@ Future<void> checkAndRedirectLogin(BuildContext context) async {
               image: AssetImage('assets/images/healthpod_image.png'),
               logo: AssetImage('assets/images/healthpod_logo.png'),
               link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-              child: HealthPodHome(), 
+              child: HealthPodHome(),
             ),
           ),
         );
@@ -53,4 +54,14 @@ Future<void> checkAndRedirectLogin(BuildContext context) async {
       debugPrint('Error in checkAndRedirectLogin: $e');
     }
   });
+}
+
+/// Safe wrapper for `getWebId` to handle exceptions gracefully.
+Future<String?> safeGetWebId() async {
+  try {
+      return await getWebId();
+    } catch (e) {
+      debugPrint('Error fetching WebID: $e');
+      return null;
+  }
 }

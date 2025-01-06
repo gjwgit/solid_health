@@ -55,7 +55,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            onPressed: () => handleLogout(context), 
+            onPressed: () => handleLogout(context),
           ),
         ],
       ),
