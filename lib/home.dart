@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2024-12-19 13:34:03 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:12:37 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -21,19 +21,17 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Kevin Wang, Graham Williams
+/// Authors: Kevin Wang, Graham Williams, Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/widgets/icon_grid_page.dart';
 import 'package:healthpod/utils/handle_logout.dart';
+import 'package:healthpod/widgets/icon_grid_page.dart';
 
 class HealthPodHome extends StatefulWidget {
-  /// Constructor for the home screen.
-
   const HealthPodHome({super.key});
 
   @override

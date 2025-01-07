@@ -1,4 +1,4 @@
-/// Icon grid page for the home screen.
+/// Icon grid page.
 //
 // Time-stamp: <Thursday 2024-12-19 13:39:36 +1100 Graham Williams>
 //
@@ -22,12 +22,13 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Ashley Tang
+/// Authors: Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/dialogs/show_comming_soon.dart';
+import 'package:healthpod/dialogs/show_coming_soon.dart';
 import 'package:healthpod/features/file/service.dart';
 
 class IconGridPage extends StatelessWidget {
