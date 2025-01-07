@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Thursday 2024-12-19 13:39:36 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:54:11 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -28,7 +28,10 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/show_coming_soon.dart';
+import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/dialogs/show_comming_soon.dart';
 import 'package:healthpod/features/file/service.dart';
 
 class IconGridPage extends StatelessWidget {
@@ -46,6 +49,7 @@ class IconGridPage extends StatelessWidget {
     Icons.wifi,
     Icons.alarm,
     Icons.folder,
+    Icons.lightbulb,
   ];
 
   IconGridPage({super.key});
@@ -70,6 +74,9 @@ class IconGridPage extends StatelessWidget {
                     MaterialPageRoute(
                         builder: (context) => const FileService()),
                   );
+                if (icon == Icons.lightbulb) {
+                  alert(context,
+                      'Using the alert dialog to avoid a lint message for now.');
                 } else {
                   showComingSoon(context); // For other icons.
                 }
@@ -83,7 +90,7 @@ class IconGridPage extends StatelessWidget {
                 ),
                 child: Icon(
                   icon,
-                  color: Colors.white,
+                  color: iconColor,
                   size: 50.0,
                 ),
               ),

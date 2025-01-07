@@ -21,6 +21,7 @@ dependencies:
   file_picker: ^8.1.7
   flutter_launcher_icons: ^0.13.1
   flutter_markdown: ^0.7.3
+  markdown_tooltip: ^0.0.2
   path: ^1.9.0
   rdflib: ^0.2.9
   solidpod: ^0.6.4
@@ -38,6 +39,26 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
+
+dependency_overrides:
+  # TODO 20240710 gjw dart-code-metrics DEPENDENCY ON pub_updater PROBLEM
+  #
+  # If Zheyuan can fix his dart-code-metrics fork this can probably be
+  # removed.
+
+  file: ^7.0.0 # Use only if necessary
+
+  # TODO 20240710 gjw solid-auth DEPENDS ON intl-0.19.0
+  #
+  # This may require Anushka's update. We will want to remove this
+  # override asap.
+
+  intl: ^0.19.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
 
 flutter:
   uses-material-design: true

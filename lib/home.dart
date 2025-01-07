@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Tuesday 2025-01-07 14:12:37 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:44:15 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -27,7 +27,10 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:markdown_tooltip/markdown_tooltip.dart';
+
 import 'package:healthpod/constants/colours.dart';
+import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 
@@ -56,6 +59,25 @@ class HealthPodHomeState extends State<HealthPodHome> {
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () => handleLogout(context),
+          MarkdownTooltip(
+            message: '''
+
+            **About:** Tap here to view information about the Rattle
+            project. This include a list of those who have contributed to the
+            latest version of the software, *Verison 6.* It also includes the
+            extensive list of open-source packages that Rattle is built on and
+            their licences.
+
+            ''',
+            child: IconButton(
+              onPressed: () {
+                showAbout(context);
+              },
+              icon: const Icon(
+                Icons.info,
+                color: Colors.blue,
+              ),
+            ),
           ),
         ],
       ),
