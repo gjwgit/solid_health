@@ -22,7 +22,6 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Graham Williams, Ashley Tang
-/// Authors: Graham Williams, Ashley Tang
 
 library;
 
@@ -99,7 +98,7 @@ class HealthPod extends StatelessWidget {
       home: SelectionArea(
         // Wrap the whole app inside a SelectionArea to ensure we get selectable
         // text, for text that can be selected, as a default.
-        
+
         child: createSolidLogin(context),
       ),
     );
