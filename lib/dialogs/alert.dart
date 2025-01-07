@@ -25,7 +25,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-// Show an alert dialog
+/// Show an alert dialog.
+
 Future<void> alert(
   BuildContext context,
   String msg, [
