@@ -32,10 +32,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/home.dart';
 
 /// Creates a SolidLogin widget with consistent configuration.
-///
-/// This widget handles user authentication and connects the app to the user's Pod.
-/// It provides options for caching login credentials and using a login popup
-/// during the session if required.
+
 Widget createSolidLogin(BuildContext context) {
   return const SolidLogin(
     // If the app has functionality that does not require access to Pod
@@ -49,6 +46,7 @@ Widget createSolidLogin(BuildContext context) {
     // save the data to the Pod or view data from the Pod, then if the
     // user did not log in during startup we can call [SolidLoginPopup] to
     // establish the connection at that time.
+
     required: false,
     title: 'HEALTH POD',
     image: AssetImage('assets/images/healthpod_image.png'),

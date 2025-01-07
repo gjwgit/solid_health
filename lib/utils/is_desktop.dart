@@ -44,6 +44,7 @@ bool isDesktop(PlatformWrapper platformWrapper) {
 // PlatformWrapper coverage is ignored as it is created to test isDesktop() and
 // Platform and kIsWeb are not mockable.
 // coverage:ignore-start
+
 class PlatformWrapper {
   /// Wraps the Platform class to allow mocking for testing.
   bool get isLinux => Platform.isLinux;

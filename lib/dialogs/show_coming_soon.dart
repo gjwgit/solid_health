@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+// Shows a "Coming Soon" dialog.
+
 void showComingSoon(BuildContext context) {
   showDialog(
     context: context,

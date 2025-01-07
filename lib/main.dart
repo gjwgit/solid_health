@@ -36,14 +36,38 @@ import 'package:healthpod/utils/is_desktop.dart';
 
 
 void main() async {
+  // This is the main entry point for the app. The [async] is required because
+  // we asynchronously [await] the window manager below. Often, `main()` will
+  // simply include just [runApp].
+
   if (isDesktop(PlatformWrapper())) {
+    // Suport [windowManager] options for the desktop. We do this here before
+    // running the app. If there is no [windowManager] options we probably don't
+    // need this whole section.
+
+    // Ensure things are set up properly since we haven't yet initialised the
+    // app with [runApp].
+
     WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
 
     const windowOptions = WindowOptions(
+      // We can set various desktop window options here.
+
+      // Setting [alwaysOnTop] here will ensure the app starts on top of other
+      // apps on the desktop so that it is visible (otherwise, Ubuuntu with
+      // GNOME it is often lost below other windows on startup which can be a
+      // little disconcerting). We later turn it off as we don't want to force
+      // it always on top.
+
       alwaysOnTop: true,
+
+      // The [title] is used for the window manager's window title.
+
       title: 'HealthPod - Private Solid Pod for Storing Key-Value Pairs',
     );
+
+    // Once the window manager is ready we reconfigure it a little.
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
@@ -52,11 +76,21 @@ void main() async {
     });
   }
 
+  // Ready to run the app.
+
   runApp(const HealthPod());
 }
 
+// The main widget could be in a separate file, but handy having it in main and
+// the file is not too large. The widget essentially orchestrates the building
+// of other widgets. Generically we set up to build a `Home()` widget containing
+// the App. For SolidPod we wrap the `Home()` widget within the `SolidLogin()`
+// widget so we start with a login screen, though this is optional.
+
 class HealthPod extends StatelessWidget {
   const HealthPod({super.key});
+
+  // This StatelessWidget is the root of our application.
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +99,7 @@ class HealthPod extends StatelessWidget {
       home: SelectionArea(
         // Wrap the whole app inside a SelectionArea to ensure we get selectable
         // text, for text that can be selected, as a default.
+        
         child: createSolidLogin(context),
       ),
     );

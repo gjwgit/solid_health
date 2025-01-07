@@ -34,15 +34,12 @@ import 'package:healthpod/utils/create_solid_login.dart';
 
 
 /// Handles logout and navigates to the login screen.
-///
-/// This function first calls the `logoutPopup` to log out the user. After logout,
-/// it checks if the user is still logged in using `getWebId`. If the user is no
-/// longer logged in, it navigates to the login screen. Otherwise, it displays
-/// an error message indicating the logout failed.
+
 Future<void> handleLogout(BuildContext context) async {
   await logoutPopup(context, const HealthPodHome());
 
   // Check login status using getWebId.
+
   final webId = await getWebId();
   if (webId == null && context.mounted) {
     Navigator.pushReplacement(

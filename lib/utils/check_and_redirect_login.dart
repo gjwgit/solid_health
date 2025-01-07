@@ -33,9 +33,7 @@ import 'package:solidpod/solidpod.dart' show getWebId;
 import 'package:healthpod/utils/create_solid_login.dart';
 
 /// Checks if the user is logged in and navigates appropriately.
-///
-/// This function uses the `getWebId` method to determine the user's status and,
-/// if necessary, redirects them to the login page.
+
 Future<void> checkAndRedirectLogin(BuildContext context) async {
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     try {
