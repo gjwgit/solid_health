@@ -22,18 +22,18 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Kevin Wang, Graham Williams, Ashley Tang
+/// Authors: Kevin Wang, Graham Williams, Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/utils/session_utils.dart'; 
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 
 class HealthPodHome extends StatefulWidget {
-  /// Constructor for the home screen.
-
   const HealthPodHome({super.key});
 
   @override
