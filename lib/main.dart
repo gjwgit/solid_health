@@ -1,6 +1,6 @@
 /// Your health data in your POD
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:52 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:10:07 +1100 Graham Williams>
 //
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -26,13 +26,11 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/utils/create_solid_login.dart';
 
 import 'package:window_manager/window_manager.dart';
 
-import 'package:healthpod/home.dart';
+import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
-import 'package:healthpod/utils/check_and_redirect_login.dart';
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
