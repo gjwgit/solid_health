@@ -22,14 +22,16 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Ashley Tang
+/// Authors: Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_coming_soon.dart';
+import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/features/file/service.dart';
 
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
@@ -45,6 +47,7 @@ class IconGridPage extends StatelessWidget {
     Icons.work,
     Icons.wifi,
     Icons.alarm,
+    Icons.folder,
     Icons.lightbulb,
   ];
 
@@ -64,7 +67,13 @@ class IconGridPage extends StatelessWidget {
           children: icons.map((icon) {
             return GestureDetector(
               onTap: () {
-                if (icon == Icons.lightbulb) {
+                if (icon == Icons.folder) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FileService()),
+                  );
+                } else if (icon == Icons.lightbulb) {
                   alert(context,
                       'Using the alert dialog to avoid a lint message for now.');
                 } else {

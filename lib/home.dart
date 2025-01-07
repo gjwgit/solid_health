@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Tuesday 2025-01-07 14:12:37 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:44:15 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
