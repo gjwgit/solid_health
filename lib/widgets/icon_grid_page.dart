@@ -1,6 +1,6 @@
 /// <DESCRIPTION>
 //
-// Time-stamp: <Tuesday 2025-01-07 14:23:30 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:54:11 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
+import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_comming_soon.dart';
 
 class IconGridPage extends StatelessWidget {
@@ -44,6 +45,7 @@ class IconGridPage extends StatelessWidget {
     Icons.work,
     Icons.wifi,
     Icons.alarm,
+    Icons.lightbulb,
   ];
 
   IconGridPage({super.key});
@@ -61,7 +63,14 @@ class IconGridPage extends StatelessWidget {
           runSpacing: 10.0, // Space between icons vertically
           children: icons.map((icon) {
             return GestureDetector(
-              onTap: () => showComingSoon(context),
+              onTap: () {
+                if (icon == Icons.lightbulb) {
+                  alert(context,
+                      'Using the alert dialog to avoid a lint message for now.');
+                } else {
+                  showComingSoon(context); // For other icons.
+                }
+              },
               child: Container(
                 width: 80.0, // Fixed width for each icon container
                 height: 80.0, // Fixed height for each icon container
