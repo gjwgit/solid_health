@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Tuesday 2025-01-07 14:54:11 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-01-08 09:34:26 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -21,7 +21,6 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang
 /// Authors: Ashley Tang
 
 library;
