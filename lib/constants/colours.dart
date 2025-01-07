@@ -1,6 +1,6 @@
 /// Color constants used throughout the app.
 ///
-// Time-stamp: <Thursday 2024-12-19 13:34:30 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:24:22 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -29,4 +29,4 @@ import 'package:flutter/material.dart';
 
 const titleBackgroundColor = Color(0xFFF0E4D7);
 
-const iconColor = Colors.orange;
+const iconColor = Colors.white;

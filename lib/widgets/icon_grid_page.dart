@@ -1,6 +1,6 @@
 /// <DESCRIPTION>
 //
-// Time-stamp: <Thursday 2024-12-19 13:39:36 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:23:30 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -27,6 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/show_comming_soon.dart';
 
 class IconGridPage extends StatelessWidget {
@@ -70,7 +71,7 @@ class IconGridPage extends StatelessWidget {
                 ),
                 child: Icon(
                   icon,
-                  color: Colors.white,
+                  color: iconColor,
                   size: 50.0,
                 ),
               ),
