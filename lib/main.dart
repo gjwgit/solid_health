@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/utils/create_solid_login.dart';
 
 import 'package:window_manager/window_manager.dart';
 
@@ -93,15 +94,12 @@ class HealthPod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Redirect the user to login if they are not logged in
-    checkAndRedirectLogin(context);
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
+    return MaterialApp(
       title: 'Solid Health Pod',
       home: SelectionArea(
         // Wrap the whole app inside a SelectionArea to ensure we get selectable
         // text, for text that can be selected, as a default.
-        child: HealthPodHome(),
+        child: createSolidLogin(context),
       ),
     );
   }
