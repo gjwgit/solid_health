@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Tuesday 2025-01-07 14:41:09 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:44:15 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -30,7 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/dialogs/show_about.dart.~1~';
+import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 
 class HealthPodHome extends StatefulWidget {
