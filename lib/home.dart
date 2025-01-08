@@ -22,10 +22,12 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Kevin Wang, Graham Williams, Ashley Tang
+/// Authors: Kevin Wang, Graham Williams, Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/utils/session_utils.dart'; 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
