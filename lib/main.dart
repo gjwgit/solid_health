@@ -32,8 +32,6 @@ import 'package:window_manager/window_manager.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
 
-
-
 void main() async {
   // This is the main entry point for the app. The [async] is required because
   // we asynchronously [await] the window manager below. Often, `main()` will
