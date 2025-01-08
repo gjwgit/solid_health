@@ -103,7 +103,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           Expanded(
             child: IconGridPage(),
           ),
-           Align(
+          Align(
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
