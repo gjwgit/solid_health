@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Tuesday 2025-01-07 14:12:37 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-01-09 09:13:26 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -50,7 +50,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Health - Your Data - You Decide ... '),
+        title: const Text(
+            'Your Health - Your Data - Our Advice - Your Choice ... '),
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
         actions: [
