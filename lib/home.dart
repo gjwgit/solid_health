@@ -26,6 +26,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/file/footer.dart';
+import 'package:healthpod/utils/fetch_key_saved_status.dart';
+import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
@@ -41,9 +44,23 @@ class HealthPodHome extends StatefulWidget {
 }
 
 class HealthPodHomeState extends State<HealthPodHome> {
+  String? _webId;
+  bool _isKeySaved = false;
+
   @override
   void initState() {
     super.initState();
+    _initialiseFooterData();
+  }
+
+  Future<void> _initialiseFooterData() async {
+    final webId = await fetchWebId();
+    final isKeySaved = await fetchKeySavedStatus();
+
+    setState(() {
+      _webId = webId;
+      _isKeySaved = isKeySaved;
+    });
   }
 
   @override
@@ -80,7 +97,23 @@ class HealthPodHomeState extends State<HealthPodHome> {
         ],
       ),
       backgroundColor: titleBackgroundColor,
-      body: IconGridPage(),
+      body: Column(
+        children: [
+          Expanded(
+            child: IconGridPage(),
+          ),
+           Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: FooterWidget(
+                webId: _webId,
+                isKeySaved: _isKeySaved,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
