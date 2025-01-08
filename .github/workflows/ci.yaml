@@ -56,12 +56,16 @@ jobs:
         uses: CQLabs/setup-dcm@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: dcm calculate-metrics lib 
-      - run: dcm analyze --fatal-style lib
-      # See web site - run: dcm analyze --help
-      # Total fail   - run: dcm check-unused-files lib
-      # Total fail   - run: dcm check-unused-code lib
-
+      - name: Run DCM Analysis
+        uses: CQLabs/dcm-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ci_key: ${{ secrets.DCM_CI_KEY }}
+          email: ${{ secrets.DCM_EMAIL }}
+          folders: lib
+          fatal_style: true
+          fatal_warnings: true
+      
   siidcm:
     runs-on: ubuntu-latest
     steps:
@@ -80,7 +84,7 @@ jobs:
       - run: find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
 
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -90,4 +94,4 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install -y clang cmake curl libgtk-3-dev ninja-build pkg-config unzip libunwind-dev
       - run: flutter pub get
-      - run: flutter build windows -v
+      - run: flutter build linux -v
