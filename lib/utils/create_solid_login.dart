@@ -49,6 +49,7 @@ Widget createSolidLogin(BuildContext context) {
 
     required: false,
     title: 'HEALTH POD',
+    appDirectory: 'healthpod',
     image: AssetImage('assets/images/healthpod_image.png'),
     logo: AssetImage('assets/images/healthpod_logo.png'),
     link: 'https://github.com/anusii/healthpod/blob/main/README.md',
