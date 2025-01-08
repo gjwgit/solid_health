@@ -32,7 +32,6 @@ import 'package:solidpod/solidpod.dart' show logoutPopup, getWebId;
 import 'package:healthpod/home.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 
-
 /// Handles logout and navigates to the login screen.
 
 Future<void> handleLogout(BuildContext context) async {
