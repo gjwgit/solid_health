@@ -87,10 +87,10 @@ void main() async {
 class HealthPod extends StatelessWidget {
   const HealthPod({super.key});
 
+  // This StatelessWidget is the root of our application.
+
   @override
   Widget build(BuildContext context) {
-    // This StatelessWidget is the root of our application.
-
     return MaterialApp(
       title: 'Solid Health Pod',
       home: SelectionArea(
