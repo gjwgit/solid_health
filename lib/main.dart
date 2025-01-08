@@ -89,7 +89,6 @@ class HealthPod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // This StatelessWidget is the root of our application.
 
     return MaterialApp(
