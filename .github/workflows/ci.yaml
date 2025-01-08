@@ -47,25 +47,6 @@ jobs:
       - run: markdownlint assets/markdown
         # -p .markdownlintignore -c .markdownlint.yaml
 
-  dcm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-      - name: Install DCM
-        uses: CQLabs/setup-dcm@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run DCM Analysis
-        uses: CQLabs/dcm-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          ci_key: ${{ secrets.DCM_CI_KEY }}
-          email: ${{ secrets.DCM_EMAIL }}
-          folders: lib
-          fatal_style: true
-          fatal_warnings: true
-      
   siidcm:
     runs-on: ubuntu-latest
     steps:
@@ -75,11 +56,9 @@ jobs:
           channel: 'stable'
           flutter-version: ${{env.FLUTTER_VERSION}}
       - run: flutter pub get
-      # 20241025 gjw Remove these for now until we resolve them all
-      #
-      #- run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
-      #- run: dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
-      #- run: dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
+      - run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
+      - run: dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
+      - run: dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
       - run: dart run dart_code_metrics:metrics analyze --disable-sunset-warning --fatal-style lib --reporter=console
       - run: find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
 
