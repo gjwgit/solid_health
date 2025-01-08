@@ -20,6 +20,7 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Dawei Chen
+
 library;
 
 import 'package:flutter/material.dart';
@@ -121,17 +122,19 @@ class _FileServiceState extends State<FileService> {
                 setState(() {
                   uploadInProgress = true;
                 });
-                await sendLargeFile(
-                    localFilePath: uploadFile!,
-                    remoteFileName: remoteFileName,
-                    onProgress: (sent, total) {
-                      setState(() {
-                        uploadDone = sent == total;
-                        uploadPercent = sent / total;
-                      });
-                    },
-                    context: context,
-                    child: const Text('Upload'));
+                if (context.mounted) {
+                  await sendLargeFile(
+                      localFilePath: uploadFile!,
+                      remoteFileName: remoteFileName,
+                      onProgress: (sent, total) {
+                        setState(() {
+                          uploadDone = sent == total;
+                          uploadPercent = sent / total;
+                        });
+                      },
+                      context: context,
+                      child: const Text('Upload'));
+                }
                 if (uploadDone) {
                   setState(() {
                     uploadInProgress = false;
@@ -165,17 +168,19 @@ class _FileServiceState extends State<FileService> {
                   setState(() {
                     downloadInProgress = true;
                   });
-                  await getLargeFile(
-                      remoteFileName: remoteFileName,
-                      localFilePath: outputFile,
-                      onProgress: (received, total) {
-                        setState(() {
-                          downloadDone = received == total;
-                          downloadPercent = received / total;
-                        });
-                      },
-                      context: context,
-                      child: const Text('Download'));
+                  if (context.mounted) {
+                    await getLargeFile(
+                        remoteFileName: remoteFileName,
+                        localFilePath: outputFile,
+                        onProgress: (received, total) {
+                          setState(() {
+                            downloadDone = received == total;
+                            downloadPercent = received / total;
+                          });
+                        },
+                        context: context,
+                        child: const Text('Download'));
+                  }
                   if (downloadDone) {
                     setState(() {
                       downloadInProgress = false;
@@ -201,16 +206,18 @@ class _FileServiceState extends State<FileService> {
                 setState(() {
                   deleteInProgress = true;
                 });
-                await deleteLargeFile(
-                    remoteFileName: remoteFileName,
-                    onProgress: (deleted, total) {
-                      setState(() {
-                        deleteDone = deleted == total;
-                        deletePercent = deleted / total;
-                      });
-                    },
-                    context: context,
-                    child: const Text('Delete'));
+                if (context.mounted) {
+                  await deleteLargeFile(
+                      remoteFileName: remoteFileName,
+                      onProgress: (deleted, total) {
+                        setState(() {
+                          deleteDone = deleted == total;
+                          deletePercent = deleted / total;
+                        });
+                      },
+                      context: context,
+                      child: const Text('Delete'));
+                }
                 if (deleteDone) {
                   setState(() {
                     deleteInProgress = false;

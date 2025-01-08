@@ -22,13 +22,13 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Graham Williams, Ashley Tang
+/// Authors: Graham Williams, Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
 
 import 'package:window_manager/window_manager.dart';
-
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
 
