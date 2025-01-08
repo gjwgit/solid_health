@@ -21,11 +21,13 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: <AUTHORS>
+/// Authors: Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
+
+// Shows a "Coming Soon" dialog.
 
 void showComingSoon(BuildContext context) {
   showDialog(

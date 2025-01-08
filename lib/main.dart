@@ -1,6 +1,6 @@
-/// Your health data in your POD
+/// Your health data in your POD.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:52 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-07 14:10:07 +1100 Graham Williams>
 //
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -21,17 +21,18 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Graham Williams
+/// Authors: Graham Williams, Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
 
-import 'package:solidpod/solidpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'package:healthpod/home.dart';
+import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
+
+
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
@@ -43,11 +44,10 @@ void main() async {
     // running the app. If there is no [windowManager] options we probably don't
     // need this whole section.
 
-    // Enusre things are set up properly since we haven't yet initialised the
+    // Ensure things are set up properly since we haven't yet initialised the
     // app with [runApp].
 
     WidgetsFlutterBinding.ensureInitialized();
-
     await windowManager.ensureInitialized();
 
     const windowOptions = WindowOptions(
@@ -66,7 +66,7 @@ void main() async {
       title: 'HealthPod - Private Solid Pod for Storing Key-Value Pairs',
     );
 
-    // Once the window manager is ready we recofigure it a little.
+    // Once the window manager is ready we reconfigure it a little.
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
@@ -93,41 +93,13 @@ class HealthPod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Solid Health Pod',
       home: SelectionArea(
         // Wrap the whole app inside a SelectionArea to ensure we get selectable
         // text, for text that can be selected, as a default.
 
-        child: SolidLogin(
-          // Wrap the actual home widget within a [SolidLogin].
-
-          // If the app has functionality that does not require access to Pod
-          // data then [required] can be `false`. If the user connects to their
-          // Pod then their session information will be saved to save having to
-          // log in everytime. The login token and the security key are (optionally)
-          // cached so that the login information is not required every time.
-          //
-          // In this demo app we allow the CONTINUE button so as to demonstrate
-          // the use of [SolidLoginPopup] during the app session. If we want to
-          // save the data to the Pod or view data from the Pod, then if the
-          // user did not log in during startup we can call [SolidLoginPopup] to
-          // establish the connection at that time.
-
-          required: false,
-
-          title: 'HEALTH POD',
-          image: AssetImage('assets/images/healthpod_image.png'),
-          logo: AssetImage('assets/images/healthpod_logo.png'),
-          link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-          infoButtonStyle: InfoButtonStyle(
-            tooltip: 'Visit the HealthPod documentation.',
-          ),
-          loginButtonStyle: LoginButtonStyle(
-            background: Colors.lightGreenAccent,
-          ),
-          child: HealthPodHome(),
-        ),
+        child: createSolidLogin(context),
       ),
     );
   }

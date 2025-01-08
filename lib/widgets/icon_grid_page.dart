@@ -1,4 +1,4 @@
-/// <DESCRIPTION>
+/// Icon grid page.
 //
 // Time-stamp: <Tuesday 2025-01-07 14:54:11 +1100 Graham Williams>
 //
@@ -21,7 +21,7 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: <AUTHORS>
+/// Authors: Ashley Tang
 
 library;
 
@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
-import 'package:healthpod/dialogs/show_comming_soon.dart';
+import 'package:healthpod/dialogs/show_coming_soon.dart';
 
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
