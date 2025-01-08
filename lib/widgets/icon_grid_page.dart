@@ -31,6 +31,7 @@ import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/show_coming_soon.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/dialogs/show_coming_soon.dart';
 
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
