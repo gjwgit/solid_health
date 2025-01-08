@@ -56,8 +56,7 @@ jobs:
         uses: CQLabs/setup-dcm@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      - run: dcm activate --license-key=DCM_S9398um8y6cO
-      - run: dcm calculate-metrics lib
+      - run: dcm calculate-metrics lib 
       - run: dcm analyze --fatal-style lib
       # See web site - run: dcm analyze --help
       # Total fail   - run: dcm check-unused-files lib

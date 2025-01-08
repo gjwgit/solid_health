@@ -23,7 +23,6 @@
 ///
 /// Authors: Kevin Wang, Graham Williams, Ashley Tang
 
-
 library;
 
 import 'package:flutter/material.dart';
