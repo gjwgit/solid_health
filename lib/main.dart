@@ -61,7 +61,7 @@ void main() async {
 
       // The [title] is used for the window manager's window title.
 
-      title: 'HealthPod - Private Solid Pod for Storing Key-Value Pairs',
+      title: 'HealthPod - Private Solid Pod for Health Data',
     );
 
     // Once the window manager is ready we reconfigure it a little.
