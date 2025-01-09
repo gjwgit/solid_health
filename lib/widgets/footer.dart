@@ -29,11 +29,11 @@ import 'package:flutter/material.dart';
 
 /// Footer widget to display server information, login status, and security key status.
 
-class FooterWidget extends StatelessWidget {
+class Footer extends StatelessWidget {
   final String? webId;
   final bool isKeySaved;
 
-  const FooterWidget({
+  const Footer({
     super.key,
     required this.webId,
     required this.isKeySaved,
@@ -45,24 +45,27 @@ class FooterWidget extends StatelessWidget {
 
     return Container(
       color: Colors.grey[200],
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
           Text(
             'Server: $serverUri',
             style: const TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
           ),
+          const Spacer(),
           Text(
             'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
             style: TextStyle(
               fontSize: 14,
               color: webId == null ? Colors.red : Colors.green,
             ),
+            overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(width: 8),
           Text(
             'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
             style: const TextStyle(fontSize: 14),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

@@ -31,7 +31,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/show_about.dart';
-import 'package:healthpod/features/file/footer.dart';
+import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/handle_logout.dart';
@@ -98,22 +98,16 @@ class HealthPodHomeState extends State<HealthPodHome> {
         ],
       ),
       backgroundColor: titleBackgroundColor,
-      body: Column(
-        children: [
-          Expanded(
-            child: IconGridPage(),
+      body: IconGridPage(),
+      bottomNavigationBar: BottomAppBar(
+        height: 60.0,
+        color: Colors.grey[200],
+        child: SizedBox(
+          child: Footer(
+            webId: _webId,
+            isKeySaved: _isKeySaved,
           ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: FooterWidget(
-                webId: _webId,
-                isKeySaved: _isKeySaved,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
