@@ -55,6 +55,10 @@ class _FileServiceState extends State<FileService> {
   bool downloadInProgress = false;
   bool deleteInProgress = false;
 
+  bool readInProgress = false;
+  bool readDone = false;
+  double readPercent = 0.0;
+
   final smallGapH = const SizedBox(width: 10);
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
@@ -197,6 +201,7 @@ class _FileServiceState extends State<FileService> {
       child: const Text('Download'),
     );
 
+
     final deleteButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
@@ -231,6 +236,55 @@ class _FileServiceState extends State<FileService> {
               }
             },
       child: const Text('Delete'),
+    );
+
+    final readButton = ElevatedButton(
+      onPressed: (uploadInProgress || downloadInProgress || deleteInProgress || readInProgress)
+          ? null
+          : () async {
+              try {
+                setState(() {
+                  readInProgress = true;
+                  readPercent = 0.5;
+                });
+
+                if (context.mounted) {
+                  final fileName = remoteFileName;
+                  debugPrint('Reading file: $fileName');
+
+                  final content = await readPod(
+                    fileName,
+                    context,
+                    const Text('Read'),
+                  );
+                  
+                  setState(() {
+                    readDone = true;
+                    readPercent = 1.0;
+                  });
+
+                  if (content != null) {
+                    if (context.mounted) {
+                      alert(context, 'File exists in POD: $content');
+                    }
+                  } else {
+                    if (context.mounted) {
+                      alert(context, 'File not found in POD');
+                    }
+                  }
+                }
+              } on Object catch (e) {
+                if (context.mounted) {
+                  alert(context, 'Failed to check file.');
+                }
+                debugPrint('Read error: $e');
+              } finally {
+                setState(() {
+                  readInProgress = false;
+                });
+              }
+            },
+      child: const Text('Check File'),
     );
 
     return Scaffold(
@@ -279,6 +333,19 @@ class _FileServiceState extends State<FileService> {
                     uploadButton,
                   ],
                 ),
+
+                largeGapV,
+
+                // Read
+                Text(
+                  'Check if the "$remoteFileName" exists in POD',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                smallGapV,
+                readButton,
 
                 largeGapV,
 
@@ -371,6 +438,16 @@ class _FileServiceState extends State<FileService> {
                 left: 0,
                 right: 0,
                 child: getProgressBar('Deleting:', deleteDone, deletePercent),
+              ),
+
+            // Reading progress bar
+
+            if (readInProgress)
+              Positioned(
+                top: 20,
+                left: 0,
+                right: 0,
+                child: getProgressBar('Reading:', readDone, readPercent),
               ),
 
             // Navigate back to demo page
