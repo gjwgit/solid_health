@@ -201,7 +201,6 @@ class _FileServiceState extends State<FileService> {
       child: const Text('Download'),
     );
 
-
     final deleteButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
@@ -239,7 +238,10 @@ class _FileServiceState extends State<FileService> {
     );
 
     final readButton = ElevatedButton(
-      onPressed: (uploadInProgress || downloadInProgress || deleteInProgress || readInProgress)
+      onPressed: (uploadInProgress ||
+              downloadInProgress ||
+              deleteInProgress ||
+              readInProgress)
           ? null
           : () async {
               try {
@@ -257,7 +259,7 @@ class _FileServiceState extends State<FileService> {
                     context,
                     const Text('Read'),
                   );
-                  
+
                   setState(() {
                     readDone = true;
                     readPercent = 1.0;
