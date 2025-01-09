@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Tuesday 2025-01-07 14:12:37 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-01-09 09:29:12 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -68,7 +68,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Health - Your Data - You Decide ... '),
+        title: const Text(
+            'Your Health - Your Data - Our Advice - Your Choice ... '),
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
         actions: [
@@ -79,11 +80,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ),
           MarkdownTooltip(
             message: '''
-            **About:** Tap here to view information about the Rattle
-            project. This includes a list of those who have contributed to the
-            latest version of the software, *Version 6.* It also includes the
-            extensive list of open-source packages that Rattle is built on and
-            their licenses.
+
+            **About:** Tap here to view information about the HealthPod app.
+            This includes a list of contributers and the extensive list of
+            open-source packages that the HealthPod app is built on and their
+            licenses.
+
             ''',
             child: IconButton(
               onPressed: () {
