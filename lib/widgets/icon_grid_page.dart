@@ -106,8 +106,11 @@ class IconGridPage extends StatelessWidget {
 
                 **File Management:** Tap here to access file management features.
                 This allows you to:
+
                 - Upload large files to your POD storage
+
                 - Download files from your POD
+
                 - Delete files from your POD
 
                 ''',
