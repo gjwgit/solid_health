@@ -8,6 +8,10 @@ can interact with it to review your health. You can also decide if you
 want to share that data with anyone else, like you general
 practitioner for them to provide their professional advice.
 
+Visit https://healthpod.solidcommunity.au/ to run the app online.
+
+See file:installers/README.md for instructions to install on your device.
+
 ## Milestones
 
 1. Basic Icon-Based GUI
