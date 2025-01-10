@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "healthpod" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "healthpod" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.togaware.healthpod. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.togaware.healthpod. All rights reserved." "\0"
             VALUE "OriginalFilename", "healthpod.exe" "\0"
             VALUE "ProductName", "healthpod" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

@@ -17,10 +17,7 @@ HealthPod.
 
 ## Android
 
-The official Android app is available on the [Google Play
-Store](https://play.google.com/store/apps/details?id=com.togaware.healthpod).
-
-You can also side load the latest version of the app by visiting the
+You can side load the latest version of the app by visiting the
 [Installer](https://solidcommunity.au/installers/healthpod.apk) from
 your Android device's browser. This will download the app to your
 Android device where you can click on the `healthpod.apk` file. Your
