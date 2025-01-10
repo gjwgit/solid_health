@@ -15,6 +15,7 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 0.1 LATEST UPDATES
 
++ Configure for android build [0.0.5 20250111 gjw]
 + Generate Windows installer exe [0.0.4 20250110 atangster]
 + Cleanup all remaining lint issues [0.0.3 20250110 atangster]
 + Add CI/CM and Lint checks [0.0.2 20250109 atangster]
