@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:markdown_tooltip/markdown_tooltip.dart';
+
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_coming_soon.dart';
@@ -64,7 +66,21 @@ class IconGridPage extends StatelessWidget {
           spacing: 10.0, // Space between icons horizontally
           runSpacing: 10.0, // Space between icons vertically
           children: icons.map((icon) {
-            return GestureDetector(
+            final iconContainer = Container(
+              width: 80.0, // Fixed width for each icon container
+              height: 80.0, // Fixed height for each icon container
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 50.0,
+              ),
+            );
+
+            final gestureDetector = GestureDetector(
               onTap: () {
                 if (icon == Icons.folder) {
                   Navigator.push(
@@ -79,20 +95,30 @@ class IconGridPage extends StatelessWidget {
                   showComingSoon(context); // For other icons.
                 }
               },
-              child: Container(
-                width: 80.0, // Fixed width for each icon container
-                height: 80.0, // Fixed height for each icon container
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 50.0,
-                ),
-              ),
+              child: iconContainer,
             );
+
+            // Add tooltip for the folder icon.
+
+            if (icon == Icons.folder) {
+              return MarkdownTooltip(
+                message: '''
+
+                **File Management:** Tap here to access file management features.
+                This allows you to:
+
+                - Upload large files to your POD storage
+
+                - Download files from your POD
+
+                - Delete files from your POD
+
+                ''',
+                child: gestureDetector,
+              );
+            }
+
+            return gestureDetector;
           }).toList(),
         ),
         // child: GridView.builder(
