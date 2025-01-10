@@ -27,6 +27,7 @@ dependencies:
   solidpod: ^0.6.4
   universal_io: ^2.2.2
   window_manager: ^0.3.9
+  build_runner: ^2.4.14
 
 dev_dependencies:
 
