@@ -10,7 +10,7 @@ practitioner for them to provide their professional advice.
 
 Visit https://healthpod.solidcommunity.au/ to run the app online.
 
-See file:installers/README.md for instructions to install on your device.
+See [installers](installers/README.md) for instructions to install on your device.
 
 ## Milestones
 
