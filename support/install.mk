@@ -2,7 +2,7 @@
 #
 # Makefile template for Installations
 #
-# Time-stamp: <Wednesday 2024-01-31 13:25:06 +1100 Graham Williams>
+# Time-stamp: <Saturday 2025-01-11 08:57:35 +1100 Graham Williams>
 #
 # Copyright (c) Graham.Williams@togaware.com
 #
@@ -46,7 +46,7 @@ help::
 
 install: $(USER).install
 
-ifeq ($(BRANCH),main)
+ifeq ($(BRANCH),dev)
 prod: $(APP).install
 else
 prod: $(USER).install
