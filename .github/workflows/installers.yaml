@@ -17,10 +17,10 @@ env:
 jobs:
 
   ########################################################################
-  # Originally I was building on Ubuntu 22.04 since my 24.04 version
-  # would not run on Mint 21.3. Then moved even older to Ubuntu 20.04
-  # to get it more widely available. Seems to work on 22.04 and
-  # 24.04. Backwards the error was: "rattle:
+  # 20250110 gjw Originally for rattle I was building on Ubuntu 22.04
+  # since my 24.04 version would not run on Mint 21.3. Then moved even
+  # older to Ubuntu 20.04 to get it more widely available. Seems to
+  # work on 22.04 and 24.04. Backwards the error was: "rattle:
   # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.34' not found
   # (required by rattle)" On Ubuntu 20.04 the highest version of GLIBC
   # is GLIBC2.30.
@@ -66,14 +66,14 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: rattle-${{ github.ref_name }}-linux.zip
+          filename: healthpod-${{ github.ref_name }}-linux.zip
           directory: build/linux/x64/release/bundle
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rattle-linux-zip
-          path: build/linux/x64/release/bundle/rattle-${{ github.ref_name }}-linux.zip
+          name: healthpod-linux-zip
+          path: build/linux/x64/release/bundle/healthpod-${{ github.ref_name }}-linux.zip
 
   ########################################################################
 
@@ -104,7 +104,7 @@ jobs:
         run: flutter build windows
 
       - name: Check the DLLs for Inclusion in the .iss script
-        run: dir D:\a\rattleng\rattleng\build\windows\x64\runner\Release\
+        run: dir D:\a\healthpod\healthpod\build\windows\x64\runner\Release\
 
       - name: Get Version from pubspec.yaml
         run: |
@@ -113,14 +113,14 @@ jobs:
       - name: Compile .ISS to .EXE Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
         with:
-          path: installers/rattle-windows.iss
+          path: installers/healthpod-windows.iss
           options: /O+
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rattle-windows-inno
-          path: D:\a\rattleng\rattleng\installers\installers\rattle-dev-windows-inno.exe
+          name: healthpod-windows-inno
+          path: D:\a\healthpod\healthpod\installers\installers\healthpod-dev-windows-inno.exe
 
   ########################################################################
 
@@ -157,14 +157,14 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: rattle-${{github.ref_name}}-windows.zip
+          filename: healthpod-${{github.ref_name}}-windows.zip
           directory: build/windows/x64/runner/Release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rattle-windows-zip
-          path: build/windows/x64/runner/Release/rattle-${{github.ref_name}}-windows.zip
+          name: healthpod-windows-zip
+          path: build/windows/x64/runner/Release/healthpod-${{github.ref_name}}-windows.zip
 
   ########################################################################
 
@@ -202,8 +202,8 @@ jobs:
         with:
           type: 'zip'
           directory: build/macos/Build/Products/Release
-          path: rattle.app
-          filename: rattle-${{github.ref_name}}-macos.zip
+          path: healthpod.app
+          filename: healthpod-${{github.ref_name}}-macos.zip
 
       - name: Review Bundle Contents
         run: ls -lh build/macos/Build/Products/Release
@@ -211,8 +211,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rattle-macos-zip
-          path: build/macos/Build/Products/Release/rattle-${{github.ref_name}}-macos.zip
+          name: healthpod-macos-zip
+          path: build/macos/Build/Products/Release/healthpod-${{github.ref_name}}-macos.zip
 
   ########################################################################
 
@@ -250,8 +250,8 @@ jobs:
   #       with:
   #         type: 'zip'
   #         directory: build/macos/Build/Products/Release
-  #         path: rattle.app
-  #         filename: rattle-${{github.ref_name}}-macos.zip
+  #         path: healthpod.app
+  #         filename: healthpod-${{github.ref_name}}-macos.zip
 
   #     - name: Review Bundle Contents
   #       run: ls -lh build/macos/Build/Products/Release
@@ -259,8 +259,8 @@ jobs:
   #     - name: Upload Artifact
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: rattle-macos-zip
-  #         path: build/macos/Build/Products/Release/rattle-${{github.ref_name}}-macos.zip
+  #         name: healthpod-macos-zip
+  #         path: build/macos/Build/Products/Release/healthpod-${{github.ref_name}}-macos.zip
 
   # ########################################################################
 
@@ -298,8 +298,8 @@ jobs:
   #       with:
   #         type: 'zip'
   #         directory: build/macos/Build/Products/Release
-  #         path: rattle.app
-  #         filename: rattle-${{github.ref_name}}-ios.zip
+  #         path: healthpod.app
+  #         filename: healthpod-${{github.ref_name}}-ios.zip
 
   #     - name: Review Bundle Contents
   #       run: ls -lh build/macos/Build/Products/Release
@@ -307,5 +307,5 @@ jobs:
   #     - name: Upload Artifact
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: rattle-macos-zip
-  #         path: build/macos/Build/Products/Release/rattle-${{github.ref_name}}-macos.zip
+  #         name: healthpod-macos-zip
+  #         path: build/macos/Build/Products/Release/healthpod-${{github.ref_name}}-macos.zip
