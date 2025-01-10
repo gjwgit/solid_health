@@ -3,7 +3,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "HealthPod"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "dev-windows-inno"
 #define MyAppPublisher "ANU"
 #define MyAppURL "https://pods.dev.solidcommunity.au/"
 #define MyAppExeName "healthpod.exe"
@@ -25,7 +25,7 @@ DisableProgramGroupPage=yes
 LicenseFile=..\LICENSE
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=build\windows\installer
-OutputBaseFilename=healthpod-setup-{#MyAppVersion}
+OutputBaseFilename=healthpod-{#MyAppVersion}
 SetupIconFile=..\windows\runner\resources\app_icon.ico
 Compression=lzma
 SolidCompression=yes
