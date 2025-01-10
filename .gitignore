@@ -1,6 +1,33 @@
+########################################################################
+# Local ignores
+########################################################################
+
+output
+tmp
+*~
+!lib
+ignore
+script.R
+.Rhistory
+NOTES.md
+TODO.md
+ARCHIVE
+TMP*
+*.tmp
+qtest*.txt
+REMOVE
+
+installers/*.exe
+installers/*.snap
+installers/*.tar.gz
+installers/*-linux.zip
+installers/*-macos.zip
+installers/*-windows.zip
+
+# ORIGINAL
+
 *generated*
 *Generated*
-*~
 *#*
 pubspec.lock
 ignore
