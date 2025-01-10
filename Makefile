@@ -2,7 +2,7 @@
 #
 # Generic Makefile
 #
-# Time-stamp: <Tuesday 2024-07-09 20:17:01 +1000 Graham Williams>
+# Time-stamp: <Friday 2025-01-10 19:18:39 +1100 Graham Williams>
 #
 # Copyright (c) Graham.Williams@togaware.com
 #
@@ -59,6 +59,8 @@ endif
 define HELP
 $(APP):
 
+  ginstall   After a github build download bundles and upload to solidcommunity.au
+
   local	     Install to $(HOME)/.local/share/$(APP)
     tgz	     Upload the installer to solidcommunity.com
   apk	     Upload the installer to solidcommunity.com
@@ -97,3 +99,9 @@ tgz::
 	rsync -avzh installers/$(APP)*.tar.gz solidcommunity.au:/var/www/html/installers/
 	ssh solidcommunity.au chmod -R go+rX /var/www/html/installers/
 	ssh solidcommunity.au chmod go=x /var/www/html/installers/
+
+# 20250110 gjw A ginstall of the built bundles from github, installed
+# to solidcommunity.au and moved into ARCHIVE.
+
+ginstall:
+	(cd installers; make $@)
