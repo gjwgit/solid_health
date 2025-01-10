@@ -22,7 +22,6 @@
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Graham Williams, Ashley Tang
-/// Authors: Graham Williams, Ashley Tang
 
 library;
 
