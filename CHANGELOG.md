@@ -17,4 +17,5 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 0.1 LATEST UPDATES
 
++ Cleanup all remaining lint issues [0.0.3 20250110 atangster]
 + Add CI/CM and Lint checks [0.0.2 20250109 atangster]
