@@ -15,7 +15,7 @@ DEST=${HOST}:${FLDR}
 # we want to download the artefacts.
 
 bumpId=$(gh run list --limit 100 --json databaseId,displayTitle,workflowName \
-	     | jq -r '.[] | select(.workflowName | startswith("Build installers")) | select(.displayTitle | startswith("Bump version")) | .databaseId' \
+	     | jq -r '.[] | select(.workflowName | startswith("Build Installers")) | select(.displayTitle | startswith("Bump version")) | .databaseId' \
 	     | head -n 1)
 
 if [[ -z "${bumpId}" ]]; then
@@ -30,7 +30,7 @@ conclusion=$(gh run view ${bumpId} --json conclusion --jq '.conclusion')
 
 if [[ "${status}" == "completed" && "${conclusion}" == "success" ]]; then
 
-    echo 'Uploads are going to ${DEST}.'
+    echo "Uploads are going to ${DEST}."
     echo
 
     # Determine the latest version from pubspec.yaml. Assumes the
