@@ -1,4 +1,4 @@
-package com.togaware.healthpod.healthpod
+package com.togaware.healthpod
 
 import io.flutter.embedding.android.FlutterActivity
 
