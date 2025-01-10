@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Wednesday 2025-01-08 09:34:26 +1100 Graham Williams>
+// Time-stamp: <Saturday 2025-01-11 08:05:49 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -37,19 +37,11 @@ import 'package:healthpod/features/file/service.dart';
 class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
     Icons.home,
-    Icons.star,
-    Icons.settings,
-    Icons.phone,
-    Icons.email,
-    Icons.camera_alt,
-    Icons.map,
-    Icons.music_note,
-    Icons.shopping_cart,
-    Icons.work,
-    Icons.wifi,
-    Icons.alarm,
     Icons.folder,
     Icons.lightbulb,
+    Icons.map,
+    Icons.work,
+    Icons.alarm,
   ];
 
   IconGridPage({super.key});
@@ -70,7 +62,9 @@ class IconGridPage extends StatelessWidget {
               width: 80.0, // Fixed width for each icon container
               height: 80.0, // Fixed height for each icon container
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: {Icons.lightbulb, Icons.folder}.contains(icon)
+                    ? Colors.blue
+                    : Colors.grey,
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: Icon(
@@ -98,11 +92,11 @@ class IconGridPage extends StatelessWidget {
               child: iconContainer,
             );
 
-            // Add tooltip for the folder icon.
+            // Add tooltips for the folder icons.
 
-            if (icon == Icons.folder) {
-              return MarkdownTooltip(
-                message: '''
+            return switch (icon) {
+              Icons.folder => MarkdownTooltip(
+                  message: '''
 
                 **File Management:** Tap here to access file management features.
                 This allows you to:
@@ -114,37 +108,16 @@ class IconGridPage extends StatelessWidget {
                 - Delete files from your POD
 
                 ''',
-                child: gestureDetector,
-              );
-            }
-
-            return gestureDetector;
+                  child: gestureDetector,
+                ),
+              Icons.lightbulb => MarkdownTooltip(
+                  message: 'Placeholder',
+                  child: gestureDetector,
+                ),
+              _ => gestureDetector,
+            };
           }).toList(),
         ),
-        // child: GridView.builder(
-        //   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        //     crossAxisCount: 5,
-        //     crossAxisSpacing: 10.0,
-        //     mainAxisSpacing: 10.0,
-        //   ),
-        //   itemCount: icons.length,
-        //   itemBuilder: (context, index) {
-        //     return GestureDetector(
-        //       onTap: () => showComingSoonDialog(context),
-        //       child: Container(
-        //         decoration: BoxDecoration(
-        //           color: Colors.blue,
-        //           borderRadius: BorderRadius.circular(10.0),
-        //         ),
-        //         child: Icon(
-        //           icons[index],
-        //           color: Colors.white,
-        //           size: 50.0,
-        //         ),
-        //       ),
-        //     );
-        //   },
-        // ),
       ),
     );
   }
