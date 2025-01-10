@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 20241024 gjw After a github action has built the bundles and stored
-# them as artefacts on github, we can upload them to togaware.com for
-# distribution.
+# them as artefacts on github, we can upload them to solidcommunity.au
+# for distribution.
 
 APP=healthpod
 
