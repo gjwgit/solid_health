@@ -57,8 +57,9 @@ jobs:
           flutter-version: ${{env.FLUTTER_VERSION}}
       - run: flutter pub get
       - run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
-      # Remove these since they seem to give spurious errors even
-      # though locally we don't see the same:
+      # 20250110 gjw Remove the unused-code check since it seems to
+      # give spurious errors even though locally we don't see the
+      # same:
       #
       # lib/features/file/service.dart:
       #     ⚠ unused class FileService
