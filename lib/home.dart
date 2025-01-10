@@ -73,10 +73,20 @@ class HealthPodHomeState extends State<HealthPodHome> {
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: () => handleLogout(context),
+          MarkdownTooltip(
+            message: '''
+
+            **Logout:** Tap here to securely log out of your HealthPod account.
+            This will clear your current session and return you to the login screen.
+
+            ''',
+            child: IconButton(
+              icon: const Icon(
+                Icons.logout,
+                color: Colors.blue,
+              ),
+              onPressed: () => handleLogout(context),
+            ),
           ),
           MarkdownTooltip(
             message: '''
