@@ -19,14 +19,14 @@ dependencies:
     sdk: flutter
 
   file_picker: ^8.1.7
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
   markdown_tooltip: ^0.0.2
   path: ^1.9.0
   rdflib: ^0.2.9
   solidpod: ^0.6.4
   universal_io: ^2.2.2
-  window_manager: ^0.3.9
+  window_manager: ^0.4.3
   build_runner: ^2.4.14
 
 dev_dependencies:
