@@ -17,7 +17,11 @@ Visit the [Solid Community AU Portfolio](https://solidcommunity.au)
 for our portfolio of Solid apps developed by the community.
 
 The app is implemented in [Flutter](https://flutter.dev) using our own
-[solidpod](https://pub.dev/packages/solidpod) package for Flutter.
+[solidpod](https://pub.dev/packages/solidpod) package for Flutter to
+manage the Solid Pod interactions, and
+[markdown_tooltip](https://pub.dev/packages/markdown_tooltip) to
+enhance the user experience, guiding the user through the app, within
+app.
 
 ## Milestones
 
