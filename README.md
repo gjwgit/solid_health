@@ -16,6 +16,9 @@ your device.
 Visit the [Solid Community AU Portfolio](https://solidcommunity.au)
 for our portfolio of Solid apps developed by the community.
 
+The app is implemented in [Flutter](https://flutter.dev) using our own
+[solidpod](https://pub.dev/packages/solidpod) package for Flutter.
+
 ## Milestones
 
 - [X] Basic Icon-Based GUI with Solid Pod login
