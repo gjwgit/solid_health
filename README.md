@@ -18,10 +18,10 @@ for our portfolio of Solid apps developed by the community.
 
 ## Milestones
 
-1. Basic Icon-Based GUI
-2. Daily entry of Blood Pressure
-3. You latest clinic data - appointments and medicines
-4. You medical system numbers
+- [X] Basic Icon-Based GUI with Solid Pod login
+- [ ] Daily entry of Blood Pressure with visualisations
+- [ ] Your latest clinic data - appointments and medicines
+- [ ] Important medical information, notes and numbers
 
 ## Design Goals
 
