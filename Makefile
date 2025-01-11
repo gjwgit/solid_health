@@ -2,7 +2,7 @@
 #
 # Generic Makefile
 #
-# Time-stamp: <Friday 2025-01-10 19:18:39 +1100 Graham Williams>
+# Time-stamp: <Sunday 2025-01-12 05:41:04 +1100 Graham Williams>
 #
 # Copyright (c) Graham.Williams@togaware.com
 #
@@ -24,6 +24,10 @@ DATE=$(shell date +%Y-%m-%d)
 # Identify a destination used by install.mk
 
 DEST=/var/www/html/$(APP)
+
+# The host for the repository of packages.
+
+REPO=solidcommunity.au
 
 ########################################################################
 # Supported Makefile modules.
@@ -59,11 +63,11 @@ endif
 define HELP
 $(APP):
 
-  ginstall   After a github build download bundles and upload to solidcommunity.au
+  ginstall   After a github build download bundles and upload to $(REPO)
 
   local	     Install to $(HOME)/.local/share/$(APP)
-    tgz	     Upload the installer to solidcommunity.com
-  apk	     Upload the installer to solidcommunity.com
+    tgz	     Upload the installer to $(REPO)
+  apk	     Upload the installer to $(REPO)
 
 endef
 export HELP
@@ -81,27 +85,32 @@ help::
 clean::
 	rm -f README.html
 
-# Android: Upload to Solid Community installers for general access.
-
-apk::
-	rsync -avzh --exclude *~ installers/$(APP)*.apk solidcommunity.au:/var/www/html/installers/
-	ssh solidcommunity.au chmod -R go+rX /var/www/html/installers/
-	ssh solidcommunity.au chmod go=x /var/www/html/installers/
-
 # Linux: Install locally.
 
 local: tgz
 	tar zxvf installers/$(APP).tar.gz -C $(HOME)/.local/share/
 
-# Linux: Upload to Solid Community installers for general access.
+# Linux: Upload the installers for general access from the repository.
 
 tgz::
-	rsync -avzh installers/$(APP)*.tar.gz solidcommunity.au:/var/www/html/installers/
-	ssh solidcommunity.au chmod -R go+rX /var/www/html/installers/
-	ssh solidcommunity.au chmod go=x /var/www/html/installers/
+	rsync -avzh installers/$(APP)*.tar.gz $(REPO):/var/www/html/installers/
+	ssh $(REPO) chmod -R go+rX /var/www/html/installers/
+	ssh $(REPO) chmod go=x /var/www/html/installers/
 
-# 20250110 gjw A ginstall of the built bundles from github, installed
-# to solidcommunity.au and moved into ARCHIVE.
+# Android: Upload to Solid Community installers for general access.
 
-ginstall:
+# Make apk on this machine to deal with signing. Then a ginstall of
+# the built bundles from github, installed to solidcommunity.au and
+# moved into ARCHIVE.
+
+apk::
+	rsync -avzh installers/$(APP).apk $(REPO):/var/www/html/installers/
+	ssh $(REPO) chmod a+r /var/www/html/installers/$(APP).apk
+	mv -f installers/$(APP)-*.apk installers/ARCHIVE
+	rm -f installers/$(APP).apk
+
+# 20250110 gjw A ginstall of the github built bundles, and the locally
+# built apk installed to the repository and moved into ARCHIVE.
+
+ginstall: apk
 	(cd installers; make $@)
