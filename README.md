@@ -10,7 +10,11 @@ practitioner for them to provide their professional advice.
 
 Visit https://healthpod.solidcommunity.au/ to run the app online.
 
-See [installers](installers/README.md) for instructions to install on your device.
+See [installers](installers/README.md) for instructions to install on
+your device.
+
+Visit the [Solid Community AU Portfolio](https://solidcommunity.au)
+for our portfolio of Solid apps developed by the community.
 
 ## Milestones
 
