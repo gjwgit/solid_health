@@ -19,9 +19,11 @@ for our portfolio of Solid apps developed by the community.
 ## Milestones
 
 - [X] Basic Icon-Based GUI with Solid Pod login
+- [ ] File browse my medical reports
 - [ ] Daily entry of Blood Pressure with visualisations
 - [ ] Your latest clinic data - appointments and medicines
 - [ ] Important medical information, notes and numbers
+- [ ] My vaccination history
 
 ## Design Goals
 
