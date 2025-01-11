@@ -17,6 +17,7 @@ TMP*
 qtest*.txt
 REMOVE
 
+installers/*.apk
 installers/*.exe
 installers/*.snap
 installers/*.tar.gz
