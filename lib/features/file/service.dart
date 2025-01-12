@@ -47,7 +47,7 @@ class _FileServiceState extends State<FileService> {
 
   String? uploadFile;
   String? downloadFile;
-  String? remoteFileName;
+  String? remoteFileName = 'remoteFileName';
   String? remoteFileUrl;
 
   // Operation states.
@@ -104,7 +104,7 @@ class _FileServiceState extends State<FileService> {
 
       if (context.mounted) {
         // Upload with encryption.
-
+      
         final result = await writePod(
           remoteFileName!,
           fileContent,
@@ -211,45 +211,38 @@ class _FileServiceState extends State<FileService> {
       if (context.mounted) {
         bool mainFileDeleted = false;
         
-        // Try to delete each file, but don't fail if auxiliary files are missing.
-
         try {
           // Delete main encrypted file first.
-
+          
           await deleteFile(basePath);
           mainFileDeleted = true;
           debugPrint('Successfully deleted main file: $basePath');
         } catch (e) {
           debugPrint('Error deleting main file: $e');
-          rethrow;
+          // Only rethrow if it's not a "not found" error.
+
+          if (!e.toString().contains('404') && 
+              !e.toString().contains('NotFoundHttpError')) {
+            rethrow;
+          }
         }
 
-        // Only try to delete auxiliary files if main file was deleted.
+        // Only try to delete ACL file if main file was deleted
+        // Note: We don't try to delete .meta files as they're managed by the server.
 
         if (mainFileDeleted) {
-          // Helper function to safely delete a file.
-
-          Future<void> safeDeleteFile(String path) async {
-            try {
-              await deleteFile(path);
-              debugPrint('Successfully deleted: $path');
-            } catch (e) {
-              // Ignore 404 errors for auxiliary files.
-
-              if (e.toString().contains('404') || 
-                  e.toString().contains('NotFoundHttpError')) {
-                debugPrint('File not found (safe to ignore): $path');
-              } else {
-                debugPrint('Error deleting file: $path - ${e.toString()}');
-              }
+          try {
+            await deleteFile('$basePath.acl');
+            debugPrint('Successfully deleted ACL file');
+          } catch (e) {
+            // Ignore 404 errors for ACL file
+            if (e.toString().contains('404') || 
+                e.toString().contains('NotFoundHttpError')) {
+              debugPrint('ACL file not found (safe to ignore)');
+            } else {
+              debugPrint('Error deleting ACL file: ${e.toString()}');
             }
           }
-
-          // Try to delete auxiliary files.
-
-          await safeDeleteFile('$basePath.acl');
-          await safeDeleteFile('$basePath.meta');
-          await safeDeleteFile('$basePath.acl.meta');
           
           setState(() {
             deleteDone = true;
@@ -420,7 +413,9 @@ class _FileServiceState extends State<FileService> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      const Text('Delete file'),
+                      Text('Delete file'),
+                      smallGapH,
+                      Text('$remoteFileName', style: const TextStyle(color: Colors.red)),
                       smallGapH,
                       Text(
                         remoteFileUrl ?? '',
