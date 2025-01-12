@@ -74,6 +74,14 @@ class _FileServiceState extends State<FileService> {
     return textFileExtensions.contains(path.extension(filePath).toLowerCase());
   }
 
+  // Helper method to show alerts safely.
+
+  void _showAlert(BuildContext context, String message) {
+    if (context.mounted) {
+      alert(context, message);
+    }
+  }
+
   Future<void> handleUpload() async {
     if (uploadFile == null) return;
 
@@ -95,43 +103,41 @@ class _FileServiceState extends State<FileService> {
         fileContent = base64Encode(bytes);
       }
 
-      // Use original filename but remove special characters
-      // Add .enc.ttl suffix for encrypted files.
-
       remoteFileName = '${path.basename(uploadFile!)
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
           .replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
 
-      if (context.mounted) {
-        // Upload with encryption.
+      if (!mounted) return;
+
+      // Upload with encryption.
       
-        final result = await writePod(
-          remoteFileName!,
-          fileContent,
-          context,
-          const Text('Upload'),
-          encrypted: true,
-        );
+      final result = await writePod(
+        remoteFileName!,
+        fileContent,
+        context,
+        const Text('Upload'),
+        encrypted: true,
+      );
 
-        setState(() {
-          uploadDone = result == SolidFunctionCallStatus.success;
-        });
+      if (!mounted) return;
 
-        if (result != SolidFunctionCallStatus.success) {
-          if (context.mounted) {
-            alert(context, 'Upload failed - please check your connection and permissions.');
-          }
-        }
+      setState(() {
+        uploadDone = result == SolidFunctionCallStatus.success;
+      });
+
+      if (result != SolidFunctionCallStatus.success && mounted) {
+        _showAlert(context, 'Upload failed - please check your connection and permissions.');
       }
     } catch (e) {
-      if (context.mounted) {
-        alert(context, 'Upload error: ${e.toString()}');
-      }
+      if (!mounted) return;
+      _showAlert(context, 'Upload error: ${e.toString()}');
       debugPrint('Upload error: $e');
     } finally {
-      setState(() {
-        uploadInProgress = false;
-      });
+      if (mounted) {
+        setState(() {
+          uploadInProgress = false;
+        });
+      }
     }
   }
 
@@ -145,127 +151,125 @@ class _FileServiceState extends State<FileService> {
       });
 
       final dataDir = await getDataDirPath();
-      // Use .enc.ttl suffix for encrypted files.
-
       final filePath = '$dataDir/$remoteFileName';
 
-      if (context.mounted) {
-        final fileContent = await readPod(
-          filePath,
-          context,
-          const Text('Downloading'),
-        );
+      if (!mounted) return;
 
-        if (fileContent == SolidFunctionCallStatus.fail || 
-            fileContent == SolidFunctionCallStatus.notLoggedIn) {
-          throw Exception('Download failed - please check your connection and permissions');
-        }
+      final fileContent = await readPod(
+        filePath,
+        context,
+        const Text('Downloading'),
+      );
 
-        // Extract original filename without .enc.ttl suffix for saving.
+      if (!mounted) return;
 
-        final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
-        final file = File(saveFileName);
-        
-        try {
-          if (isTextFile(remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
+      if (fileContent == SolidFunctionCallStatus.fail || 
+          fileContent == SolidFunctionCallStatus.notLoggedIn) {
+        throw Exception('Download failed - please check your connection and permissions');
+      }
+
+      final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+      final file = File(saveFileName);
+      
+      try {
+        if (isTextFile(remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
+          await file.writeAsString(fileContent.toString());
+        } else {
+          try {
+            final bytes = base64Decode(fileContent.toString());
+            await file.writeAsBytes(bytes);
+          } catch (e) {
             await file.writeAsString(fileContent.toString());
-          } else {
-            try {
-              final bytes = base64Decode(fileContent.toString());
-              await file.writeAsBytes(bytes);
-            } catch (e) {
-              await file.writeAsString(fileContent.toString());
-            }
           }
-          setState(() {
-            downloadDone = true;
-          });
-        } catch (e) {
-          throw Exception('Failed to save file: ${e.toString()}');
         }
+
+        if (!mounted) return;
+        setState(() {
+          downloadDone = true;
+        });
+      } catch (e) {
+        throw Exception('Failed to save file: ${e.toString()}');
       }
     } catch (e) {
-      if (context.mounted) {
-        alert(context, e.toString().replaceAll('Exception: ', ''));
-      }
+      if (!mounted) return;
+      _showAlert(context, e.toString().replaceAll('Exception: ', ''));
       debugPrint('Download error: $e');
     } finally {
-      setState(() {
-        downloadInProgress = false;
-      });
+      if (mounted) {
+        setState(() {
+          downloadInProgress = false;
+        });
+      }
     }
   }
 
   Future<void> handleDelete() async {
+    if (remoteFileName == null) return;
+
     try {
       setState(() {
         deleteInProgress = true;
         deleteDone = false;
       });
 
-      if (remoteFileName == null) return;
-      
       final dataDir = await getDataDirPath();
       final basePath = '$dataDir/$remoteFileName';
+
+      if (!mounted) return;
       
-      if (context.mounted) {
-        bool mainFileDeleted = false;
-        
-        try {
-          // Delete main encrypted file first.
-          
-          await deleteFile(basePath);
-          mainFileDeleted = true;
-          debugPrint('Successfully deleted main file: $basePath');
-        } catch (e) {
-          debugPrint('Error deleting main file: $e');
-          // Only rethrow if it's not a "not found" error.
-
-          if (!e.toString().contains('404') && 
-              !e.toString().contains('NotFoundHttpError')) {
-            rethrow;
-          }
-        }
-
-        // Only try to delete ACL file if main file was deleted
-        // Note: We don't try to delete .meta files as they're managed by the server.
-
-        if (mainFileDeleted) {
-          try {
-            await deleteFile('$basePath.acl');
-            debugPrint('Successfully deleted ACL file');
-          } catch (e) {
-            // Ignore 404 errors for ACL file
-            if (e.toString().contains('404') || 
-                e.toString().contains('NotFoundHttpError')) {
-              debugPrint('ACL file not found (safe to ignore)');
-            } else {
-              debugPrint('Error deleting ACL file: ${e.toString()}');
-            }
-          }
-          
-          setState(() {
-            deleteDone = true;
-          });
+      bool mainFileDeleted = false;
+      try {
+        await deleteFile(basePath);
+        mainFileDeleted = true;
+        debugPrint('Successfully deleted main file: $basePath');
+      } catch (e) {
+        debugPrint('Error deleting main file: $e');
+        if (!e.toString().contains('404') && 
+            !e.toString().contains('NotFoundHttpError')) {
+          rethrow;
         }
       }
+
+      if (!mounted) return;
+
+      if (mainFileDeleted) {
+        try {
+          await deleteFile('$basePath.acl');
+          debugPrint('Successfully deleted ACL file');
+        } catch (e) {
+          if (e.toString().contains('404') || 
+              e.toString().contains('NotFoundHttpError')) {
+            debugPrint('ACL file not found (safe to ignore)');
+          } else {
+            debugPrint('Error deleting ACL file: ${e.toString()}');
+          }
+        }
+        
+        if (!mounted) return;
+        setState(() {
+          deleteDone = true;
+        });
+      }
     } catch (e) {
+      if (!mounted) return;
+      
       setState(() {
         deleteDone = false;
       });
-      if (context.mounted) {
-        if (e.toString().contains('404') || 
-            e.toString().contains('NotFoundHttpError')) {
-          alert(context, 'File not found or already deleted');
-        } else {
-          alert(context, 'Delete failed: ${e.toString()}');
-        }
-      }
+
+      final message = e.toString().contains('404') || 
+                     e.toString().contains('NotFoundHttpError')
+          ? 'File not found or already deleted'
+          : 'Delete failed: ${e.toString()}';
+      
+      _showAlert(context, message);
       debugPrint('Delete error: $e');
     } finally {
-      setState(() {
-        deleteInProgress = false;
-      });
+      if (mounted) {
+        setState(() {
+          deleteInProgress = false;
+        });
+      }
     }
   }
 
