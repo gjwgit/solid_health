@@ -34,7 +34,6 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/dialogs/alert.dart';
 
-
 class FileService extends StatefulWidget {
   const FileService({super.key});
 
@@ -67,8 +66,19 @@ class _FileServiceState extends State<FileService> {
 
   // File type detection.
 
-  final textFileExtensions = ['.txt', '.md', '.json', '.xml', '.csv', '.html', 
-                            '.css', '.js', '.dart', '.yaml', '.yml'];
+  final textFileExtensions = [
+    '.txt',
+    '.md',
+    '.json',
+    '.xml',
+    '.csv',
+    '.html',
+    '.css',
+    '.js',
+    '.dart',
+    '.yaml',
+    '.yml'
+  ];
 
   bool isTextFile(String filePath) {
     return textFileExtensions.contains(path.extension(filePath).toLowerCase());
@@ -103,14 +113,13 @@ class _FileServiceState extends State<FileService> {
         fileContent = base64Encode(bytes);
       }
 
-      remoteFileName = '${path.basename(uploadFile!)
-          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
-          .replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
+      remoteFileName =
+          '${path.basename(uploadFile!).replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
 
       if (!mounted) return;
 
       // Upload with encryption.
-      
+
       final result = await writePod(
         remoteFileName!,
         fileContent,
@@ -126,7 +135,8 @@ class _FileServiceState extends State<FileService> {
       });
 
       if (result != SolidFunctionCallStatus.success && mounted) {
-        _showAlert(context, 'Upload failed - please check your connection and permissions.');
+        _showAlert(context,
+            'Upload failed - please check your connection and permissions.');
       }
     } catch (e) {
       if (!mounted) return;
@@ -163,16 +173,18 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
-      if (fileContent == SolidFunctionCallStatus.fail || 
+      if (fileContent == SolidFunctionCallStatus.fail ||
           fileContent == SolidFunctionCallStatus.notLoggedIn) {
-        throw Exception('Download failed - please check your connection and permissions');
+        throw Exception(
+            'Download failed - please check your connection and permissions');
       }
 
       final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
       final file = File(saveFileName);
-      
+
       try {
-        if (isTextFile(remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
+        if (isTextFile(
+            remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
           await file.writeAsString(fileContent.toString());
         } else {
           try {
@@ -216,7 +228,7 @@ class _FileServiceState extends State<FileService> {
       final basePath = '$dataDir/$remoteFileName';
 
       if (!mounted) return;
-      
+
       bool mainFileDeleted = false;
       try {
         await deleteFile(basePath);
@@ -224,7 +236,7 @@ class _FileServiceState extends State<FileService> {
         debugPrint('Successfully deleted main file: $basePath');
       } catch (e) {
         debugPrint('Error deleting main file: $e');
-        if (!e.toString().contains('404') && 
+        if (!e.toString().contains('404') &&
             !e.toString().contains('NotFoundHttpError')) {
           rethrow;
         }
@@ -237,14 +249,14 @@ class _FileServiceState extends State<FileService> {
           await deleteFile('$basePath.acl');
           debugPrint('Successfully deleted ACL file');
         } catch (e) {
-          if (e.toString().contains('404') || 
+          if (e.toString().contains('404') ||
               e.toString().contains('NotFoundHttpError')) {
             debugPrint('ACL file not found (safe to ignore)');
           } else {
             debugPrint('Error deleting ACL file: ${e.toString()}');
           }
         }
-        
+
         if (!mounted) return;
         setState(() {
           deleteDone = true;
@@ -252,16 +264,16 @@ class _FileServiceState extends State<FileService> {
       }
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         deleteDone = false;
       });
 
-      final message = e.toString().contains('404') || 
-                     e.toString().contains('NotFoundHttpError')
+      final message = e.toString().contains('404') ||
+              e.toString().contains('NotFoundHttpError')
           ? 'File not found or already deleted'
           : 'Delete failed: ${e.toString()}';
-      
+
       _showAlert(context, message);
       debugPrint('Delete error: $e');
     } finally {
@@ -419,7 +431,8 @@ class _FileServiceState extends State<FileService> {
                     children: <Widget>[
                       Text('Delete file'),
                       smallGapH,
-                      Text('$remoteFileName', style: const TextStyle(color: Colors.red)),
+                      Text('$remoteFileName',
+                          style: const TextStyle(color: Colors.red)),
                       smallGapH,
                       Text(
                         remoteFileUrl ?? '',
