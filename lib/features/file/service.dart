@@ -48,6 +48,7 @@ class _FileServiceState extends State<FileService> {
   String? downloadFile;
   String? remoteFileName = 'remoteFileName';
   String? remoteFileUrl;
+  String? filePreview;
 
   // Operation states.
 
@@ -57,6 +58,7 @@ class _FileServiceState extends State<FileService> {
   bool uploadDone = false;
   bool downloadDone = false;
   bool deleteDone = false;
+  bool showPreview = false;
 
   // UI Constants.
 
@@ -215,6 +217,39 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
+  Future<void> handlePreview() async {
+    if (uploadFile == null) return;
+
+    try {
+      final file = File(uploadFile!);
+      String content;
+
+      if (isTextFile(uploadFile!)) {
+        // For text files, read first few lines.
+
+        content = await file.readAsString();
+
+        // Take first 500 characters or less.
+        content = content.length > 500 ? '${content.substring(0, 500)}...' : content;
+      } else {
+        // For binary files, show basic info.
+
+        final bytes = await file.readAsBytes();
+        content = 'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(uploadFile!)}';
+      }
+
+      if (!mounted) return;
+      setState(() {
+        filePreview = content;
+        showPreview = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      _showAlert(context, 'Failed to preview file: ${e.toString()}');
+      debugPrint('Preview error: $e');
+    }
+  }
+
   Future<void> handleDelete() async {
     if (remoteFileName == null) return;
 
@@ -297,6 +332,10 @@ class _FileServiceState extends State<FileService> {
           });
         }
       },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Browse'),
     );
 
@@ -307,8 +346,27 @@ class _FileServiceState extends State<FileService> {
               deleteInProgress)
           ? null
           : handleUpload,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Upload'),
     );
+
+    final previewButton = ElevatedButton(
+      onPressed: (uploadFile == null ||
+              uploadInProgress ||
+              downloadInProgress ||
+              deleteInProgress)
+          ? null
+          : handlePreview,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
+      child: const Text('Preview'),
+    );
+
 
     final downloadButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
@@ -327,6 +385,10 @@ class _FileServiceState extends State<FileService> {
                 debugPrint('Download is cancelled');
               }
             },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Download'),
     );
 
@@ -334,6 +396,10 @@ class _FileServiceState extends State<FileService> {
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
           : handleDelete,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Delete'),
     );
 
@@ -342,110 +408,127 @@ class _FileServiceState extends State<FileService> {
         padding: const EdgeInsets.all(10),
         child: Stack(
           children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                largeGapV,
-                largeGapV,
-
-                // Upload section.
-
-                Text(
-                  'Upload a file and save it as "$remoteFileName" in POD',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                smallGapV,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text('Upload file'),
-                    smallGapH,
-                    Text(
-                      uploadFile ?? 'Click the Browse button to choose a file',
-                      style: TextStyle(
-                        color: uploadFile == null ? Colors.red : Colors.blue,
-                      ),
+            SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  largeGapV,
+                  largeGapV,
+              
+                  // Upload section.
+              
+                  Text(
+                    'Upload a file and save it as "$remoteFileName" in POD',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    smallGapH,
-                    if (uploadDone) const Icon(Icons.done, color: Colors.green),
-                  ],
-                ),
-                smallGapV,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    browseButton,
-                    smallGapH,
-                    uploadButton,
-                  ],
-                ),
-
-                largeGapV,
-
-                // Download section.
-
-                Text(
-                  'Download "$remoteFileName" from POD',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                smallGapV,
-                if (downloadFile != null)
+                  smallGapV,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      const Text('Save file'),
+                      const Text('Upload file'),
                       smallGapH,
                       Text(
-                        downloadFile!,
-                        style: const TextStyle(color: Colors.blue),
+                        uploadFile ?? 'Click the Browse button to choose a file',
+                        style: TextStyle(
+                          color: uploadFile == null ? Colors.red : Colors.blue,
+                        ),
                       ),
                       smallGapH,
-                      if (downloadDone)
-                        const Icon(Icons.done, color: Colors.green),
+                      if (uploadDone) const Icon(Icons.done, color: Colors.green),
                     ],
                   ),
-                smallGapV,
-                downloadButton,
-
-                largeGapV,
-
-                // Delete section.
-
-                Text(
-                  'Delete "$remoteFileName" from POD',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                smallGapV,
-                if (deleteInProgress || deleteDone)
+                  smallGapV,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text('Delete file'),
+                      browseButton,
                       smallGapH,
-                      Text('$remoteFileName',
-                          style: const TextStyle(color: Colors.red)),
+                      previewButton,
                       smallGapH,
-                      Text(
-                        remoteFileUrl ?? '',
-                        style: const TextStyle(color: Colors.blue),
-                      ),
-                      smallGapH,
-                      if (deleteDone)
-                        const Icon(Icons.done, color: Colors.green),
+                      uploadButton,
                     ],
                   ),
-                smallGapV,
-                deleteButton,
-              ],
+              
+                  largeGapV,
+              
+                  // Preview section.
+              
+                  if (showPreview) _buildPreviewDialog(),
+              
+                  largeGapV,
+                  
+                  // Download section.
+              
+                  Text(
+                    'Download "$remoteFileName" from POD',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  smallGapV,
+                  if (downloadFile != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Text('Save file'),
+                        smallGapH,
+                        Text(
+                          downloadFile!,
+                          style: const TextStyle(color: Colors.blue),
+                        ),
+                        smallGapH,
+                        if (downloadDone)
+                          const Icon(Icons.done, color: Colors.green),
+                      ],
+                    ),
+                  smallGapV,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      downloadButton,
+                      smallGapH,
+                      previewButton,
+                    ],
+                  ),
+              
+                  largeGapV,
+              
+                  // Delete section.
+              
+                  Text(
+                    'Delete "$remoteFileName" from POD',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  smallGapV,
+                  if (deleteInProgress || deleteDone)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text('Delete file'),
+                        smallGapH,
+                        Text('$remoteFileName',
+                            style: const TextStyle(color: Colors.red)),
+                        smallGapH,
+                        Text(
+                          remoteFileUrl ?? '',
+                          style: const TextStyle(color: Colors.blue),
+                        ),
+                        smallGapH,
+                        if (deleteDone)
+                          const Icon(Icons.done, color: Colors.green),
+                      ],
+                    ),
+                  smallGapV,
+                  deleteButton,
+                ],
+              ),
             ),
 
             // Operation indicators.
@@ -487,6 +570,68 @@ class _FileServiceState extends State<FileService> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviewDialog() {
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 600,
+          maxHeight: MediaQuery.of(context).size.height * 0.8,  // 80% of screen height
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,  
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(  
+                    child: Text(
+                      'Preview: ${path.basename(uploadFile ?? '')}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,  // Handles long filenames
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    padding: EdgeInsets.zero,  
+                    onPressed: () {
+                      setState(() {
+                        showPreview = false;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const Divider(height: 16), 
+              Flexible(  
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: double.infinity,  
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: SelectableText(  
+                      filePreview ?? 'No preview available',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
