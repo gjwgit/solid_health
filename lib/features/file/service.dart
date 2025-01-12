@@ -231,12 +231,14 @@ class _FileServiceState extends State<FileService> {
         content = await file.readAsString();
 
         // Take first 500 characters or less.
-        content = content.length > 500 ? '${content.substring(0, 500)}...' : content;
+        content =
+            content.length > 500 ? '${content.substring(0, 500)}...' : content;
       } else {
         // For binary files, show basic info.
 
         final bytes = await file.readAsBytes();
-        content = 'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(uploadFile!)}';
+        content =
+            'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(uploadFile!)}';
       }
 
       if (!mounted) return;
@@ -368,7 +370,6 @@ class _FileServiceState extends State<FileService> {
       child: const Text('Preview'),
     );
 
-
     final downloadButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
@@ -415,9 +416,9 @@ class _FileServiceState extends State<FileService> {
                 children: <Widget>[
                   largeGapV,
                   largeGapV,
-              
+
                   // Upload section.
-              
+
                   Text(
                     'Upload a file and save it as "$remoteFileName" in POD',
                     style: const TextStyle(
@@ -432,13 +433,15 @@ class _FileServiceState extends State<FileService> {
                       const Text('Upload file'),
                       smallGapH,
                       Text(
-                        uploadFile ?? 'Click the Browse button to choose a file',
+                        uploadFile ??
+                            'Click the Browse button to choose a file',
                         style: TextStyle(
                           color: uploadFile == null ? Colors.red : Colors.blue,
                         ),
                       ),
                       smallGapH,
-                      if (uploadDone) const Icon(Icons.done, color: Colors.green),
+                      if (uploadDone)
+                        const Icon(Icons.done, color: Colors.green),
                     ],
                   ),
                   smallGapV,
@@ -452,24 +455,26 @@ class _FileServiceState extends State<FileService> {
                       uploadButton,
                     ],
                   ),
-              
+
                   largeGapV,
-              
+
                   // Preview section.
-              
+
                   if (showPreview)
                     PreviewDialog(
-                      uploadFile: uploadFile, 
-                      filePreview: filePreview, 
-                      onClose: () { 
-                        setState(() { showPreview = false; }); 
+                      uploadFile: uploadFile,
+                      filePreview: filePreview,
+                      onClose: () {
+                        setState(() {
+                          showPreview = false;
+                        });
                       },
                     ),
-              
+
                   largeGapV,
-                  
+
                   // Download section.
-              
+
                   Text(
                     'Download "$remoteFileName" from POD',
                     style: const TextStyle(
@@ -502,11 +507,11 @@ class _FileServiceState extends State<FileService> {
                       previewButton,
                     ],
                   ),
-              
+
                   largeGapV,
-              
+
                   // Delete section.
-              
+
                   Text(
                     'Delete "$remoteFileName" from POD',
                     style: const TextStyle(

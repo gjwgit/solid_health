@@ -25,7 +25,6 @@
 
 library;
 
-
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as path;
@@ -48,44 +47,45 @@ class PreviewDialog extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 600,
-          maxHeight: MediaQuery.of(context).size.height * 0.8,  // 80% of screen height
+          maxHeight:
+              MediaQuery.of(context).size.height * 0.8, // 80% of screen height
         ),
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,  
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(  
+                  Expanded(
                     child: Text(
                       'Preview: ${path.basename(uploadFile ?? '')}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
-                      overflow: TextOverflow.ellipsis,  // Handles long filenames
+                      overflow: TextOverflow.ellipsis, // Handles long filenames
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    padding: EdgeInsets.zero,  
+                    padding: EdgeInsets.zero,
                     onPressed: onClose,
                   ),
                 ],
               ),
-              const Divider(height: 16), 
-              Flexible(  
+              const Divider(height: 16),
+              Flexible(
                 child: SingleChildScrollView(
                   child: Container(
-                    width: double.infinity,  
+                    width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: SelectableText(  
+                    child: SelectableText(
                       filePreview ?? 'No preview available',
                       style: const TextStyle(
                         fontFamily: 'monospace',
