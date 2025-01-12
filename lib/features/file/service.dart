@@ -33,7 +33,8 @@ import 'package:healthpod/widgets/preview.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/utils/is_text_file.dart';
+import 'package:healthpod/utils/show_alert.dart';
 
 class FileService extends StatefulWidget {
   const FileService({super.key});
@@ -66,34 +67,6 @@ class _FileServiceState extends State<FileService> {
   final smallGapH = const SizedBox(width: 10);
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
-
-  // File type detection.
-
-  final textFileExtensions = [
-    '.txt',
-    '.md',
-    '.json',
-    '.xml',
-    '.csv',
-    '.html',
-    '.css',
-    '.js',
-    '.dart',
-    '.yaml',
-    '.yml'
-  ];
-
-  bool isTextFile(String filePath) {
-    return textFileExtensions.contains(path.extension(filePath).toLowerCase());
-  }
-
-  // Helper method to show alerts safely.
-
-  void _showAlert(BuildContext context, String message) {
-    if (context.mounted) {
-      alert(context, message);
-    }
-  }
 
   Future<void> handleUpload() async {
     if (uploadFile == null) return;
@@ -138,12 +111,12 @@ class _FileServiceState extends State<FileService> {
       });
 
       if (result != SolidFunctionCallStatus.success && mounted) {
-        _showAlert(context,
+        showAlert(context,
             'Upload failed - please check your connection and permissions.');
       }
     } catch (e) {
       if (!mounted) return;
-      _showAlert(context, 'Upload error: ${e.toString()}');
+      showAlert(context, 'Upload error: ${e.toString()}');
       debugPrint('Upload error: $e');
     } finally {
       if (mounted) {
@@ -207,7 +180,7 @@ class _FileServiceState extends State<FileService> {
       }
     } catch (e) {
       if (!mounted) return;
-      _showAlert(context, e.toString().replaceAll('Exception: ', ''));
+      showAlert(context, e.toString().replaceAll('Exception: ', ''));
       debugPrint('Download error: $e');
     } finally {
       if (mounted) {
@@ -248,7 +221,7 @@ class _FileServiceState extends State<FileService> {
       });
     } catch (e) {
       if (!mounted) return;
-      _showAlert(context, 'Failed to preview file: ${e.toString()}');
+      showAlert(context, 'Failed to preview file: ${e.toString()}');
       debugPrint('Preview error: $e');
     }
   }
@@ -312,7 +285,7 @@ class _FileServiceState extends State<FileService> {
           ? 'File not found or already deleted'
           : 'Delete failed: ${e.toString()}';
 
-      _showAlert(context, message);
+      showAlert(context, message);
       debugPrint('Delete error: $e');
     } finally {
       if (mounted) {
