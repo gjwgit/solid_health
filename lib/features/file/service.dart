@@ -29,6 +29,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/widgets/preview.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
@@ -456,7 +457,14 @@ class _FileServiceState extends State<FileService> {
               
                   // Preview section.
               
-                  if (showPreview) _buildPreviewDialog(),
+                  if (showPreview)
+                    PreviewDialog(
+                      uploadFile: uploadFile, 
+                      filePreview: filePreview, 
+                      onClose: () { 
+                        setState(() { showPreview = false; }); 
+                      },
+                    ),
               
                   largeGapV,
                   
@@ -570,68 +578,6 @@ class _FileServiceState extends State<FileService> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPreviewDialog() {
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 600,
-          maxHeight: MediaQuery.of(context).size.height * 0.8,  // 80% of screen height
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,  
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(  
-                    child: Text(
-                      'Preview: ${path.basename(uploadFile ?? '')}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,  // Handles long filenames
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    padding: EdgeInsets.zero,  
-                    onPressed: () {
-                      setState(() {
-                        showPreview = false;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              const Divider(height: 16), 
-              Flexible(  
-                child: SingleChildScrollView(
-                  child: Container(
-                    width: double.infinity,  
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: SelectableText(  
-                      filePreview ?? 'No preview available',
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
