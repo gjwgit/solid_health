@@ -39,36 +39,112 @@ class Footer extends StatelessWidget {
     required this.isKeySaved,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+  Widget _buildTextRow(String label, String value, {Color? valueColor}) {
+    return Text(
+      '$label: $value',
+      style: TextStyle(fontSize: 14, color: valueColor ?? Colors.black),
+      overflow: TextOverflow.ellipsis,
+    );
+  }
 
+  Widget _buildNarrowLayout(String serverUri, String loginStatus,
+      Color loginStatusColor, String securityKeyStatus) {
     return Container(
       color: Colors.grey[200],
+      height: 90.0,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTextRow('Server', serverUri),
+            const SizedBox(height: 2),
+            _buildTextRow('Login Status', loginStatus,
+                valueColor: loginStatusColor),
+            const SizedBox(height: 2),
+            _buildTextRow('Security Key', securityKeyStatus),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediumLayout(String serverUri, String loginStatus,
+      Color loginStatusColor, String securityKeyStatus) {
+    return Container(
+      color: Colors.grey[200],
+      height: 70.0,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildTextRow('Server', serverUri),
+            const SizedBox(height: 4),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildTextRow('Login Status', loginStatus,
+                      valueColor: loginStatusColor),
+                  const SizedBox(width: 16),
+                  _buildTextRow('Security Key', securityKeyStatus),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideLayout(String serverUri, String loginStatus,
+      Color loginStatusColor, String securityKeyStatus) {
+    return Container(
+      color: Colors.grey[200],
+      height: 50.0,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          Text(
-            'Server: $serverUri',
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
+          Expanded(
+            child: _buildTextRow('Server', serverUri),
           ),
-          const Spacer(),
-          Text(
-            'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
-            style: TextStyle(
-              fontSize: 14,
-              color: webId == null ? Colors.red : Colors.green,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTextRow('Login Status', loginStatus,
+                  valueColor: loginStatusColor),
+              const SizedBox(width: 16),
+              _buildTextRow('Security Key', securityKeyStatus),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+    final loginStatus = webId == null ? "Not Logged In" : "Logged In";
+    final loginStatusColor = webId == null ? Colors.red : Colors.green;
+    final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 400) {
+          return _buildNarrowLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        } else if (constraints.maxWidth < 600) {
+          return _buildMediumLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        } else {
+          return _buildWideLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        }
+      },
     );
   }
 }

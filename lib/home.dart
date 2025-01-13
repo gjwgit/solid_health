@@ -33,6 +33,7 @@ import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
+import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 import 'package:healthpod/widgets/footer.dart';
@@ -111,7 +112,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
       backgroundColor: titleBackgroundColor,
       body: IconGridPage(),
       bottomNavigationBar: BottomAppBar(
-        height: 60.0,
+        height: getFooterHeight(context),
         color: Colors.grey[200],
         child: SizedBox(
           child: Footer(
