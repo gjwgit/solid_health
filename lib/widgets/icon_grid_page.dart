@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Monday 2025-01-13 15:10:20 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-01-13 15:13:43 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -35,11 +35,12 @@ import 'package:healthpod/dialogs/show_coming_soon.dart';
 import 'package:healthpod/features/file/service.dart';
 
 class IconGridPage extends StatelessWidget {
-  final List<IconData> icons = [
+  // TODO 20250113 gjw MOVE TO constants/features.dart
+  final List<IconData> features = [
     Icons.home,
+    Icons.calendar_today,
     Icons.folder,
     Icons.vaccines,
-    Icons.calendar_today,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -60,11 +61,12 @@ class IconGridPage extends StatelessWidget {
         child: Wrap(
           spacing: 10.0, // Space between icons horizontally
           runSpacing: 10.0, // Space between icons vertically
-          children: icons.map((icon) {
+          children: features.map((icon) {
             final iconContainer = Container(
               width: 80.0, // Fixed width for each icon container
               height: 80.0, // Fixed height for each icon container
               decoration: BoxDecoration(
+                // TODO 20250113 gjw MOVE TO constants/features.dart
                 color: {
                   Icons.calendar_today,
                   Icons.folder,
@@ -83,7 +85,7 @@ class IconGridPage extends StatelessWidget {
 
             final gestureDetector = GestureDetector(
               onTap: () {
-                // TODO 20250113 gjw MOVE INTO constants/features AND USE map() HERE
+                // TODO 20250113 gjw MOVE INTO constants/features.dart AND USE map() HERE
                 switch (icon) {
                   case Icons.calendar_today:
                     alert(
@@ -121,13 +123,13 @@ class IconGridPage extends StatelessWidget {
                     );
                     break;
                   default:
-                    showComingSoon(context); // For other icons.
+                    showComingSoon(context); // For other features.
                 }
               },
               child: iconContainer,
             );
 
-            // Add tooltips for the folder icons.
+            // Add tooltips for the folder features.
 
             return switch (icon) {
               // TODO 20250113 gjw MOVE INTO constants/features AND USE map() HERE
