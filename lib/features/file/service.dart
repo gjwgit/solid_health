@@ -23,12 +23,18 @@
 
 library;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/widgets/preview.dart';
+import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/utils/is_text_file.dart';
+import 'package:healthpod/utils/show_alert.dart';
 
 class FileService extends StatefulWidget {
   const FileService({super.key});
@@ -38,60 +44,256 @@ class FileService extends StatefulWidget {
 }
 
 class _FileServiceState extends State<FileService> {
-  String remoteFileName = 'large_file.bin';
+  // File state.
+
   String? uploadFile;
   String? downloadFile;
+  String? remoteFileName = 'remoteFileName';
   String? remoteFileUrl;
+  String? filePreview;
 
-  double uploadPercent = 0.0;
-  double downloadPercent = 0.0;
-  double deletePercent = 0.0;
-
-  bool uploadDone = false;
-  bool downloadDone = false;
-  bool deleteDone = false;
+  // Operation states.
 
   bool uploadInProgress = false;
   bool downloadInProgress = false;
   bool deleteInProgress = false;
+  bool uploadDone = false;
+  bool downloadDone = false;
+  bool deleteDone = false;
+  bool showPreview = false;
+
+  // UI Constants.
 
   final smallGapH = const SizedBox(width: 10);
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
 
-  Future<String> getRemoteFileUrl() async =>
-      getFileUrl([await getDataDirPath(), remoteFileName].join('/'));
+  Future<void> handleUpload() async {
+    if (uploadFile == null) return;
 
-  Widget getProgressBar(String message, bool isDone, double percent) {
-    const textStyle = TextStyle(
-      color: Colors.green,
-      fontWeight: FontWeight.bold,
-    );
+    try {
+      setState(() {
+        uploadInProgress = true;
+        uploadDone = false;
+      });
 
-    final prefix = Text(message, style: textStyle);
-    final suffix = Text('${(percent * 100).toInt()}%', style: textStyle);
-    final progress = SizedBox(
-      width: 300,
-      height: 10,
-      child: LinearProgressIndicator(
-        value: percent,
-        minHeight: 2,
-        backgroundColor: Colors.black12,
-        color: Colors.greenAccent,
-      ),
-    );
+      final file = File(uploadFile!);
+      String fileContent;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      // crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        prefix,
-        smallGapH,
-        progress,
-        smallGapH,
-        suffix,
-      ],
-    );
+      // Read file content.
+
+      if (isTextFile(uploadFile!)) {
+        fileContent = await file.readAsString();
+      } else {
+        final bytes = await file.readAsBytes();
+        fileContent = base64Encode(bytes);
+      }
+
+      remoteFileName =
+          '${path.basename(uploadFile!).replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
+
+      if (!mounted) return;
+
+      // Upload with encryption.
+
+      final result = await writePod(
+        remoteFileName!,
+        fileContent,
+        context,
+        const Text('Upload'),
+        encrypted: true,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        uploadDone = result == SolidFunctionCallStatus.success;
+      });
+
+      if (result != SolidFunctionCallStatus.success && mounted) {
+        showAlert(context,
+            'Upload failed - please check your connection and permissions.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showAlert(context, 'Upload error: ${e.toString()}');
+      debugPrint('Upload error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          uploadInProgress = false;
+        });
+      }
+    }
+  }
+
+  Future<void> handleDownload() async {
+    if (downloadFile == null || remoteFileName == null) return;
+
+    try {
+      setState(() {
+        downloadInProgress = true;
+        downloadDone = false;
+      });
+
+      final dataDir = await getDataDirPath();
+      final filePath = '$dataDir/$remoteFileName';
+
+      if (!mounted) return;
+
+      final fileContent = await readPod(
+        filePath,
+        context,
+        const Text('Downloading'),
+      );
+
+      if (!mounted) return;
+
+      if (fileContent == SolidFunctionCallStatus.fail ||
+          fileContent == SolidFunctionCallStatus.notLoggedIn) {
+        throw Exception(
+            'Download failed - please check your connection and permissions');
+      }
+
+      final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+      final file = File(saveFileName);
+
+      try {
+        if (isTextFile(
+            remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
+          await file.writeAsString(fileContent.toString());
+        } else {
+          try {
+            final bytes = base64Decode(fileContent.toString());
+            await file.writeAsBytes(bytes);
+          } catch (e) {
+            await file.writeAsString(fileContent.toString());
+          }
+        }
+
+        if (!mounted) return;
+        setState(() {
+          downloadDone = true;
+        });
+      } catch (e) {
+        throw Exception('Failed to save file: ${e.toString()}');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showAlert(context, e.toString().replaceAll('Exception: ', ''));
+      debugPrint('Download error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          downloadInProgress = false;
+        });
+      }
+    }
+  }
+
+  Future<void> handlePreview() async {
+    if (uploadFile == null) return;
+
+    try {
+      final file = File(uploadFile!);
+      String content;
+
+      if (isTextFile(uploadFile!)) {
+        // For text files, read first few lines.
+
+        content = await file.readAsString();
+
+        // Take first 500 characters or less.
+        content =
+            content.length > 500 ? '${content.substring(0, 500)}...' : content;
+      } else {
+        // For binary files, show basic info.
+
+        final bytes = await file.readAsBytes();
+        content =
+            'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(uploadFile!)}';
+      }
+
+      if (!mounted) return;
+      setState(() {
+        filePreview = content;
+        showPreview = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      showAlert(context, 'Failed to preview file: ${e.toString()}');
+      debugPrint('Preview error: $e');
+    }
+  }
+
+  Future<void> handleDelete() async {
+    if (remoteFileName == null) return;
+
+    try {
+      setState(() {
+        deleteInProgress = true;
+        deleteDone = false;
+      });
+
+      final dataDir = await getDataDirPath();
+      final basePath = '$dataDir/$remoteFileName';
+
+      if (!mounted) return;
+
+      bool mainFileDeleted = false;
+      try {
+        await deleteFile(basePath);
+        mainFileDeleted = true;
+        debugPrint('Successfully deleted main file: $basePath');
+      } catch (e) {
+        debugPrint('Error deleting main file: $e');
+        if (!e.toString().contains('404') &&
+            !e.toString().contains('NotFoundHttpError')) {
+          rethrow;
+        }
+      }
+
+      if (!mounted) return;
+
+      if (mainFileDeleted) {
+        try {
+          await deleteFile('$basePath.acl');
+          debugPrint('Successfully deleted ACL file');
+        } catch (e) {
+          if (e.toString().contains('404') ||
+              e.toString().contains('NotFoundHttpError')) {
+            debugPrint('ACL file not found (safe to ignore)');
+          } else {
+            debugPrint('Error deleting ACL file: ${e.toString()}');
+          }
+        }
+
+        if (!mounted) return;
+        setState(() {
+          deleteDone = true;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        deleteDone = false;
+      });
+
+      final message = e.toString().contains('404') ||
+              e.toString().contains('NotFoundHttpError')
+          ? 'File not found or already deleted'
+          : 'Delete failed: ${e.toString()}';
+
+      showAlert(context, message);
+      debugPrint('Delete error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          deleteInProgress = false;
+        });
+      }
+    }
   }
 
   @override
@@ -103,10 +305,13 @@ class _FileServiceState extends State<FileService> {
           setState(() {
             uploadFile = result.files.single.path!;
             uploadDone = false;
-            uploadPercent = 0.0;
           });
         }
       },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Browse'),
     );
 
@@ -116,36 +321,26 @@ class _FileServiceState extends State<FileService> {
               downloadInProgress ||
               deleteInProgress)
           ? null
-          : () async {
-              try {
-                remoteFileUrl ??= await getRemoteFileUrl();
-                setState(() {
-                  uploadInProgress = true;
-                });
-                if (context.mounted) {
-                  await sendLargeFile(
-                      localFilePath: uploadFile!,
-                      remoteFileName: remoteFileName,
-                      onProgress: (sent, total) {
-                        setState(() {
-                          uploadDone = sent == total;
-                          uploadPercent = sent / total;
-                        });
-                      },
-                      context: context,
-                      child: const Text('Upload'));
-                }
-                if (uploadDone) {
-                  setState(() {
-                    uploadInProgress = false;
-                  });
-                }
-              } on Object catch (e) {
-                if (context.mounted) alert(context, 'Failed to send file.');
-                debugPrint('$e');
-              }
-            },
+          : handleUpload,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Upload'),
+    );
+
+    final previewButton = ElevatedButton(
+      onPressed: (uploadFile == null ||
+              uploadInProgress ||
+              downloadInProgress ||
+              deleteInProgress)
+          ? null
+          : handlePreview,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
+      child: const Text('Preview'),
     );
 
     final downloadButton = ElevatedButton(
@@ -154,82 +349,32 @@ class _FileServiceState extends State<FileService> {
           : () async {
               String? outputFile = await FilePicker.platform.saveFile(
                 dialogTitle: 'Please set the output file:',
-                // fileName: 'download.bin',
+                fileName: remoteFileName, // Suggest the original filename
               );
-              if (outputFile == null) {
-                // User canceled the picker
-                debugPrint('Download is cancelled');
-              } else {
+              if (outputFile != null) {
                 setState(() {
                   downloadFile = outputFile;
                 });
-                try {
-                  remoteFileUrl ??= await getRemoteFileUrl();
-                  setState(() {
-                    downloadInProgress = true;
-                  });
-                  if (context.mounted) {
-                    await getLargeFile(
-                        remoteFileName: remoteFileName,
-                        localFilePath: outputFile,
-                        onProgress: (received, total) {
-                          setState(() {
-                            downloadDone = received == total;
-                            downloadPercent = received / total;
-                          });
-                        },
-                        context: context,
-                        child: const Text('Download'));
-                  }
-                  if (downloadDone) {
-                    setState(() {
-                      downloadInProgress = false;
-                    });
-                  }
-                } on Object catch (e) {
-                  if (context.mounted) {
-                    alert(context, 'Failed to download file.');
-                  }
-                  debugPrint('$e');
-                }
+                await handleDownload();
+              } else {
+                debugPrint('Download is cancelled');
               }
             },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Download'),
     );
 
     final deleteButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
-          : () async {
-              try {
-                remoteFileUrl ??= await getRemoteFileUrl();
-                setState(() {
-                  deleteInProgress = true;
-                });
-                if (context.mounted) {
-                  await deleteLargeFile(
-                      remoteFileName: remoteFileName,
-                      onProgress: (deleted, total) {
-                        setState(() {
-                          deleteDone = deleted == total;
-                          deletePercent = deleted / total;
-                        });
-                      },
-                      context: context,
-                      child: const Text('Delete'));
-                }
-                if (deleteDone) {
-                  setState(() {
-                    deleteInProgress = false;
-                  });
-                }
-              } on Object catch (e) {
-                if (context.mounted) {
-                  alert(context, 'Failed to delete file.');
-                }
-                debugPrint('$e');
-              }
-            },
+          : handleDelete,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size(100, 40),
+      ),
       child: const Text('Delete'),
     );
 
@@ -238,142 +383,170 @@ class _FileServiceState extends State<FileService> {
         padding: const EdgeInsets.all(10),
         child: Stack(
           children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                largeGapV,
-                largeGapV,
+            SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  largeGapV,
+                  largeGapV,
 
-                // Upload
+                  // Upload section.
 
-                Text(
-                  'Upload a large file and save it as "$remoteFileName" in POD',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                smallGapV,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text('Upload file'),
-                    smallGapH,
-                    Text(
-                      uploadFile ?? 'Click the Browse button to choose a file',
-                      style: TextStyle(
-                        color: uploadFile == null ? Colors.red : Colors.blue,
-                        // fontStyle: FontStyle.italic,
-                      ),
+                  Text(
+                    'Upload a file and save it as "$remoteFileName" in POD',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    smallGapH,
-                    if (uploadDone) const Icon(Icons.done, color: Colors.green),
-                  ],
-                ),
-                smallGapV,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    browseButton,
-                    smallGapH,
-                    uploadButton,
-                  ],
-                ),
-
-                largeGapV,
-
-                // Download
-
-                Text(
-                  'Download the "$remoteFileName" from POD',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-                smallGapV,
-                if (downloadFile != null)
+                  smallGapV,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      const Text('Save file'),
+                      const Text('Upload file'),
                       smallGapH,
                       Text(
-                        downloadFile!,
-                        style: const TextStyle(color: Colors.blue),
+                        uploadFile ??
+                            'Click the Browse button to choose a file',
+                        style: TextStyle(
+                          color: uploadFile == null ? Colors.red : Colors.blue,
+                        ),
                       ),
                       smallGapH,
-                      if (downloadDone)
+                      if (uploadDone)
                         const Icon(Icons.done, color: Colors.green),
                     ],
                   ),
-                smallGapV,
-                downloadButton,
-
-                largeGapV,
-
-                // Delete
-
-                Text(
-                  'Delete the "$remoteFileName" from POD',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                smallGapV,
-                if (deleteInProgress || deleteDone)
+                  smallGapV,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      const Text('Delete file'),
+                      browseButton,
                       smallGapH,
-                      Text(
-                        remoteFileUrl!,
-                        style: const TextStyle(color: Colors.blue),
-                      ),
+                      previewButton,
                       smallGapH,
-                      if (deleteDone)
-                        const Icon(Icons.done, color: Colors.green),
+                      uploadButton,
                     ],
                   ),
-                smallGapV,
-                deleteButton,
-              ],
+
+                  largeGapV,
+
+                  // Preview section.
+
+                  if (showPreview)
+                    PreviewDialog(
+                      uploadFile: uploadFile,
+                      filePreview: filePreview,
+                      onClose: () {
+                        setState(() {
+                          showPreview = false;
+                        });
+                      },
+                    ),
+
+                  largeGapV,
+
+                  // Download section.
+
+                  Text(
+                    'Download "$remoteFileName" from POD',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  smallGapV,
+                  if (downloadFile != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const Text('Save file'),
+                        smallGapH,
+                        Text(
+                          downloadFile!,
+                          style: const TextStyle(color: Colors.blue),
+                        ),
+                        smallGapH,
+                        if (downloadDone)
+                          const Icon(Icons.done, color: Colors.green),
+                      ],
+                    ),
+                  smallGapV,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      downloadButton,
+                      smallGapH,
+                      previewButton,
+                    ],
+                  ),
+
+                  largeGapV,
+
+                  // Delete section.
+
+                  Text(
+                    'Delete "$remoteFileName" from POD',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  smallGapV,
+                  if (deleteInProgress || deleteDone)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text('Delete file'),
+                        smallGapH,
+                        Text('$remoteFileName',
+                            style: const TextStyle(color: Colors.red)),
+                        smallGapH,
+                        Text(
+                          remoteFileUrl ?? '',
+                          style: const TextStyle(color: Colors.blue),
+                        ),
+                        smallGapH,
+                        if (deleteDone)
+                          const Icon(Icons.done, color: Colors.green),
+                      ],
+                    ),
+                  smallGapV,
+                  deleteButton,
+                ],
+              ),
             ),
 
-            // Uploading progress bar
+            // Operation indicators.
 
-            if (uploadInProgress)
+            if (uploadInProgress || downloadInProgress || deleteInProgress)
               Positioned(
                 top: 20,
                 left: 0,
                 right: 0,
-                child: getProgressBar('Uploading:', uploadDone, uploadPercent),
+                child: Center(
+                  child: Column(
+                    children: [
+                      const CircularProgressIndicator(),
+                      smallGapV,
+                      Text(
+                        uploadInProgress
+                            ? 'Uploading...'
+                            : downloadInProgress
+                                ? 'Downloading...'
+                                : 'Deleting...',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-            // Downloading progress bar
+            // Back button.
 
-            if (downloadInProgress)
-              Positioned(
-                top: 20,
-                left: 0,
-                right: 0,
-                child: getProgressBar(
-                    'Downloading:', downloadDone, downloadPercent),
-              ),
-
-            // Deleting progress bar
-
-            if (deleteInProgress)
-              Positioned(
-                top: 20,
-                left: 0,
-                right: 0,
-                child: getProgressBar('Deleting:', deleteDone, deletePercent),
-              ),
-
-            // Navigate back to demo page
             Positioned(
               top: 10,
               left: 10,
