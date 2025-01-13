@@ -39,29 +39,6 @@ class Footer extends StatelessWidget {
     required this.isKeySaved,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
-    final loginStatus = webId == null ? "Not Logged In" : "Logged In";
-    final loginStatusColor = webId == null ? Colors.red : Colors.green;
-    final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 400) {
-          return _buildNarrowLayout(
-              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
-        } else if (constraints.maxWidth < 600) {
-          return _buildMediumLayout(
-              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
-        } else {
-          return _buildWideLayout(
-              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
-        }
-      },
-    );
-  }
-
   Widget _buildTextRow(String label, String value, {Color? valueColor}) {
     return Text(
       '$label: $value',
@@ -145,6 +122,29 @@ class Footer extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+    final loginStatus = webId == null ? "Not Logged In" : "Logged In";
+    final loginStatusColor = webId == null ? Colors.red : Colors.green;
+    final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 400) {
+          return _buildNarrowLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        } else if (constraints.maxWidth < 600) {
+          return _buildMediumLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        } else {
+          return _buildWideLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        }
+      },
     );
   }
 }
