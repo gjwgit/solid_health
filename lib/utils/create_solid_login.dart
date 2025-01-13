@@ -1,6 +1,6 @@
 /// Creates a SolidLogin widget with consistent configuration.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-14 09:29:45 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -51,7 +51,7 @@ Widget createSolidLogin(BuildContext context) {
     title: 'HEALTH POD',
     appDirectory: 'healthpod',
     image: AssetImage('assets/images/healthpod_image.png'),
-    logo: AssetImage('assets/images/healthpod_logo.png'),
+    logo: AssetImage('assets/images/healthpod_icon.png'),
     link: 'https://github.com/anusii/healthpod/blob/main/README.md',
     child: HealthPodHome(),
   );
