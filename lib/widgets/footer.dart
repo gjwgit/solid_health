@@ -49,11 +49,14 @@ class Footer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 400) {
-          return _buildNarrowLayout(serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+          return _buildNarrowLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
         } else if (constraints.maxWidth < 600) {
-          return _buildMediumLayout(serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+          return _buildMediumLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
         } else {
-          return _buildWideLayout(serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+          return _buildWideLayout(
+              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
         }
       },
     );
@@ -67,7 +70,8 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget _buildNarrowLayout(String serverUri, String loginStatus, Color loginStatusColor, String securityKeyStatus) {
+  Widget _buildNarrowLayout(String serverUri, String loginStatus,
+      Color loginStatusColor, String securityKeyStatus) {
     return Container(
       color: Colors.grey[200],
       height: 90.0,
@@ -79,7 +83,8 @@ class Footer extends StatelessWidget {
           children: [
             _buildTextRow('Server', serverUri),
             const SizedBox(height: 2),
-            _buildTextRow('Login Status', loginStatus, valueColor: loginStatusColor),
+            _buildTextRow('Login Status', loginStatus,
+                valueColor: loginStatusColor),
             const SizedBox(height: 2),
             _buildTextRow('Security Key', securityKeyStatus),
           ],
@@ -88,7 +93,8 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget _buildMediumLayout(String serverUri, String loginStatus, Color loginStatusColor, String securityKeyStatus) {
+  Widget _buildMediumLayout(String serverUri, String loginStatus,
+      Color loginStatusColor, String securityKeyStatus) {
     return Container(
       color: Colors.grey[200],
       height: 70.0,
@@ -104,7 +110,8 @@ class Footer extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildTextRow('Login Status', loginStatus, valueColor: loginStatusColor),
+                  _buildTextRow('Login Status', loginStatus,
+                      valueColor: loginStatusColor),
                   const SizedBox(width: 16),
                   _buildTextRow('Security Key', securityKeyStatus),
                 ],
@@ -116,7 +123,8 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget _buildWideLayout(String serverUri, String loginStatus, Color loginStatusColor, String securityKeyStatus) {
+  Widget _buildWideLayout(String serverUri, String loginStatus,
+      Color loginStatusColor, String securityKeyStatus) {
     return Container(
       color: Colors.grey[200],
       height: 50.0,
@@ -129,7 +137,8 @@ class Footer extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildTextRow('Login Status', loginStatus, valueColor: loginStatusColor),
+              _buildTextRow('Login Status', loginStatus,
+                  valueColor: loginStatusColor),
               const SizedBox(width: 16),
               _buildTextRow('Security Key', securityKeyStatus),
             ],
