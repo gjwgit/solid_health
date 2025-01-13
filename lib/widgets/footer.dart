@@ -42,33 +42,124 @@ class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // For very narrow screens (mobile), use three lines.
 
-    return Container(
-      color: Colors.grey[200],
-      child: Row(
-        children: [
-          Text(
-            'Server: $serverUri',
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Text(
-            'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
-            style: TextStyle(
-              fontSize: 14,
-              color: webId == null ? Colors.red : Colors.green,
+        if (constraints.maxWidth < 400) {
+          return Container(
+            color: Colors.grey[200],
+            height: 90.0,
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Server: $serverUri',
+                    style: const TextStyle(fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: webId == null ? Colors.red : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
             ),
-            overflow: TextOverflow.ellipsis,
+          );
+        }
+        
+        // For medium screens, use two-line layout.
+
+        if (constraints.maxWidth < 600) {
+          return Container(
+            color: Colors.grey[200],
+            height: 70.0,
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Server: $serverUri',
+                    style: const TextStyle(fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: webId == null ? Colors.red : Colors.green,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        
+        // For wider screens, use single-line layout.
+        
+        return Container(
+          color: Colors.grey[200],
+          height: 50.0,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Server: $serverUri',
+                  style: const TextStyle(fontSize: 14),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: webId == null ? Colors.red : Colors.green,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Text(
-            'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
