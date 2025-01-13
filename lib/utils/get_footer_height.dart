@@ -38,10 +38,10 @@ double getFooterHeight(BuildContext context) {
   // For medium screens, use two lines.
 
   if (width < 600) {
-    return 70.0;
+    return 90.0;
   }
 
   // For wider screens, use single line.
 
-  return 50.0;
+  return 70.0;
 }

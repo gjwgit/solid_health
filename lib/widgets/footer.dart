@@ -42,124 +42,100 @@ class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+    final loginStatus = webId == null ? "Not Logged In" : "Logged In";
+    final loginStatusColor = webId == null ? Colors.red : Colors.green;
+    final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // For very narrow screens (mobile), use three lines.
-
         if (constraints.maxWidth < 400) {
-          return Container(
-            color: Colors.grey[200],
-            height: 90.0,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Server: $serverUri',
-                    style: const TextStyle(fontSize: 14),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: webId == null ? Colors.red : Colors.green,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildNarrowLayout(serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        } else if (constraints.maxWidth < 600) {
+          return _buildMediumLayout(serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+        } else {
+          return _buildWideLayout(serverUri, loginStatus, loginStatusColor, securityKeyStatus);
         }
+      },
+    );
+  }
 
-        // For medium screens, use two-line layout.
+  Widget _buildTextRow(String label, String value, {Color? valueColor}) {
+    return Text(
+      '$label: $value',
+      style: TextStyle(fontSize: 14, color: valueColor ?? Colors.black),
+      overflow: TextOverflow.ellipsis,
+    );
+  }
 
-        if (constraints.maxWidth < 600) {
-          return Container(
-            color: Colors.grey[200],
-            height: 70.0,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Server: $serverUri',
-                    style: const TextStyle(fontSize: 14),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: webId == null ? Colors.red : Colors.green,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
+  Widget _buildNarrowLayout(String serverUri, String loginStatus, Color loginStatusColor, String securityKeyStatus) {
+    return Container(
+      color: Colors.grey[200],
+      height: 90.0,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTextRow('Server', serverUri),
+            const SizedBox(height: 2),
+            _buildTextRow('Login Status', loginStatus, valueColor: loginStatusColor),
+            const SizedBox(height: 2),
+            _buildTextRow('Security Key', securityKeyStatus),
+          ],
+        ),
+      ),
+    );
+  }
 
-        // For wider screens, use single-line layout.
-
-        return Container(
-          color: Colors.grey[200],
-          height: 50.0,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Server: $serverUri',
-                  style: const TextStyle(fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Row(
+  Widget _buildMediumLayout(String serverUri, String loginStatus, Color loginStatusColor, String securityKeyStatus) {
+    return Container(
+      color: Colors.grey[200],
+      height: 70.0,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildTextRow('Server', serverUri),
+            const SizedBox(height: 4),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: webId == null ? Colors.red : Colors.green,
-                    ),
-                  ),
+                  _buildTextRow('Login Status', loginStatus, valueColor: loginStatusColor),
                   const SizedBox(width: 16),
-                  Text(
-                    'Security Key: ${isKeySaved ? "Saved" : "Not Saved"}',
-                    style: const TextStyle(fontSize: 14),
-                  ),
+                  _buildTextRow('Security Key', securityKeyStatus),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideLayout(String serverUri, String loginStatus, Color loginStatusColor, String securityKeyStatus) {
+    return Container(
+      color: Colors.grey[200],
+      height: 50.0,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildTextRow('Server', serverUri),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTextRow('Login Status', loginStatus, valueColor: loginStatusColor),
+              const SizedBox(width: 16),
+              _buildTextRow('Security Key', securityKeyStatus),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
