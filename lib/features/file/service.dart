@@ -49,6 +49,7 @@ class _FileServiceState extends State<FileService> {
   String? uploadFile;
   String? downloadFile;
   String? remoteFileName = 'remoteFileName';
+  String? cleanFileName = 'remoteFileName';
   String? remoteFileUrl;
   String? filePreview;
 
@@ -91,6 +92,9 @@ class _FileServiceState extends State<FileService> {
 
       remoteFileName =
           '${path.basename(uploadFile!).replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
+      
+      cleanFileName = remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+
 
       if (!mounted) return;
 
@@ -347,9 +351,12 @@ class _FileServiceState extends State<FileService> {
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
           : () async {
+              // Remove .enc.ttl from the suggested filename
+              final suggestedName = remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+              
               String? outputFile = await FilePicker.platform.saveFile(
                 dialogTitle: 'Please set the output file:',
-                fileName: remoteFileName, // Suggest the original filename
+                fileName: suggestedName, // Clean filename without encryption suffix
               );
               if (outputFile != null) {
                 setState(() {
@@ -366,7 +373,7 @@ class _FileServiceState extends State<FileService> {
       ),
       child: const Text('Download'),
     );
-
+    
     final deleteButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
@@ -393,7 +400,7 @@ class _FileServiceState extends State<FileService> {
                   // Upload section.
 
                   Text(
-                    'Upload a file and save it as "$remoteFileName" in POD',
+                    'Upload a file and save it as "$cleanFileName" in POD',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -449,7 +456,7 @@ class _FileServiceState extends State<FileService> {
                   // Download section.
 
                   Text(
-                    'Download "$remoteFileName" from POD',
+                    'Download "$cleanFileName" from POD',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -486,7 +493,7 @@ class _FileServiceState extends State<FileService> {
                   // Delete section.
 
                   Text(
-                    'Delete "$remoteFileName" from POD',
+                    'Delete "$cleanFileName" from POD',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
