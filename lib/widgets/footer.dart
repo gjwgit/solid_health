@@ -42,7 +42,7 @@ class Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // For very narrow screens (mobile), use three lines.
@@ -80,7 +80,7 @@ class Footer extends StatelessWidget {
             ),
           );
         }
-        
+
         // For medium screens, use two-line layout.
 
         if (constraints.maxWidth < 600) {
@@ -123,9 +123,9 @@ class Footer extends StatelessWidget {
             ),
           );
         }
-        
+
         // For wider screens, use single-line layout.
-        
+
         return Container(
           color: Colors.grey[200],
           height: 50.0,

@@ -28,20 +28,20 @@ library;
 import 'package:flutter/material.dart';
 
 double getFooterHeight(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    // For very narrow screens (mobile), use three lines.
+  final width = MediaQuery.of(context).size.width;
+  // For very narrow screens (mobile), use three lines.
 
-    if (width < 400) {
-      return 110.0;
-    }
-
-    // For medium screens, use two lines.
-
-    if (width < 600) {
-      return 70.0;
-    }
-
-    // For wider screens, use single line.
-
-    return 50.0;
+  if (width < 400) {
+    return 110.0;
   }
+
+  // For medium screens, use two lines.
+
+  if (width < 600) {
+    return 70.0;
+  }
+
+  // For wider screens, use single line.
+
+  return 50.0;
+}
