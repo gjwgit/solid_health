@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Monday 2025-01-13 14:47:12 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-01-13 15:10:20 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -38,14 +38,16 @@ class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
     Icons.home,
     Icons.folder,
+    Icons.vaccines,
+    Icons.calendar_today,
+    Icons.approval,
+    Icons.lightbulb,
     Icons.local_hospital,
     Icons.health_and_safety,
     Icons.medical_information,
     Icons.medical_services,
     Icons.medication,
     Icons.medication_liquid,
-    Icons.vaccines,
-    Icons.lightbulb,
   ];
 
   IconGridPage({super.key});
@@ -53,9 +55,6 @@ class IconGridPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('What would you like to do today ...'),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Wrap(
@@ -67,7 +66,7 @@ class IconGridPage extends StatelessWidget {
               height: 80.0, // Fixed height for each icon container
               decoration: BoxDecoration(
                 color: {
-                  Icons.lightbulb,
+                  Icons.calendar_today,
                   Icons.folder,
                   Icons.vaccines,
                 }.contains(icon)
@@ -84,17 +83,45 @@ class IconGridPage extends StatelessWidget {
 
             final gestureDetector = GestureDetector(
               onTap: () {
-                if (icon == Icons.folder) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FileService()),
-                  );
-                } else if (icon == Icons.lightbulb) {
-                  alert(context,
-                      'Using the alert dialog to avoid a lint message for now.');
-                } else {
-                  showComingSoon(context); // For other icons.
+                // TODO 20250113 gjw MOVE INTO constants/features AND USE map() HERE
+                switch (icon) {
+                  case Icons.calendar_today:
+                    alert(
+                      context,
+                      '''
+
+                      Here you will be able to access and manage your
+                      appointments. You can enter historic information, update
+                      when you recieve a new appointment, and download
+                      appointments from other sources.
+
+                      ''',
+                      'Comming Soon - Appointment',
+                    );
+                    break;
+                  case Icons.folder:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FileService()),
+                    );
+                    break;
+                  case Icons.vaccines:
+                    alert(
+                      context,
+                      '''
+
+                    Here you will be able to access and manage your record of
+                    vaccinations. You can enter historic information, update
+                    when you recieve a vaccination, and download from governemnt
+                    records of your vaccinations.
+
+                    ''',
+                      'Comming Soon - Vaccines',
+                    );
+                    break;
+                  default:
+                    showComingSoon(context); // For other icons.
                 }
               },
               child: iconContainer,
@@ -103,6 +130,19 @@ class IconGridPage extends StatelessWidget {
             // Add tooltips for the folder icons.
 
             return switch (icon) {
+              // TODO 20250113 gjw MOVE INTO constants/features AND USE map() HERE
+              Icons.calendar_today => MarkdownTooltip(
+                  message: '''
+
+                  **Appointment:** Here you will be able to access and manage
+                  your appointments. You can enter historic information, update
+                  when you recieve a new appointment, and download appointments
+                  from other sources. This will be a record of all your
+                  interactions with the health system.
+
+                  ''',
+                  child: gestureDetector,
+                ),
               Icons.folder => MarkdownTooltip(
                   message: '''
 
