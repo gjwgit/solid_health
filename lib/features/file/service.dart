@@ -19,7 +19,7 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Dawei Chen
+/// Authors: Dawei Chen, Ashley Tang
 
 library;
 
@@ -207,6 +207,7 @@ class _FileServiceState extends State<FileService> {
         content = await file.readAsString();
 
         // Take first 500 characters or less.
+        
         content =
             content.length > 500 ? '${content.substring(0, 500)}...' : content;
       } else {
@@ -350,7 +351,8 @@ class _FileServiceState extends State<FileService> {
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
           : () async {
-              // Remove .enc.ttl from the suggested filename
+              // Remove .enc.ttl from the suggested filename.
+            
               final suggestedName =
                   remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
