@@ -507,7 +507,7 @@ class _FileServiceState extends State<FileService> {
                       children: <Widget>[
                         Text('Delete file'),
                         smallGapH,
-                        Text('$remoteFileName',
+                        Text('$cleanFileName',
                             style: const TextStyle(color: Colors.red)),
                         smallGapH,
                         Text(
