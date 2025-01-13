@@ -92,9 +92,8 @@ class _FileServiceState extends State<FileService> {
 
       remoteFileName =
           '${path.basename(uploadFile!).replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
-      
-      cleanFileName = remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
+      cleanFileName = remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
       if (!mounted) return;
 
@@ -352,11 +351,13 @@ class _FileServiceState extends State<FileService> {
           ? null
           : () async {
               // Remove .enc.ttl from the suggested filename
-              final suggestedName = remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
-              
+              final suggestedName =
+                  remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+
               String? outputFile = await FilePicker.platform.saveFile(
                 dialogTitle: 'Please set the output file:',
-                fileName: suggestedName, // Clean filename without encryption suffix
+                fileName:
+                    suggestedName, // Clean filename without encryption suffix
               );
               if (outputFile != null) {
                 setState(() {
@@ -373,7 +374,7 @@ class _FileServiceState extends State<FileService> {
       ),
       child: const Text('Download'),
     );
-    
+
     final deleteButton = ElevatedButton(
       onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
           ? null
