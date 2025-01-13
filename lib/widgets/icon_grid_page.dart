@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Saturday 2025-01-11 08:05:49 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-01-13 14:47:12 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -38,10 +38,14 @@ class IconGridPage extends StatelessWidget {
   final List<IconData> icons = [
     Icons.home,
     Icons.folder,
+    Icons.local_hospital,
+    Icons.health_and_safety,
+    Icons.medical_information,
+    Icons.medical_services,
+    Icons.medication,
+    Icons.medication_liquid,
+    Icons.vaccines,
     Icons.lightbulb,
-    Icons.map,
-    Icons.work,
-    Icons.alarm,
   ];
 
   IconGridPage({super.key});
@@ -62,7 +66,11 @@ class IconGridPage extends StatelessWidget {
               width: 80.0, // Fixed width for each icon container
               height: 80.0, // Fixed height for each icon container
               decoration: BoxDecoration(
-                color: {Icons.lightbulb, Icons.folder}.contains(icon)
+                color: {
+                  Icons.lightbulb,
+                  Icons.folder,
+                  Icons.vaccines,
+                }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
                 borderRadius: BorderRadius.circular(10.0),
@@ -112,6 +120,17 @@ class IconGridPage extends StatelessWidget {
                 ),
               Icons.lightbulb => MarkdownTooltip(
                   message: 'Placeholder',
+                  child: gestureDetector,
+                ),
+              Icons.vaccines => MarkdownTooltip(
+                  message: '''
+
+                  **Record of Vaccinations:** Tap here to access and manage your
+                  record of vaccinations. You can enter historic information,
+                  update when you recieve a vaccination, and download from
+                  governemnt records of your vaccinations.
+
+                  ''',
                   child: gestureDetector,
                 ),
               _ => gestureDetector,
