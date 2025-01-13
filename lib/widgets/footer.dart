@@ -27,6 +27,12 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
+import 'package:healthpod/utils/create_solid_login.dart';
+import 'package:healthpod/utils/create_interactive_text.dart';
+import 'package:healthpod/utils/handle_logout.dart';
+
 /// Footer widget to display server information, login status, and security key status.
 
 class Footer extends StatelessWidget {
@@ -39,6 +45,12 @@ class Footer extends StatelessWidget {
     required this.isKeySaved,
   });
 
+  Future<void> _launchUrl(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    }
+  }
+
   Widget _buildTextRow(String label, String value, {Color? valueColor}) {
     return Text(
       '$label: $value',
@@ -47,8 +59,41 @@ class Footer extends StatelessWidget {
     );
   }
 
+  Widget buildServerInteractiveText(String serverUri, BuildContext context) {
+    return createInteractiveText(
+      context: context,
+      text: serverUri,
+      onTap: () => _launchUrl(serverUri),
+      style: TextStyle(fontSize: 14, color: Colors.blue),
+    );
+  }
+
+  Widget buildLoginStatusInteractiveText(
+      String loginStatus, BuildContext context) {
+    return createInteractiveText(
+      context: context,
+      text: 'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
+      onTap: () {
+        if (webId != null) {
+          handleLogout(context);
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => createSolidLogin(context)),
+          );
+        }
+      },
+      style: TextStyle(
+        fontSize: 14,
+        color: webId == null ? Colors.red : Colors.green,
+      ),
+    );
+  }
+
+  // TODO: build security key status interactive text
+
   Widget _buildNarrowLayout(String serverUri, String loginStatus,
-      Color loginStatusColor, String securityKeyStatus) {
+      Color loginStatusColor, String securityKeyStatus, BuildContext context) {
     return Container(
       color: Colors.grey[200],
       height: 90.0,
@@ -58,10 +103,9 @@ class Footer extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTextRow('Server', serverUri),
+            buildServerInteractiveText(serverUri, context),
             const SizedBox(height: 2),
-            _buildTextRow('Login Status', loginStatus,
-                valueColor: loginStatusColor),
+            buildLoginStatusInteractiveText(loginStatus, context),
             const SizedBox(height: 2),
             _buildTextRow('Security Key', securityKeyStatus),
           ],
@@ -71,7 +115,7 @@ class Footer extends StatelessWidget {
   }
 
   Widget _buildMediumLayout(String serverUri, String loginStatus,
-      Color loginStatusColor, String securityKeyStatus) {
+      Color loginStatusColor, String securityKeyStatus, BuildContext context) {
     return Container(
       color: Colors.grey[200],
       height: 70.0,
@@ -80,15 +124,14 @@ class Footer extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildTextRow('Server', serverUri),
+            buildServerInteractiveText(serverUri, context),
             const SizedBox(height: 4),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildTextRow('Login Status', loginStatus,
-                      valueColor: loginStatusColor),
+                  buildLoginStatusInteractiveText(loginStatus, context),
                   const SizedBox(width: 16),
                   _buildTextRow('Security Key', securityKeyStatus),
                 ],
@@ -101,7 +144,7 @@ class Footer extends StatelessWidget {
   }
 
   Widget _buildWideLayout(String serverUri, String loginStatus,
-      Color loginStatusColor, String securityKeyStatus) {
+      Color loginStatusColor, String securityKeyStatus, BuildContext context) {
     return Container(
       color: Colors.grey[200],
       height: 50.0,
@@ -109,13 +152,12 @@ class Footer extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _buildTextRow('Server', serverUri),
+            child: buildServerInteractiveText(serverUri, context),
           ),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildTextRow('Login Status', loginStatus,
-                  valueColor: loginStatusColor),
+              buildLoginStatusInteractiveText(loginStatus, context),
               const SizedBox(width: 16),
               _buildTextRow('Security Key', securityKeyStatus),
             ],
@@ -135,14 +177,14 @@ class Footer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 400) {
-          return _buildNarrowLayout(
-              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+          return _buildNarrowLayout(serverUri, loginStatus, loginStatusColor,
+              securityKeyStatus, context);
         } else if (constraints.maxWidth < 600) {
-          return _buildMediumLayout(
-              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+          return _buildMediumLayout(serverUri, loginStatus, loginStatusColor,
+              securityKeyStatus, context);
         } else {
-          return _buildWideLayout(
-              serverUri, loginStatus, loginStatusColor, securityKeyStatus);
+          return _buildWideLayout(serverUri, loginStatus, loginStatusColor,
+              securityKeyStatus, context);
         }
       },
     );
