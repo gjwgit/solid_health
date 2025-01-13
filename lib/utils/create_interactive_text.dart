@@ -31,8 +31,8 @@ import 'package:flutter/material.dart';
 Widget createInteractiveText({
   required BuildContext context,
   required String text,
-  required VoidCallback? onTap,
-  TextStyle? style,
+  required VoidCallback onTap,
+  required TextStyle style,
   bool isClickable = true,
 }) {
   return MouseRegion(
