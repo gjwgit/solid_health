@@ -207,7 +207,7 @@ class _FileServiceState extends State<FileService> {
         content = await file.readAsString();
 
         // Take first 500 characters or less.
-        
+
         content =
             content.length > 500 ? '${content.substring(0, 500)}...' : content;
       } else {
@@ -352,7 +352,7 @@ class _FileServiceState extends State<FileService> {
           ? null
           : () async {
               // Remove .enc.ttl from the suggested filename.
-            
+
               final suggestedName =
                   remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
