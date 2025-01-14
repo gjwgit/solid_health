@@ -49,13 +49,6 @@ class HealthSurveyPage extends StatelessWidget {
       max: 200,
     ),
     HealthSurveyQuestion(
-      question: "What's your heart rate?",
-      type: HealthDataType.number,
-      unit: "bpm",
-      min: 40,
-      max: 220,
-    ),
-    HealthSurveyQuestion(
       question: "What's your diastolic measurement today?",
       type: HealthDataType.number,
       unit: "mm Hg",
@@ -63,19 +56,16 @@ class HealthSurveyPage extends StatelessWidget {
       max: 220,
     ),
     HealthSurveyQuestion(
+      question: "What's your heart rate?",
+      type: HealthDataType.number,
+      unit: "bpm",
+      min: 40,
+      max: 220,
+    ),
+    HealthSurveyQuestion(
       question: "How are you feeling today?",
       type: HealthDataType.categorical,
       options: ["Excellent", "Good", "Fair", "Poor"],
-    ),
-    HealthSurveyQuestion(
-      question: "What's your fasting blood glucose today?",
-      type: HealthDataType.number,
-      unit: "mg/dL",
-    ),
-    HealthSurveyQuestion(
-      question: "What's your postprandial blood glucose today?",
-      type: HealthDataType.number,
-      unit: "mg/dL",
     ),
     HealthSurveyQuestion(
       question: "Any additional notes about your health today?",
