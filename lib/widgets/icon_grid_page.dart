@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/widgets/health_survey/page.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -41,6 +42,7 @@ class IconGridPage extends StatelessWidget {
     Icons.calendar_today,
     Icons.folder,
     Icons.vaccines,
+    Icons.quiz,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -71,6 +73,7 @@ class IconGridPage extends StatelessWidget {
                   Icons.calendar_today,
                   Icons.folder,
                   Icons.vaccines,
+                  Icons.quiz
                 }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
@@ -120,6 +123,13 @@ class IconGridPage extends StatelessWidget {
 
                     ''',
                       'Comming Soon - Vaccines',
+                    );
+                    break;
+                  case Icons.quiz:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HealthSurveyPage()),
                     );
                     break;
                   default:
