@@ -169,7 +169,7 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+    final serverUrl = webId?.split('profile')[0] ?? 'Not connected';
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
     final loginStatusColor = webId == null ? Colors.red : Colors.green;
     final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
@@ -177,13 +177,13 @@ class Footer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 400) {
-          return _buildNarrowLayout(serverUri, loginStatus, loginStatusColor,
+          return _buildNarrowLayout(serverUrl, loginStatus, loginStatusColor,
               securityKeyStatus, context);
         } else if (constraints.maxWidth < 600) {
-          return _buildMediumLayout(serverUri, loginStatus, loginStatusColor,
+          return _buildMediumLayout(serverUrl, loginStatus, loginStatusColor,
               securityKeyStatus, context);
         } else {
-          return _buildWideLayout(serverUri, loginStatus, loginStatusColor,
+          return _buildWideLayout(serverUrl, loginStatus, loginStatusColor,
               securityKeyStatus, context);
         }
       },
