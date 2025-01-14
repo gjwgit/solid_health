@@ -185,7 +185,7 @@ class IconGridPage extends StatelessWidget {
                   ''',
                   child: gestureDetector,
                 ),
-                Icons.quiz => MarkdownTooltip(
+              Icons.quiz => MarkdownTooltip(
                   message: '''
                   **Health Survey:** Tap here to start the Health Survey. This allows you to answer important health-related questions, track your responses, and share them securely with your healthcare provider if needed.
                   ''',

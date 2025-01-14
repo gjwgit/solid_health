@@ -50,5 +50,5 @@ class HealthSurveyQuestion {
           type != HealthDataType.categorical ||
               (options != null && options.isNotEmpty),
           'Categorical questions must have options',
-        );
+        ); // Ensures categorical questions have options.
 }

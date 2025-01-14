@@ -39,6 +39,8 @@ import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/widgets/health_survey/form.dart';
 import 'package:healthpod/widgets/health_survey/question.dart';
 
+/// A page for collecting health survey data.
+
 class HealthSurveyPage extends StatelessWidget {
   final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
@@ -75,6 +77,8 @@ class HealthSurveyPage extends StatelessWidget {
   ];
 
   HealthSurveyPage({super.key});
+
+  /// Saves the survey responses to a local file.
 
   Future<void> _saveResponsesLocally(
       BuildContext context, Map<String, dynamic> responses) async {
@@ -146,6 +150,8 @@ class HealthSurveyPage extends StatelessWidget {
       }
     }
   }
+
+  /// Saves the survey responses to a POD.
 
   Future<void> _saveResponsesToPod(
       BuildContext context, Map<String, dynamic> responses) async {
@@ -240,6 +246,8 @@ class HealthSurveyPage extends StatelessWidget {
       }
     }
   }
+
+  /// Handles the submission of the survey.
 
   Future<void> _handleSubmit(
       BuildContext context, Map<String, dynamic> responses) async {
@@ -346,6 +354,8 @@ class HealthSurveyPage extends StatelessWidget {
       },
     );
   }
+
+  /// Builds the health survey page.
 
   @override
   Widget build(BuildContext context) {
