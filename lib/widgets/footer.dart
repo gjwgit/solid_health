@@ -1,6 +1,6 @@
 /// Footer widget to display server information, login status, and security key status.
 //
-// Time-stamp: <Tuesday 2025-01-14 21:18:27 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-14 21:20:03 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -184,14 +184,29 @@ class Footer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 400) {
-          return _buildNarrowLayout(serverUri, loginStatus, loginStatusColor,
-              securityKeyStatus, context);
+          return _buildNarrowLayout(
+            serverUri,
+            loginStatus,
+            loginStatusColor,
+            securityKeyStatus,
+            context,
+          );
         } else if (constraints.maxWidth < 600) {
-          return _buildMediumLayout(serverUri, loginStatus, loginStatusColor,
-              securityKeyStatus, context);
+          return _buildMediumLayout(
+            serverUri,
+            loginStatus,
+            loginStatusColor,
+            securityKeyStatus,
+            context,
+          );
         } else {
-          return _buildWideLayout(serverUri, loginStatus, loginStatusColor,
-              securityKeyStatus, context);
+          return _buildWideLayout(
+            serverUri,
+            loginStatus,
+            loginStatusColor,
+            securityKeyStatus,
+            context,
+          );
         }
       },
     );
