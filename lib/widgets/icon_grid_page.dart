@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/widgets/health_survey/page.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -41,6 +42,7 @@ class IconGridPage extends StatelessWidget {
     Icons.calendar_today,
     Icons.folder,
     Icons.vaccines,
+    Icons.quiz,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -71,6 +73,7 @@ class IconGridPage extends StatelessWidget {
                   Icons.calendar_today,
                   Icons.folder,
                   Icons.vaccines,
+                  Icons.quiz
                 }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
@@ -122,6 +125,13 @@ class IconGridPage extends StatelessWidget {
                       'Comming Soon - Vaccines',
                     );
                     break;
+                  case Icons.quiz:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HealthSurveyPage()),
+                    );
+                    break;
                   default:
                     showComingSoon(context); // For other features.
                 }
@@ -171,6 +181,17 @@ class IconGridPage extends StatelessWidget {
                   record of vaccinations. You can enter historic information,
                   update when you recieve a vaccination, and download from
                   governemnt records of your vaccinations.
+
+                  ''',
+                  child: gestureDetector,
+                ),
+              Icons.quiz => MarkdownTooltip(
+                  message: '''
+
+                  **Health Survey:** Tap here to start the Health Survey. 
+                  This allows you to answer important health-related questions, 
+                  track your responses, and share them securely with your healthcare 
+                  provider if needed.
 
                   ''',
                   child: gestureDetector,
