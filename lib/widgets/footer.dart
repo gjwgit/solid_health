@@ -1,6 +1,6 @@
 /// Footer widget to display server information, login status, and security key status.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-14 21:20:03 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -33,7 +33,8 @@ import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/create_interactive_text.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 
-/// Footer widget to display server information, login status, and security key status.
+/// Footer widget to display server information, login status, and security key
+/// status.
 
 class Footer extends StatelessWidget {
   final String? webId;
@@ -169,7 +170,14 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // 20250114 gjw Ensure we retain the final '/' for the serverUri else we get
+    // a link to the 'Not logged in' page. With the final '/' we get to the
+    // publicly visible page of the user's Pod. Thus strip the final `profile`
+    // not eh final `/profile`.
+
     final serverUrl = webId?.split('profile')[0] ?? 'Not connected';
+
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
     final loginStatusColor = webId == null ? Colors.red : Colors.green;
     final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
@@ -177,14 +185,29 @@ class Footer extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 400) {
-          return _buildNarrowLayout(serverUrl, loginStatus, loginStatusColor,
-              securityKeyStatus, context);
+          return _buildNarrowLayout(
+            serverUrl,
+            loginStatus,
+            loginStatusColor,
+            securityKeyStatus,
+            context,
+          );
         } else if (constraints.maxWidth < 600) {
-          return _buildMediumLayout(serverUrl, loginStatus, loginStatusColor,
-              securityKeyStatus, context);
+          return _buildMediumLayout(
+            serverUrl,
+            loginStatus,
+            loginStatusColor,
+            securityKeyStatus,
+            context,
+          );
         } else {
-          return _buildWideLayout(serverUrl, loginStatus, loginStatusColor,
-              securityKeyStatus, context);
+          return _buildWideLayout(
+            serverUrl,
+            loginStatus,
+            loginStatusColor,
+            securityKeyStatus,
+            context,
+          );
         }
       },
     );
