@@ -170,12 +170,13 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     // 20250114 gjw Ensure we retain the final '/' for the serverUri else we get
     // a link to the 'Not logged in' page. With the final '/' we get to the
     // publicly visible page of the user's Pod. Thus strip the final `profile`
     // not eh final `/profile`.
 
-    final serverUri = webId?.split('profile')[0] ?? 'Not connected';
+    final serverUrl = webId?.split('profile')[0] ?? 'Not connected';
 
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
     final loginStatusColor = webId == null ? Colors.red : Colors.green;
@@ -185,7 +186,7 @@ class Footer extends StatelessWidget {
       builder: (context, constraints) {
         if (constraints.maxWidth < 400) {
           return _buildNarrowLayout(
-            serverUri,
+            serverUrl,
             loginStatus,
             loginStatusColor,
             securityKeyStatus,
@@ -193,7 +194,7 @@ class Footer extends StatelessWidget {
           );
         } else if (constraints.maxWidth < 600) {
           return _buildMediumLayout(
-            serverUri,
+            serverUrl,
             loginStatus,
             loginStatusColor,
             securityKeyStatus,
@@ -201,7 +202,7 @@ class Footer extends StatelessWidget {
           );
         } else {
           return _buildWideLayout(
-            serverUri,
+            serverUrl,
             loginStatus,
             loginStatusColor,
             securityKeyStatus,
