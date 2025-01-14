@@ -63,7 +63,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     super.dispose();
   }
 
-  // Generates UI for each survey question, including text, number, and categorical options.
+  /// Generates UI for each survey question, including text, number, and categorical options.
 
   Widget _buildQuestionWidget(HealthSurveyQuestion question, int index) {
     const double fixedWidth = 300.0; // Define a fixed width for all fields
@@ -126,7 +126,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  // Handles rendering of input fields for non-categorical questions like number and text.
+  /// Handles rendering of input fields for non-categorical questions like number and text.
 
   Widget _buildInputField(HealthSurveyQuestion question) {
     return SizedBox(
@@ -139,7 +139,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  // Handles rendering of text input fields.
+  /// Handles rendering of text input fields.
 
   Widget _buildTextInput(HealthSurveyQuestion question) {
     return TextFormField(
@@ -162,7 +162,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  // Handles rendering of number input fields.
+  /// Handles rendering of number input fields.
 
   Widget _buildNumberInput(HealthSurveyQuestion question) {
     return TextFormField(
@@ -196,7 +196,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  // Handles rendering of categorical questions.
+  /// Handles rendering of categorical questions.
 
   Widget _buildCategoricalQuestion(HealthSurveyQuestion question) {
     return Card(
@@ -249,7 +249,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  // Submits the form when the submit button is pressed.
+  /// Submits the form when the submit button is pressed.
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -258,7 +258,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     }
   }
 
-  // Builds the form UI.
+  /// Builds the form UI.
 
   @override
   Widget build(BuildContext context) {
