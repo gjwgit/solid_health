@@ -33,6 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/widgets/health_survey/form.dart';
@@ -43,7 +44,7 @@ class HealthSurveyPage extends StatelessWidget {
     HealthSurveyQuestion(
       question: "What's your systolic blood pressure?",
       type: HealthDataType.number,
-      unit: "mmHg",
+      unit: "mm Hg",
       min: 70,
       max: 200,
     ),
@@ -55,16 +56,26 @@ class HealthSurveyPage extends StatelessWidget {
       max: 220,
     ),
     HealthSurveyQuestion(
-      question: "What's your weight?",
+      question: "What's your diastolic measurement today?",
       type: HealthDataType.number,
-      unit: "kg",
-      min: 20,
-      max: 300,
+      unit: "mm Hg",
+      min: 40,
+      max: 220,
     ),
     HealthSurveyQuestion(
-      question: "Are you lacking in strength today?",
+      question: "How are you feeling today?",
       type: HealthDataType.categorical,
-      options: ["Not at all", "Somewhat", "Moderately", "Severely"],
+      options: ["Excellent", "Good", "Fair", "Poor"],
+    ),
+    HealthSurveyQuestion(
+      question: "What's your fasting blood glucose today?",
+      type: HealthDataType.number,
+      unit: "mg/dL",
+    ),
+    HealthSurveyQuestion(
+      question: "What's your postprandial blood glucose today?",
+      type: HealthDataType.number,
+      unit: "mg/dL",
     ),
     HealthSurveyQuestion(
       question: "Any additional notes about your health today?",
@@ -351,6 +362,7 @@ class HealthSurveyPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Health Survey'),
+        backgroundColor: titleBackgroundColor,
       ),
       body: HealthSurveyForm(
         questions: questions,
