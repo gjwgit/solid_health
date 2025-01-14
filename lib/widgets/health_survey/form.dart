@@ -30,8 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/widgets/health_survey/question.dart';
 
-/// A widget that displays and collects responses for health survey questions.
-
 class HealthSurveyForm extends StatefulWidget {
   final List<HealthSurveyQuestion> questions;
   final void Function(Map<String, dynamic> responses) onSubmit;
@@ -51,14 +49,83 @@ class HealthSurveyForm extends StatefulWidget {
 class _HealthSurveyFormState extends State<HealthSurveyForm> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _responses = {};
+  final TextEditingController _notesController = TextEditingController();
 
-  Widget _buildQuestionWidget(HealthSurveyQuestion question) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildQuestionWidget(HealthSurveyQuestion question, int index) {
+  const double fixedWidth = 300.0; // Define a fixed width for all fields
+
+  // Special handling for the notes field.
+  
+  if (question.type == HealthDataType.text) {
+    return SizedBox(
+      width: fixedWidth,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${index + 1}. ${question.question}',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _notesController,
+            maxLines: null,
+            minLines: 3,
+            decoration: const InputDecoration(
+              hintText: 'Enter your notes here',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              contentPadding: EdgeInsets.all(12),
+            ),
+            validator: (value) {
+              if (question.isRequired && (value == null || value.isEmpty)) {
+                return 'Please enter a value';
+              }
+              return null;
+            },
+            onSaved: (value) {
+              _responses[question.question] = value;
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  return SizedBox(
+    width: fixedWidth,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${index + 1}. ${question.question}',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 8),
+        if (question.type != HealthDataType.categorical)
+          _buildInputField(question)
+        else
+          _buildCategoricalQuestion(question),
+      ],
+    ),
+  );
+}
+
+
+  Widget _buildInputField(HealthSurveyQuestion question) {
+    return SizedBox(
+      width: double.infinity,
       child: switch (question.type) {
-        HealthDataType.categorical => _buildCategoricalQuestion(question),
         HealthDataType.number => _buildNumberInput(question),
         HealthDataType.text => _buildTextInput(question),
+        _ => const SizedBox(), // Categorical handled separately
       },
     );
   }
@@ -66,9 +133,10 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   Widget _buildTextInput(HealthSurveyQuestion question) {
     return TextFormField(
       decoration: InputDecoration(
-        labelText: question.question,
+        hintText: 'Enter your response',
         suffixText: question.unit,
         border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
       validator: (value) {
         if (question.isRequired && (value == null || value.isEmpty)) {
@@ -86,9 +154,10 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     return TextFormField(
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        labelText: question.question,
+        hintText: 'Enter value',
         suffixText: question.unit,
         border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -113,51 +182,53 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   }
 
   Widget _buildCategoricalQuestion(HealthSurveyQuestion question) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          question.question,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        FormField<String>(
-          validator: (value) {
-            if (question.isRequired && (value == null || value.isEmpty)) {
-              return 'Please select an option';
-            }
-            return null;
-          },
-          builder: (FormFieldState<String> field) {
-            return Column(
-              children: [
-                ...question.options!.map(
-                  (option) => RadioListTile<String>(
-                    title: Text(option),
-                    value: option,
-                    groupValue: field.value,
-                    onChanged: (value) {
-                      field.didChange(value);
-                      _responses[question.question] = value;
-                    },
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FormField<String>(
+      validator: (value) {
+        if (question.isRequired && (value == null || value.isEmpty)) {
+          return 'Please select an option';
+        }
+        return null;
+      },
+      builder: (FormFieldState<String> field) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...question.options!.map(
+              (option) => SizedBox(
+                width: 300,
+                child: RadioListTile<String>(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(option),
+                  value: option,
+                  groupValue: field.value,
+                  onChanged: (value) {
+                    field.didChange(value);
+                    _responses[question.question] = value;
+                  },
+                ),
+              ),
+            ),
+            if (field.hasError)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8),
+                child: Text(
+                  field.errorText!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
                   ),
                 ),
-                if (field.hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12, top: 8),
-                    child: Text(
-                      field.errorText!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-              ],
-            );
+              ),
+          ],
+        );
           },
         ),
-      ],
+      ),
     );
   }
 
@@ -170,29 +241,78 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
   @override
   Widget build(BuildContext context) {
+    final regularQuestions = widget.questions.where((q) => q.type != HealthDataType.text).toList();
+    final notesQuestion = widget.questions.firstWhere((q) => q.type == HealthDataType.text);
+    
     return Form(
       key: _formKey,
-      child: ListView(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        children: [
-          ...widget.questions.map((question) => _buildQuestionWidget(question)),
-          const SizedBox(height: 20),
-          Center(
-            child: SizedBox(
-              width: 120, // Fixed width for smaller button
-              child: ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+        child: Column(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final optimalCount = constraints.maxWidth > 900 
+                    ? 3 
+                    : constraints.maxWidth > 600 
+                        ? 2 
+                        : 1;
+                
+                final rows = <Widget>[];
+                for (var i = 0; i < regularQuestions.length; i += optimalCount) {
+                  final rowItems = <Widget>[];
+                  
+                  for (var j = 0; j < optimalCount && i + j < regularQuestions.length; j++) {
+                    rowItems.add(
+                      Padding(
+                        padding: EdgeInsets.only(
+                          right: j < optimalCount - 1 ? 16.0 : 0,
+                        ),
+                        child: _buildQuestionWidget(
+                          regularQuestions[i + j],
+                          i + j,
+                        ),
+                      ),
+                    );
+                  }
+                  
+                  rows.add(
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: rowItems.map((item) => Expanded(child: item)).toList(),
+                  )
+
+                    ),
+                  );
+                }
+                
+                return Column(children: rows);
+              },
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: _buildQuestionWidget(notesQuestion, widget.questions.length - 1),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: SizedBox(
+                width: 120,
+                child: ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  child: Text(widget.submitButtonText),
                 ),
-                child: Text(widget.submitButtonText),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
