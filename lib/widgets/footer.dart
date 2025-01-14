@@ -1,6 +1,6 @@
 /// Footer widget to display server information, login status, and security key status.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-01-14 21:13:36 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -169,7 +169,7 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final serverUri = webId?.split('/profile')[0] ?? 'Not connected';
+    final serverUri = webId?.split('profile')[0] ?? 'Not connected';
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
     final loginStatusColor = webId == null ? Colors.red : Colors.green;
     final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
