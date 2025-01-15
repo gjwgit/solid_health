@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -61,32 +62,69 @@ class Footer extends StatelessWidget {
   }
 
   Widget buildServerInteractiveText(String serverUri, BuildContext context) {
-    return createInteractiveText(
-      context: context,
-      text: serverUri,
-      onTap: () => _launchUrl(serverUri),
-      style: TextStyle(fontSize: 14, color: Colors.blue),
+    return MarkdownTooltip(
+      message: '''
+
+      **Server Information**
+
+      - Click to open server in browser
+      
+      - Manages your personal data pod
+
+      ''',
+      child: createInteractiveText(
+        context: context,
+        text: serverUri,
+        onTap: () => _launchUrl(serverUri),
+        style: TextStyle(fontSize: 14, color: Colors.blue),
+      ),
     );
   }
 
   Widget buildLoginStatusInteractiveText(
       String loginStatus, BuildContext context) {
-    return createInteractiveText(
-      context: context,
-      text: 'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
-      onTap: () {
-        if (webId != null) {
-          handleLogout(context);
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => createSolidLogin(context)),
-          );
-        }
-      },
-      style: TextStyle(
-        fontSize: 14,
-        color: webId == null ? Colors.red : Colors.green,
+    final tooltipMessage = webId == null
+        ? '''
+
+      **Login Required**
+
+      - Current status: Not logged in
+
+      - Click to log in to your pod
+
+      - Access your personal health data
+      '''
+        : '''
+      **Currently Logged In**
+      
+      - WebID: $webId
+
+      - Click to log out
+
+      - Your data is secure
+
+      ''';
+
+    return MarkdownTooltip(
+      message: tooltipMessage,
+      child: createInteractiveText(
+        context: context,
+        text: 'Login Status: ${webId == null ? "Not Logged In" : "Logged In"}',
+        onTap: () {
+          if (webId != null) {
+            handleLogout(context);
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => createSolidLogin(context)),
+            );
+          }
+        },
+        style: TextStyle(
+          fontSize: 14,
+          color: webId == null ? Colors.red : Colors.green,
+        ),
       ),
     );
   }
@@ -170,7 +208,6 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // 20250114 gjw Ensure we retain the final '/' for the serverUri else we get
     // a link to the 'Not logged in' page. With the final '/' we get to the
     // publicly visible page of the user's Pod. Thus strip the final `profile`
