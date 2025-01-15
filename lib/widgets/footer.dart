@@ -54,14 +54,6 @@ class Footer extends StatelessWidget {
     }
   }
 
-  Widget _buildTextRow(String label, String value, {Color? valueColor}) {
-    return Text(
-      '$label: $value',
-      style: TextStyle(fontSize: 14, color: valueColor ?? Colors.black),
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
   Widget buildServerInteractiveText(String serverUri, BuildContext context) {
     return createInteractiveText(
       context: context,
@@ -93,7 +85,7 @@ class Footer extends StatelessWidget {
     );
   }
 
-    Widget buildSecurityKeyStatusInteractiveText(
+  Widget buildSecurityKeyStatusInteractiveText(
       String securityKeyStatus, BuildContext context) {
     return MarkdownTooltip(
       message: '''
@@ -110,15 +102,15 @@ class Footer extends StatelessWidget {
       
       ''',
       child: createInteractiveText(
-      context: context,
-      text: securityKeyStatus,
-      onTap: () => showDialog(
         context: context,
-        barrierColor: Colors.black12, // Makes the background more transparent
-        builder: (BuildContext context) => const SecurityKeyManager(),
-      ),
-      style: TextStyle(
-        fontSize: 14,
+        text: securityKeyStatus,
+        onTap: () => showDialog(
+          context: context,
+          barrierColor: Colors.black12, // Makes the background more transparent
+          builder: (BuildContext context) => const SecurityKeyManager(),
+        ),
+        style: TextStyle(
+          fontSize: 14,
           color: isKeySaved ? Colors.green : Colors.red,
         ),
       ),

@@ -42,7 +42,7 @@ class ViewKeys extends StatefulWidget {
   });
 
   /// Data of the key file.
-  
+
   final String keyInfo;
 
   // Title of the page.
@@ -55,13 +55,13 @@ class ViewKeys extends StatefulWidget {
 
 class _ViewKeysState extends State<ViewKeys> {
   /// Scaffold key for managing widget state.
-  
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     // The main screen layout with an app bar and a data table.
-    
+
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -77,12 +77,12 @@ class _ViewKeysState extends State<ViewKeys> {
   }
 
   /// A widget to display the loaded encryption key data in a table.
-   
+
   Widget loadedScreen(String keyData) {
     final encFileData = getEncKeyContent(keyData);
 
     // Map the data into rows for the DataTable.
-    
+
     final dataRows = encFileData.entries.map((entry) {
       return DataRow(cells: [
         DataCell(Text(
@@ -104,7 +104,7 @@ class _ViewKeysState extends State<ViewKeys> {
     }).toList();
 
     // Display the table of encryption key data.
-    
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(

@@ -53,18 +53,18 @@ class KeyValueEdit extends StatefulWidget {
 
   // File name to be saved in PODs.
 
-  final String fileName; 
+  final String fileName;
 
   // The widget to navigate to after saving.
-  
+
   final Widget child;
 
   // Whether the data should be encrypted.
-  
+
   final bool encrypted;
 
   // Initial key-value pairs to populate the table.
-  
+
   final List<({String key, dynamic value})>?
       keyValuePairs; // initial key value pairs
 
@@ -74,18 +74,18 @@ class KeyValueEdit extends StatefulWidget {
 
 class _KeyValueEditState extends State<KeyValueEdit> {
   // Create a Key for EditableState.
-  
+
   final _editableKey = GlobalKey<EditableState>();
 
   // Regular expression to validate keys (e.g. no spaces allowed).
-  
+
   final regExp = RegExp(r'\s+');
   static const rowKey = 'row'; // key of row index in editedRows
   static const keyStr = 'key';
   static const valStr = 'value';
 
   // Rows of data to display in the editable table.
-  
+
   final List<dynamic> rows = [];
 
   // Definitions of table columns.
@@ -257,7 +257,7 @@ class _KeyValueEditState extends State<KeyValueEdit> {
                   const SizedBox(width: 10),
 
                   // Button to save the data to PODs.
-                  
+
                   ElevatedButton(
                       onPressed: () async {
                         final saved = await _saveToPod(context);

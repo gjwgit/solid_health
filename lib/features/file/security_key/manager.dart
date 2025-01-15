@@ -41,10 +41,10 @@ import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/security_key/view_keys.dart';
 
 /// Security Key Manager.
-/// 
+///
 /// This class represents a dialog interface for managing local security keys.
 /// It provides features like showing the current securtiy key, changing the key,
-/// and forgetting the key locally altogether. 
+/// and forgetting the key locally altogether.
 
 /// Main widget for managing security keys.
 
@@ -60,7 +60,6 @@ class SecurityKeyManager extends StatefulWidget {
 
 class SecurityKeyManagerState extends State<SecurityKeyManager>
     with SingleTickerProviderStateMixin {
-  
   // A boolean flag to indicate when an operation is in progress.
 
   bool _isLoading = false;
@@ -68,7 +67,6 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   /// Retrieves and displays private security key data when the user requests it.
 
   Future<void> _showPrivateData(String title, BuildContext context) async {
-
     // The user inititaes an action. Start by indicating that a process is ongoing.
 
     setState(() {
@@ -121,7 +119,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
       (name: await AppInfo.name, webId: await getWebId());
 
   /// Builds the content of the dialog.
-  /// 
+  ///
   /// The user is presented with options to view, change or forget the security key.
 
   Widget _buildDialogContent(BuildContext context, String title) {
@@ -269,7 +267,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   }
 
   /// Builds the dialog widget.
-  /// 
+  ///
   /// It uses a FutureBuilder to fetch app information and display the dialog content.
 
   @override
