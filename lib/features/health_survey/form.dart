@@ -28,7 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/health_data_type.dart';
-import 'package:healthpod/widgets/health_survey/question.dart';
+import 'package:healthpod/features/health_survey/question.dart';
 
 /// A widget for rendering a dynamic health survey form.
 ///

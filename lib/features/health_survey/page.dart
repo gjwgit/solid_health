@@ -36,8 +36,8 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
-import 'package:healthpod/widgets/health_survey/form.dart';
-import 'package:healthpod/widgets/health_survey/question.dart';
+import 'package:healthpod/features/health_survey/form.dart';
+import 'package:healthpod/features/health_survey/question.dart';
 
 /// A page for collecting health survey data.
 
