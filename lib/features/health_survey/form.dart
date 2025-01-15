@@ -26,7 +26,6 @@
 library;
 
 import 'package:flutter/material.dart';
-
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/health_survey/question.dart';
 
@@ -68,65 +67,159 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   Widget _buildQuestionWidget(HealthSurveyQuestion question, int index) {
     const double fixedWidth = 300.0; // Define a fixed width for all fields
 
-    // Special handling for the notes field.
+    // Build the UI for the question based on its type
 
     if (question.type == HealthDataType.text) {
       return SizedBox(
         width: fixedWidth,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${index + 1}. ${question.question}',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _notesController,
-              maxLines: null,
-              minLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Enter your notes here',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4)),
+        child: Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.notes, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${index + 1}. ${question.question}',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
-                contentPadding: EdgeInsets.all(12),
-              ),
-              validator: (value) {
-                if (question.isRequired && (value == null || value.isEmpty)) {
-                  return 'Please enter a value';
-                }
-                return null;
-              },
-              onSaved: (value) {
-                _responses[question.question] = value;
-              },
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _notesController,
+                  maxLines: null,
+                  minLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your notes here',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                  validator: (value) {
+                    if (question.isRequired &&
+                        (value == null || value.isEmpty)) {
+                      return 'Please enter a value';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _responses[question.question] = value;
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       );
     }
 
+
     return SizedBox(
       width: fixedWidth,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${index + 1}. ${question.question}',
-            style: Theme.of(context).textTheme.bodyLarge,
+      child: Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _getQuestionIcon(question.type, question.question),
+                    size: 20,
+                    color: _getIconColor(question.type, question.question),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${index + 1}. ${question.question}',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (question.type != HealthDataType.categorical)
+                _buildInputField(question)
+              else
+                _buildCategoricalQuestion(question),
+            ],
           ),
-          const SizedBox(height: 8),
-          if (question.type != HealthDataType.categorical)
-            _buildInputField(question)
-          else
-            _buildCategoricalQuestion(question),
-        ],
+        ),
       ),
     );
   }
 
-  /// Handles rendering of input fields for non-categorical questions like number and text.
+  /// Returns an icon based on the question type and content.
+
+  IconData _getQuestionIcon(HealthDataType type, String question) {
+    // Return specific icons based on both type and question content
+    if (type == HealthDataType.number) {
+      if (question.toLowerCase().contains('blood pressure') ||
+          question.toLowerCase().contains('systolic') ||
+          question.toLowerCase().contains('diastolic')) {
+        return Icons.favorite; // Heart icon for blood pressure
+      } else if (question.toLowerCase().contains('heart rate')) {
+        return Icons.monitor_heart; // Heart monitor for heart rate
+      }
+      return Icons.numbers; // Default for other numeric inputs
+    }
+
+    if (type == HealthDataType.categorical &&
+        question.toLowerCase().contains('feeling')) {
+      return Icons.mood; // Mood icon for feeling questions
+    }
+
+    return switch (type) {
+      HealthDataType.text => Icons.notes,
+      HealthDataType.categorical => Icons.checklist,
+      _ => Icons.help_outline,
+    };
+  }
+
+  /// Returns a color based on the question type and content.
+
+  Color _getIconColor(HealthDataType type, String question) {
+    if (type == HealthDataType.number) {
+      if (question.toLowerCase().contains('blood pressure') ||
+          question.toLowerCase().contains('systolic') ||
+          question.toLowerCase().contains('diastolic')) {
+        return Colors.red.shade400; // Red for blood pressure
+      } else if (question.toLowerCase().contains('heart rate')) {
+        return Colors.pink.shade400; // Pink for heart rate
+      }
+      return Colors.blue.shade400; // Blue for other numbers
+    }
+
+    if (type == HealthDataType.categorical &&
+        question.toLowerCase().contains('feeling')) {
+      return Colors.amber.shade400; // Amber for mood/feeling
+    }
+
+    return switch (type) {
+      HealthDataType.text => Colors.green.shade400, // Green for text
+      HealthDataType.categorical =>
+        Colors.purple.shade400, // Purple for other categorical
+      _ => Colors.grey.shade400, // Grey as fallback
+    };
+  }
+
+  /// Builds an input field for a health survey question.
 
   Widget _buildInputField(HealthSurveyQuestion question) {
     return SizedBox(
@@ -134,19 +227,23 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       child: switch (question.type) {
         HealthDataType.number => _buildNumberInput(question),
         HealthDataType.text => _buildTextInput(question),
-        _ => const SizedBox(), // Categorical handled separately
+        _ => const SizedBox(),
       },
     );
   }
 
-  /// Handles rendering of text input fields.
+  /// Builds a text input field for a health survey question.
 
   Widget _buildTextInput(HealthSurveyQuestion question) {
     return TextFormField(
       decoration: InputDecoration(
         hintText: 'Enter your response',
         suffixText: question.unit,
-        border: const OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
@@ -162,7 +259,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  /// Handles rendering of number input fields.
+  /// Builds a number input field for a health survey question.
 
   Widget _buildNumberInput(HealthSurveyQuestion question) {
     return TextFormField(
@@ -170,7 +267,11 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       decoration: InputDecoration(
         hintText: 'Enter value',
         suffixText: question.unit,
-        border: const OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
@@ -196,56 +297,55 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  /// Handles rendering of categorical questions.
+  /// Builds a categorical question for a health survey.
 
   Widget _buildCategoricalQuestion(HealthSurveyQuestion question) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: FormField<String>(
-          validator: (value) {
-            if (question.isRequired && (value == null || value.isEmpty)) {
-              return 'Please select an option';
-            }
-            return null;
-          },
-          builder: (FormFieldState<String> field) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...question.options!.map(
-                  (option) => SizedBox(
-                    width: 300,
-                    child: RadioListTile<String>(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(option),
-                      value: option,
-                      groupValue: field.value,
-                      onChanged: (value) {
-                        field.didChange(value);
-                        _responses[question.question] = value;
-                      },
-                    ),
+    return FormField<String>(
+      validator: (value) {
+        if (question.isRequired && (value == null || value.isEmpty)) {
+          return 'Please select an option';
+        }
+        return null;
+      },
+      builder: (FormFieldState<String> field) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...question.options!.map(
+              (option) => Container(
+                margin: const EdgeInsets.only(bottom: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: RadioListTile<String>(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  title: Text(option),
+                  value: option,
+                  groupValue: field.value,
+                  onChanged: (value) {
+                    field.didChange(value);
+                    _responses[question.question] = value;
+                  },
+                ),
+              ),
+            ),
+            if (field.hasError)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8),
+                child: Text(
+                  field.errorText!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
                   ),
                 ),
-                if (field.hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12, top: 8),
-                    child: Text(
-                      field.errorText!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -258,14 +358,9 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     }
   }
 
-  /// Builds the form UI.
-
   @override
   Widget build(BuildContext context) {
-    final regularQuestions =
-        widget.questions.where((q) => q.type != HealthDataType.text).toList();
-    final notesQuestion =
-        widget.questions.firstWhere((q) => q.type == HealthDataType.text);
+    // Build the form UI
 
     return Form(
       key: _formKey,
@@ -283,12 +378,12 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
                 final rows = <Widget>[];
                 for (var i = 0;
-                    i < regularQuestions.length;
+                    i < widget.questions.length;
                     i += optimalCount) {
                   final rowItems = <Widget>[];
 
                   for (var j = 0;
-                      j < optimalCount && i + j < regularQuestions.length;
+                      j < optimalCount && i + j < widget.questions.length;
                       j++) {
                     rowItems.add(
                       Padding(
@@ -296,7 +391,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                           right: j < optimalCount - 1 ? 16.0 : 0,
                         ),
                         child: _buildQuestionWidget(
-                          regularQuestions[i + j],
+                          widget.questions[i + j],
                           i + j,
                         ),
                       ),
@@ -318,24 +413,20 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                 return Column(children: rows);
               },
             ),
-            const SizedBox(height: 20),
-            Center(
-              child: _buildQuestionWidget(
-                  notesQuestion, widget.questions.length - 1),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
             Center(
               child: SizedBox(
-                width: 120,
-                child: ElevatedButton(
+                width: 200,
+                child: ElevatedButton.icon(
                   onPressed: _submitForm,
+                  icon: const Icon(Icons.send),
+                  label: Text(widget.submitButtonText),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(widget.submitButtonText),
                 ),
               ),
             ),

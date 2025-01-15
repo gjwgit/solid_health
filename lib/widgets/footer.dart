@@ -170,7 +170,6 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // 20250114 gjw Ensure we retain the final '/' for the serverUri else we get
     // a link to the 'Not logged in' page. With the final '/' we get to the
     // publicly visible page of the user's Pod. Thus strip the final `profile`
