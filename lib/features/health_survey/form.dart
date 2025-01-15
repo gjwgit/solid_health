@@ -125,7 +125,6 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       );
     }
 
-
     return SizedBox(
       width: fixedWidth,
       child: Card(
