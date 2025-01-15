@@ -57,7 +57,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
   Future<void> _initialiseFooterData() async {
     final webId = await fetchWebId();
-    final isKeySaved = await fetchKeySavedStatus();
+    final isKeySaved = await fetchKeySavedStatus(context);
 
     setState(() {
       _webId = webId;

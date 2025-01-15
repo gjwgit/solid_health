@@ -26,6 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/file/security_key/manager.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -91,7 +93,37 @@ class Footer extends StatelessWidget {
     );
   }
 
-  // TODO: build security key status interactive text
+    Widget buildSecurityKeyStatusInteractiveText(
+      String securityKeyStatus, BuildContext context) {
+    return MarkdownTooltip(
+      message: '''
+
+      **Security Key Manager:** Tap here to manage your security key settings.
+
+      - View your current security key status
+
+      - Save a new security key
+      
+      - Remove an existing security key
+      
+      Your security key is essential for encrypting and protecting your health data.
+      
+      ''',
+      child: createInteractiveText(
+      context: context,
+      text: securityKeyStatus,
+      onTap: () => showDialog(
+        context: context,
+        barrierColor: Colors.black12, // Makes the background more transparent
+        builder: (BuildContext context) => const SecurityKeyManager(),
+      ),
+      style: TextStyle(
+        fontSize: 14,
+          color: isKeySaved ? Colors.green : Colors.red,
+        ),
+      ),
+    );
+  }
 
   Widget _buildNarrowLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
@@ -108,7 +140,7 @@ class Footer extends StatelessWidget {
             const SizedBox(height: 2),
             buildLoginStatusInteractiveText(loginStatus, context),
             const SizedBox(height: 2),
-            _buildTextRow('Security Key', securityKeyStatus),
+            buildSecurityKeyStatusInteractiveText(securityKeyStatus, context),
           ],
         ),
       ),
@@ -134,7 +166,8 @@ class Footer extends StatelessWidget {
                 children: [
                   buildLoginStatusInteractiveText(loginStatus, context),
                   const SizedBox(width: 16),
-                  _buildTextRow('Security Key', securityKeyStatus),
+                  buildSecurityKeyStatusInteractiveText(
+                      securityKeyStatus, context),
                 ],
               ),
             ),
@@ -160,7 +193,7 @@ class Footer extends StatelessWidget {
             children: [
               buildLoginStatusInteractiveText(loginStatus, context),
               const SizedBox(width: 16),
-              _buildTextRow('Security Key', securityKeyStatus),
+              buildSecurityKeyStatusInteractiveText(securityKeyStatus, context),
             ],
           ),
         ],
@@ -170,7 +203,6 @@ class Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // 20250114 gjw Ensure we retain the final '/' for the serverUri else we get
     // a link to the 'Not logged in' page. With the final '/' we get to the
     // publicly visible page of the user's Pod. Thus strip the final `profile`
@@ -180,7 +212,8 @@ class Footer extends StatelessWidget {
 
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
     final loginStatusColor = webId == null ? Colors.red : Colors.green;
-    final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
+    final securityKeyStatus =
+        isKeySaved ? "Security Key: Saved" : "Security Key: Not Saved";
 
     return LayoutBuilder(
       builder: (context, constraints) {
