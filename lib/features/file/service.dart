@@ -29,6 +29,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/features/file/browser.dart';
 import 'package:healthpod/widgets/preview.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
@@ -391,180 +392,161 @@ class _FileServiceState extends State<FileService> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(10),
-        child: Stack(
-          children: <Widget>[
-            SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  largeGapV,
-                  largeGapV,
-
-                  // Upload section.
-
-                  Text(
-                    'Upload a file and save it as "$cleanFileName" in POD',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  smallGapV,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Text('Upload file'),
-                      smallGapH,
-                      Text(
-                        uploadFile ??
-                            'Click the Browse button to choose a file',
-                        style: TextStyle(
-                          color: uploadFile == null ? Colors.red : Colors.blue,
+        child: Column(
+          children: [
+            // Back button row
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Back to Home'),
+                ),
+              ],
+            ),
+            
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Left side: File Browser
+                  Expanded(
+                    flex: 2,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Your Files',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Expanded(
+                              child: FileBrowser(
+                                onFileSelected: (fileName) {
+                                  setState(() {
+                                    cleanFileName = fileName;
+                                    remoteFileName = '$fileName.enc.ttl';
+                                  });
+                                },
+                                onFileDownload: (fileName) async {
+                                  setState(() {
+                                    cleanFileName = fileName;
+                                    remoteFileName = '$fileName.enc.ttl';
+                                  });
+                                  
+                                  String? outputFile = await FilePicker.platform.saveFile(
+                                    dialogTitle: 'Save file as:',
+                                    fileName: fileName,
+                                  );
+                                  
+                                  if (outputFile != null) {
+                                    setState(() {
+                                      downloadFile = outputFile;
+                                    });
+                                    await handleDownload();
+                                  }
+                                },
+                                onFileDelete: (fileName) async {
+                                  setState(() {
+                                    cleanFileName = fileName;
+                                    remoteFileName = '$fileName.enc.ttl';
+                                  });
+                                  await handleDelete();
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      smallGapH,
-                      if (uploadDone)
-                        const Icon(Icons.done, color: Colors.green),
-                    ],
-                  ),
-                  smallGapV,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      browseButton,
-                      smallGapH,
-                      previewButton,
-                      smallGapH,
-                      uploadButton,
-                    ],
-                  ),
-
-                  largeGapV,
-
-                  // Preview section.
-
-                  if (showPreview)
-                    PreviewDialog(
-                      uploadFile: uploadFile,
-                      filePreview: filePreview,
-                      onClose: () {
-                        setState(() {
-                          showPreview = false;
-                        });
-                      },
-                    ),
-
-                  largeGapV,
-
-                  // Download section.
-
-                  Text(
-                    'Download "$cleanFileName" from POD',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  smallGapV,
-                  if (downloadFile != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Text('Save file'),
-                        smallGapH,
-                        Text(
-                          downloadFile!,
-                          style: const TextStyle(color: Colors.blue),
+                  
+                  const SizedBox(width: 16),
+                  
+                  // Right side: Upload Section
+                  Expanded(
+                    flex: 1,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Upload New File',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            if (uploadFile != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  'Selected: ${path.basename(uploadFile!)}',
+                                  style: const TextStyle(color: Colors.blue),
+                                ),
+                              ),
+                            Row(
+                              children: [
+                                Expanded(child: browseButton),
+                                const SizedBox(width: 8),
+                                Expanded(child: uploadButton),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: previewButton,
+                            ),
+                            
+                            if (uploadInProgress || downloadInProgress || deleteInProgress)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Column(
+                                  children: [
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      uploadInProgress
+                                          ? 'Uploading...'
+                                          : downloadInProgress
+                                              ? 'Downloading...'
+                                              : 'Deleting...',
+                                      style: const TextStyle(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
-                        smallGapH,
-                        if (downloadDone)
-                          const Icon(Icons.done, color: Colors.green),
-                      ],
-                    ),
-                  smallGapV,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      downloadButton,
-                      smallGapH,
-                      previewButton,
-                    ],
-                  ),
-
-                  largeGapV,
-
-                  // Delete section.
-
-                  Text(
-                    'Delete "$cleanFileName" from POD',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  smallGapV,
-                  if (deleteInProgress || deleteDone)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text('Delete file'),
-                        smallGapH,
-                        Text('$cleanFileName',
-                            style: const TextStyle(color: Colors.red)),
-                        smallGapH,
-                        Text(
-                          remoteFileUrl ?? '',
-                          style: const TextStyle(color: Colors.blue),
-                        ),
-                        smallGapH,
-                        if (deleteDone)
-                          const Icon(Icons.done, color: Colors.green),
-                      ],
-                    ),
-                  smallGapV,
-                  deleteButton,
                 ],
               ),
             ),
-
-            // Operation indicators.
-
-            if (uploadInProgress || downloadInProgress || deleteInProgress)
-              Positioned(
-                top: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Column(
-                    children: [
-                      const CircularProgressIndicator(),
-                      smallGapV,
-                      Text(
-                        uploadInProgress
-                            ? 'Uploading...'
-                            : downloadInProgress
-                                ? 'Downloading...'
-                                : 'Deleting...',
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            
+            // Preview dialog
+            if (showPreview)
+              PreviewDialog(
+                uploadFile: uploadFile,
+                filePreview: filePreview,
+                onClose: () {
+                  setState(() {
+                    showPreview = false;
+                  });
+                },
               ),
-
-            // Back button.
-
-            Positioned(
-              top: 10,
-              left: 10,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Back to Home'),
-              ),
-            ),
           ],
         ),
       ),
