@@ -25,7 +25,7 @@
 
 library;
 
-import 'package:healthpod/features/file/security_key/manager.dart';
+import 'package:healthpod/utils/security_key/manager.dart';
 import 'package:solidpod/solidpod.dart'
     show KeyManager, SolidFunctionCallStatus, getEncKeyPath, readPod;
 

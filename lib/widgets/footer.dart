@@ -26,7 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/file/security_key/manager.dart';
+import 'package:healthpod/utils/security_key/manager.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:url_launcher/url_launcher.dart';

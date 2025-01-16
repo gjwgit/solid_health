@@ -38,7 +38,7 @@ import 'package:solidpod/solidpod.dart'
         readPod;
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/features/file/security_key/view_keys.dart';
+import 'package:healthpod/utils/security_key/view_keys.dart';
 
 /// Security Key Manager.
 ///
