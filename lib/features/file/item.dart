@@ -24,6 +24,7 @@
 library;
 
 // Represents a single file with its metadata such as name, path and date modified.
+
 class FileItem {
   final String name;
   final String path;
