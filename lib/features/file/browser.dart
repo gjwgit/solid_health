@@ -356,7 +356,7 @@ class FileBrowserState extends State<FileBrowser> {
                                               selectedFile = file.name;
                                             });
                                             widget.onFileSelected
-                                                ?.call(file.name);
+                                                .call(file.name);
                                           },
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -453,7 +453,7 @@ class FileBrowserState extends State<FileBrowser> {
                                                     ),
                                                     onPressed: () => widget
                                                         .onFileDownload
-                                                        ?.call(file.name),
+                                                        .call(file.name),
                                                     style: IconButton.styleFrom(
                                                       backgroundColor:
                                                           Theme.of(context)
@@ -478,7 +478,7 @@ class FileBrowserState extends State<FileBrowser> {
                                                     ),
                                                     onPressed: () => widget
                                                         .onFileDelete
-                                                        ?.call(file.name),
+                                                        .call(file.name),
                                                     style: IconButton.styleFrom(
                                                       backgroundColor:
                                                           Theme.of(context)
