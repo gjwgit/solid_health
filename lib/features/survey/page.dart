@@ -184,9 +184,14 @@ class HealthSurveyPage extends StatelessWidget {
         ),
       );
 
-      debugPrint('Attempting to save survey to POD: $fileName');
+      // Blood pressure data is stored in the 'bp' subdirectory
+      // within 'healthpod/data' for better organisation.
+
+      final savePath = 'bp/$fileName';
+
+      debugPrint('Attempting to save survey to POD: $savePath');
       final result = await writePod(
-        fileName,
+        savePath,
         jsonString,
         context,
         const Text('Saving survey'),
@@ -210,9 +215,9 @@ class HealthSurveyPage extends StatelessWidget {
       // Verify the file exists by attempting to read it.
 
       final dataDir = await getDataDirPath();
-      final filePath = '$dataDir/$fileName';
+      final filePath = '$dataDir$savePath';
 
-      debugPrint('Verifying file at path: $filePath');
+      debugPrint('Verifying file at path: $savePath');
 
       if (!context.mounted) return;
 
