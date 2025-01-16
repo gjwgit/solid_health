@@ -30,7 +30,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/features/file/item.dart';
 
 /// File Browser Widget.
-/// 
+///
 /// Interacts with files and directories in user's POD.
 /// Handles displaying files and directories, and allows for navigation and file operations.
 
@@ -175,7 +175,8 @@ class FileBrowserState extends State<FileBrowser> {
     return SingleChildScrollView(
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height - 100, // Account for padding/margins
+          minHeight: MediaQuery.of(context).size.height -
+              100, // Account for padding/margins
           maxHeight: MediaQuery.of(context).size.height - 100,
         ),
         child: Column(
@@ -221,7 +222,7 @@ class FileBrowserState extends State<FileBrowser> {
                       ),
                     ),
                   ),
-              
+
                   // Add Spacer to push the refresh icon to the far right.
 
                   const Spacer(),
@@ -507,5 +508,3 @@ class FileBrowserState extends State<FileBrowser> {
     );
   }
 }
-
-

@@ -38,11 +38,10 @@ import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// File service.
-/// 
+///
 /// Demonstrates process of uploading, downloading, and deleting files.
-/// It supports both text and binary file formats, providing features like encryption 
+/// It supports both text and binary file formats, providing features like encryption
 /// during upload, previewing files before uploading, and file management.
-
 
 class FileService extends StatefulWidget {
   const FileService({super.key});
@@ -395,7 +394,6 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
-
   Widget _buildDesktopLayout() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -690,7 +688,7 @@ class _FileServiceState extends State<FileService> {
   @override
   Widget build(BuildContext context) {
     // Get screen width to determine layout.
-    
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
 
