@@ -26,7 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/widgets/health_survey/page.dart';
+import 'package:healthpod/features/survey/page.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
