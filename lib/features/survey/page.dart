@@ -99,6 +99,9 @@ class HealthSurveyPage extends StatelessWidget {
 
       final timestamp =
           DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+
+      // Use blood_pressure file prefix for better organisation.
+
       final defaultFileName = 'blood_pressure_$timestamp.json';
 
       // Show file picker for save location.
