@@ -1,24 +1,65 @@
+/// File browser widget.
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Ashley Tang
+
+library;
+
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
+
 import 'package:solidpod/solidpod.dart';
+
+import 'package:healthpod/features/file/item.dart';
+
+/// File Browser Widget.
+/// 
+/// Interacts with files and directories in user's POD.
+/// Handles displaying files and directories, and allows for navigation and file operations.
+
+/// `FileBrowser` is a StatefulWidget as it needs to change its contents
+/// based on user's actions, such as navigating directories or refreshing the view.
+/// A few key callbacks are provided to allow for interaction outside this widget,
+/// such as selecting a file, downloading a file, and deleting a file.
 
 class FileBrowser extends StatefulWidget {
   final Function(String)? onFileSelected;
   final Function(String)? onFileDownload;
   final Function(String)? onFileDelete;
-  
+  final GlobalKey<FileBrowserState>? browserKey;
+
   const FileBrowser({
-    super.key, 
+    super.key,
     this.onFileSelected,
     this.onFileDownload,
     this.onFileDelete,
+    this.browserKey,
   });
 
   @override
-  State<FileBrowser> createState() => _FileBrowserState();
+  State<FileBrowser> createState() => FileBrowserState();
 }
 
-class _FileBrowserState extends State<FileBrowser> {
+class FileBrowserState extends State<FileBrowser> {
+  // State variables.
+
   List<FileItem> files = [];
   List<String> directories = [];
   bool isLoading = true;
@@ -26,11 +67,17 @@ class _FileBrowserState extends State<FileBrowser> {
   String currentPath = 'healthpod/data';
   List<String> pathHistory = ['healthpod/data'];
 
+  final smallGapH = const SizedBox(width: 10);
+
+  // As the widget initialises, we fetch the file list.
+
   @override
   void initState() {
     super.initState();
     refreshFiles();
   }
+
+  // When a user clicks a directory, we navigate deeper into it.
 
   Future<void> navigateToDirectory(String dirName) async {
     setState(() {
@@ -39,6 +86,8 @@ class _FileBrowserState extends State<FileBrowser> {
     });
     await refreshFiles();
   }
+
+  // Users can navigate up by removing the last directory from the path history.
 
   Future<void> navigateUp() async {
     if (pathHistory.length > 1) {
@@ -50,200 +99,413 @@ class _FileBrowserState extends State<FileBrowser> {
     }
   }
 
+  // This is the core of the file browser.
+  // We fetch the list of directories and files, processing each file for metadata.
+
   Future<void> refreshFiles() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      // Get URL for current directory
+      // Get current directory URL and resources (subdirectories and files).
+
       final dirUrl = await getDirUrl(currentPath);
-      debugPrint('Current directory URL: $dirUrl');
-      
-      // Get list of resources in the container
       final resources = await getResourcesInContainer(dirUrl);
-      debugPrint('Subdirectories: ${resources.subDirs}');
-      debugPrint('Files: ${resources.files}');
-      
+
       if (!mounted) return;
 
-      // Process directories
       setState(() {
         directories = resources.subDirs;
       });
 
-      // Process and filter files
+      // Process each file. We are interested in files with a specific extension (.enc.ttl)
+
       final processedFiles = <FileItem>[];
-      
+
       for (var fileName in resources.files) {
-        // Skip non-.enc.ttl files
         if (!fileName.endsWith('.enc.ttl')) {
           continue;
         }
-        
-        // Get clean filename without .enc.ttl
+
         final cleanName = fileName.replaceAll(RegExp(r'\.enc\.ttl$'), '');
-        
-        // Only add if we haven't already added this file
+
         if (!processedFiles.any((f) => f.name == cleanName)) {
-          // Construct the relative path from the current directory
           final relativePath = '$currentPath/$fileName';
-          debugPrint('Reading file with relative path: $relativePath');
-          
-          // Read file metadata using readPod with relative path
+
+          // Fetch metadata for the file.
+
           final metadata = await readPod(
             relativePath,
             context,
             const Text('Reading file info'),
           );
 
-          if (metadata != SolidFunctionCallStatus.fail && 
+          // If metadata is valid, add the file to the list.
+
+          if (metadata != SolidFunctionCallStatus.fail &&
               metadata != SolidFunctionCallStatus.notLoggedIn) {
             processedFiles.add(FileItem(
               name: cleanName,
               path: relativePath,
-              dateModified: DateTime.now(), // Could be extracted from metadata if available
+              dateModified: DateTime.now(),
             ));
           }
         }
       }
 
       setState(() {
-        files = processedFiles;
+        files = processedFiles; // Update list of files.
         isLoading = false;
       });
     } catch (e) {
       debugPrint('Error loading files: $e');
       if (mounted) {
         setState(() {
-          isLoading = false;
+          isLoading = false; // Stop loading if there's an error.
         });
       }
     }
   }
 
+  // Build the UI that will be displayed to the user.
+
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Column(
-      children: [
-        // Navigation bar
-        Container(
-          padding: const EdgeInsets.all(8.0),
-          color: Theme.of(context).colorScheme.surfaceVariant,
-          child: Row(
-            children: [
-              if (pathHistory.length > 1)
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: navigateUp,
-                  tooltip: 'Go up',
-                ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  currentPath,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: refreshFiles,
-                tooltip: 'Refresh',
-              ),
-            ],
-          ),
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 100, // Account for padding/margins
+          maxHeight: MediaQuery.of(context).size.height - 100,
         ),
-        
-        // Directory and file list
-        Expanded(
-          child: directories.isEmpty && files.isEmpty
-              ? const Center(
-                  child: Text('This folder is empty'),
-                )
-              : ListView(
-                  children: [
-                    // Directories section
-                    if (directories.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Folders',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Path bar: display current directory and allow user to go up.
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withAlpha(50),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor.withAlpha(10),
+                ),
+              ),
+              child: Row(
+                children: [
+                  if (pathHistory.length > 1)
+                    IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      ...directories.map((dir) => ListTile(
-                        leading: const Icon(Icons.folder),
-                        title: Text(dir),
-                        onTap: () => navigateToDirectory(dir),
-                      )),
-                      const Divider(),
-                    ],
-                    
-                    // Files section
-                    if (files.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Files',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
+                      onPressed: navigateUp,
+                      tooltip: 'Go up',
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primary.withAlpha(10),
+                        padding: const EdgeInsets.all(8),
                       ),
-                      ...files.map((file) => ListTile(
-                        leading: const Icon(Icons.insert_drive_file),
-                        title: Text(file.name),
-                        subtitle: Text(
-                          'Modified: ${file.dateModified.toString().split('.')[0]}',
-                        ),
-                        selected: selectedFile == file.name,
-                        onTap: () {
-                          setState(() {
-                            selectedFile = file.name;
-                          });
-                          widget.onFileSelected?.call(file.name);
-                        },
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                    ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      currentPath,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+              
+                  // Add Spacer to push the refresh icon to the far right.
+
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(
+                      Icons.refresh,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: refreshFiles,
+                    tooltip: 'Refresh',
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primary.withAlpha(10),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Content: display directories and files, or loading indicators when necessary.
+
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : directories.isEmpty && files.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.folder_open,
+                                size: 48,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha(50),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'This folder is empty',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView(
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.download),
-                              onPressed: () => widget.onFileDownload?.call(file.name),
-                              tooltip: 'Download file',
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => widget.onFileDelete?.call(file.name),
-                              tooltip: 'Delete file',
-                            ),
+                            if (directories.isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  'Folders',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                              // Display directories as a list.
+
+                              ...directories.map((dir) => ListTile(
+                                    leading: Icon(
+                                      Icons.folder,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                    title: Text(
+                                      dir,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    dense: true,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    onTap: () => navigateToDirectory(dir),
+                                  )),
+                              if (files.isNotEmpty)
+                                Divider(
+                                  height: 24,
+                                  indent: 16,
+                                  endIndent: 16,
+                                  color: Theme.of(context)
+                                      .dividerColor
+                                      .withAlpha(20),
+                                ),
+                            ],
+                            if (files.isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  'Files',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
+                              // Display files with additional actions (select, download, delete).
+
+                              ...files.map((file) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 4),
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        const minWidthForButtons = 200;
+                                        final showButtons =
+                                            constraints.maxWidth >=
+                                                minWidthForButtons;
+
+                                        return InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              selectedFile = file.name;
+                                            });
+                                            widget.onFileSelected
+                                                ?.call(file.name);
+                                          },
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: selectedFile == file.name
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .primaryContainer
+                                                      .withAlpha(10)
+                                                  : null,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: constraints.maxWidth <
+                                                      50
+                                                  ? 4
+                                                  : 12, // Reduce padding when very small
+                                              vertical: 8,
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize
+                                                  .min, // Changed from max to min
+                                              children: [
+                                                // File icon and title.
+
+                                                if (constraints.maxWidth > 40)
+                                                  Icon(
+                                                    Icons.insert_drive_file,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
+                                                    size: 20,
+                                                  ),
+                                                if (constraints.maxWidth > 40)
+                                                  SizedBox(
+                                                      width:
+                                                          constraints.maxWidth <
+                                                                  100
+                                                              ? 4
+                                                              : 12),
+
+                                                // Title and date modified.
+
+                                                Expanded(
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        file.name,
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w500),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      if (constraints.maxWidth >
+                                                          150)
+                                                        Text(
+                                                          'Modified: ${file.dateModified.toString().split('.')[0]}',
+                                                          style: TextStyle(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .onSurfaceVariant,
+                                                            fontSize: 12,
+                                                          ),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                    ],
+                                                  ),
+                                                ),
+
+                                                // Action buttons (download, delete).
+
+                                                if (showButtons) ...[
+                                                  const SizedBox(width: 8),
+                                                  IconButton(
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    icon: Icon(
+                                                      Icons.download,
+                                                      size: 20,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary,
+                                                    ),
+                                                    onPressed: () => widget
+                                                        .onFileDownload
+                                                        ?.call(file.name),
+                                                    style: IconButton.styleFrom(
+                                                      backgroundColor:
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .primary
+                                                              .withAlpha(10),
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize:
+                                                          const Size(35, 35),
+                                                    ),
+                                                  ),
+                                                  smallGapH,
+                                                  IconButton(
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    icon: Icon(
+                                                      Icons.delete_outline,
+                                                      size: 20,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .error,
+                                                    ),
+                                                    onPressed: () => widget
+                                                        .onFileDelete
+                                                        ?.call(file.name),
+                                                    style: IconButton.styleFrom(
+                                                      backgroundColor:
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .error
+                                                              .withAlpha(10),
+                                                      padding: EdgeInsets.zero,
+                                                      minimumSize:
+                                                          const Size(35, 35),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )),
+                            ],
                           ],
                         ),
-                      )),
-                    ],
-                  ],
-                ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
 
-class FileItem {
-  final String name;
-  final String path;
-  final DateTime dateModified;
 
-  FileItem({
-    required this.name,
-    required this.path,
-    required this.dateModified,
-  });
-}
