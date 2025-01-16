@@ -29,12 +29,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:healthpod/widgets/preview.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/colours.dart';
+import 'package:healthpod/features/file/browser.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/show_alert.dart';
+
+/// File service.
+///
+/// Demonstrates process of uploading, downloading, and deleting files.
+/// It supports both text and binary file formats, providing features like encryption
+/// during upload, previewing files before uploading, and file management.
 
 class FileService extends StatefulWidget {
   const FileService({super.key});
@@ -44,7 +51,9 @@ class FileService extends StatefulWidget {
 }
 
 class _FileServiceState extends State<FileService> {
-  // File state.
+  // File state variables that manage the selected file, its name and its preview.
+
+  final _browserKey = GlobalKey<FileBrowserState>();
 
   String? uploadFile;
   String? downloadFile;
@@ -53,7 +62,7 @@ class _FileServiceState extends State<FileService> {
   String? remoteFileUrl;
   String? filePreview;
 
-  // Operation states.
+  // Boolean flags to track status of various file operations.
 
   bool uploadInProgress = false;
   bool downloadInProgress = false;
@@ -63,11 +72,13 @@ class _FileServiceState extends State<FileService> {
   bool deleteDone = false;
   bool showPreview = false;
 
-  // UI Constants.
+  // UI Constants for layout spacing.
 
   final smallGapH = const SizedBox(width: 10);
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
+
+  /// Handles file upload by reading its contents and encrypting it for upload.
 
   Future<void> handleUpload() async {
     if (uploadFile == null) return;
@@ -81,7 +92,8 @@ class _FileServiceState extends State<FileService> {
       final file = File(uploadFile!);
       String fileContent;
 
-      // Read file content.
+      // For text files, we directly read the content.
+      // For binary files, we encode them into base64 format.
 
       if (isTextFile(uploadFile!)) {
         fileContent = await file.readAsString();
@@ -90,6 +102,8 @@ class _FileServiceState extends State<FileService> {
         fileContent = base64Encode(bytes);
       }
 
+      // Sanitise file name and append encryption extension.
+
       remoteFileName =
           '${path.basename(uploadFile!).replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
 
@@ -97,7 +111,7 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
-      // Upload with encryption.
+      // Upload file with encryption.
 
       final result = await writePod(
         remoteFileName!,
@@ -113,7 +127,10 @@ class _FileServiceState extends State<FileService> {
         uploadDone = result == SolidFunctionCallStatus.success;
       });
 
-      if (result != SolidFunctionCallStatus.success && mounted) {
+      if (result == SolidFunctionCallStatus.success) {
+        // Refresh the file browser after successful upload.
+        _browserKey.currentState?.refreshFiles();
+      } else if (mounted) {
         showAlert(context,
             'Upload failed - please check your connection and permissions.');
       }
@@ -129,6 +146,8 @@ class _FileServiceState extends State<FileService> {
       }
     }
   }
+
+  /// Handles file download by reading encrypted file from POD and saving it locally.
 
   Future<void> handleDownload() async {
     if (downloadFile == null || remoteFileName == null) return;
@@ -152,6 +171,8 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
+      // Check for errors in downloading the file.
+
       if (fileContent == SolidFunctionCallStatus.fail ||
           fileContent == SolidFunctionCallStatus.notLoggedIn) {
         throw Exception(
@@ -162,6 +183,9 @@ class _FileServiceState extends State<FileService> {
       final file = File(saveFileName);
 
       try {
+        // If file is text, write it as a string.
+        // If file is binary, decode and write the bytes.
+
         if (isTextFile(
             remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
           await file.writeAsString(fileContent.toString());
@@ -194,6 +218,8 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
+  /// Handles file preview before upload to display its content or basic info.
+
   Future<void> handlePreview() async {
     if (uploadFile == null) return;
 
@@ -202,16 +228,13 @@ class _FileServiceState extends State<FileService> {
       String content;
 
       if (isTextFile(uploadFile!)) {
-        // For text files, read first few lines.
+        // For text files, show the first 500 characters.
 
         content = await file.readAsString();
-
-        // Take first 500 characters or less.
-
         content =
             content.length > 500 ? '${content.substring(0, 500)}...' : content;
       } else {
-        // For binary files, show basic info.
+        // For binary files, show their size and type.
 
         final bytes = await file.readAsBytes();
         content =
@@ -229,6 +252,73 @@ class _FileServiceState extends State<FileService> {
       debugPrint('Preview error: $e');
     }
   }
+
+  /// Builds a preview card UI to show content or info of selected file.
+
+  Widget _buildPreviewCard() {
+    if (!showPreview || filePreview == null) return const SizedBox.shrink();
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withAlpha(10),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.preview,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Preview',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: () => setState(() => showPreview = false),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  tooltip: 'Close preview',
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: SingleChildScrollView(
+              child: Text(
+                filePreview!,
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Handles file deletion by removing both the main file and its ACL file.
 
   Future<void> handleDelete() async {
     if (remoteFileName == null) return;
@@ -276,6 +366,10 @@ class _FileServiceState extends State<FileService> {
         setState(() {
           deleteDone = true;
         });
+
+        // Refresh the file browser after successful deletion.
+
+        _browserKey.currentState?.refreshFiles();
       }
     } catch (e) {
       if (!mounted) return;
@@ -300,273 +394,319 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final browseButton = ElevatedButton(
-      onPressed: () async {
-        final result = await FilePicker.platform.pickFiles();
-        if (result != null) {
-          setState(() {
-            uploadFile = result.files.single.path!;
-            uploadDone = false;
-          });
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        minimumSize: const Size(100, 40),
-      ),
-      child: const Text('Browse'),
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left panel: File Browser.
+
+        Expanded(
+          flex: 2,
+          child: Card(
+            elevation: 4, // Increased elevation for better depth
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // More rounded corners
+              side: BorderSide(
+                color: Theme.of(context).dividerColor.withAlpha(10),
+                width: 1,
+              ),
+            ),
+            child: _buildFileBrowserPanel(),
+          ),
+        ),
+        const SizedBox(width: 16),
+        // Right panel: Upload.
+
+        Expanded(
+          flex: 1,
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: Theme.of(context).dividerColor.withAlpha(10),
+                width: 1,
+              ),
+            ),
+            child: _buildUploadPanel(),
+          ),
+        ),
+      ],
     );
+  }
 
-    final uploadButton = ElevatedButton(
-      onPressed: (uploadFile == null ||
-              uploadInProgress ||
-              downloadInProgress ||
-              deleteInProgress)
-          ? null
-          : handleUpload,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        minimumSize: const Size(100, 40),
-      ),
-      child: const Text('Upload'),
+  /// Builds the mobile layout for the file service.
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        // Top panel: Upload section.
+
+        Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: Theme.of(context).dividerColor.withAlpha(10),
+              width: 1,
+            ),
+          ),
+          child: ExpansionTile(
+            title: const Text(
+              'Upload New File',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildUploadPanel(),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Bottom panel: File Browser.
+
+        Expanded(
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: Theme.of(context).dividerColor.withAlpha(10),
+                width: 1,
+              ),
+            ),
+            child: _buildFileBrowserPanel(),
+          ),
+        ),
+      ],
     );
+  }
 
-    final previewButton = ElevatedButton(
-      onPressed: (uploadFile == null ||
-              uploadInProgress ||
-              downloadInProgress ||
-              deleteInProgress)
-          ? null
-          : handlePreview,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        minimumSize: const Size(100, 40),
-      ),
-      child: const Text('Preview'),
-    );
+  /// Builds the file browser panel for desktop layout.
 
-    final downloadButton = ElevatedButton(
-      onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
-          ? null
-          : () async {
-              // Remove .enc.ttl from the suggested filename.
-
-              final suggestedName =
-                  remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+  Widget _buildFileBrowserPanel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              const Icon(Icons.folder_open),
+              const SizedBox(width: 8),
+              Expanded(
+                child: const Text(
+                  'Your Files',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (uploadInProgress ||
+                  downloadInProgress ||
+                  deleteInProgress) ...[
+                const SizedBox(width: 16),
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  uploadInProgress
+                      ? 'Uploading...'
+                      : downloadInProgress
+                          ? 'Downloading...'
+                          : 'Deleting...',
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: FileBrowser(
+            key: _browserKey,
+            browserKey: _browserKey,
+            onFileSelected: (fileName) {
+              setState(() {
+                cleanFileName = fileName;
+                remoteFileName = '$fileName.enc.ttl';
+              });
+            },
+            onFileDownload: (fileName) async {
+              setState(() {
+                cleanFileName = fileName;
+                remoteFileName = '$fileName.enc.ttl';
+              });
 
               String? outputFile = await FilePicker.platform.saveFile(
-                dialogTitle: 'Please set the output file:',
-                fileName:
-                    suggestedName, // Clean filename without encryption suffix
+                dialogTitle: 'Save file as:',
+                fileName: fileName,
               );
+
               if (outputFile != null) {
                 setState(() {
                   downloadFile = outputFile;
                 });
                 await handleDownload();
-              } else {
-                debugPrint('Download is cancelled');
               }
             },
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        minimumSize: const Size(100, 40),
-      ),
-      child: const Text('Download'),
+            onFileDelete: (fileName) async {
+              setState(() {
+                cleanFileName = fileName;
+                remoteFileName = '$fileName.enc.ttl';
+              });
+              await handleDelete();
+            },
+          ),
+        ),
+      ],
     );
+  }
 
-    final deleteButton = ElevatedButton(
-      onPressed: (uploadInProgress || downloadInProgress || deleteInProgress)
-          ? null
-          : handleDelete,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        minimumSize: const Size(100, 40),
-      ),
-      child: const Text('Delete'),
-    );
+  /// Builds the upload panel for desktop layout.
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Stack(
-          children: <Widget>[
-            SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  largeGapV,
-                  largeGapV,
-
-                  // Upload section.
-
-                  Text(
-                    'Upload a file and save it as "$cleanFileName" in POD',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+  Widget _buildUploadPanel() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildPreviewCard(),
+          const SizedBox(height: 16),
+          if (uploadFile != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withAlpha(8),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withAlpha(20),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.file_present,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                  smallGapV,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      const Text('Upload file'),
-                      smallGapH,
-                      Text(
-                        uploadFile ??
-                            'Click the Browse button to choose a file',
-                        style: TextStyle(
-                          color: uploadFile == null ? Colors.red : Colors.blue,
-                        ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      path.basename(uploadFile!),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
                       ),
-                      smallGapH,
-                      if (uploadDone)
-                        const Icon(Icons.done, color: Colors.green),
-                    ],
-                  ),
-                  smallGapV,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      browseButton,
-                      smallGapH,
-                      previewButton,
-                      smallGapH,
-                      uploadButton,
-                    ],
-                  ),
-
-                  largeGapV,
-
-                  // Preview section.
-
-                  if (showPreview)
-                    PreviewDialog(
-                      uploadFile: uploadFile,
-                      filePreview: filePreview,
-                      onClose: () {
-                        setState(() {
-                          showPreview = false;
-                        });
-                      },
-                    ),
-
-                  largeGapV,
-
-                  // Download section.
-
-                  Text(
-                    'Download "$cleanFileName" from POD',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  smallGapV,
-                  if (downloadFile != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Text('Save file'),
-                        smallGapH,
-                        Text(
-                          downloadFile!,
-                          style: const TextStyle(color: Colors.blue),
-                        ),
-                        smallGapH,
-                        if (downloadDone)
-                          const Icon(Icons.done, color: Colors.green),
-                      ],
-                    ),
-                  smallGapV,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      downloadButton,
-                      smallGapH,
-                      previewButton,
-                    ],
-                  ),
-
-                  largeGapV,
-
-                  // Delete section.
-
-                  Text(
-                    'Delete "$cleanFileName" from POD',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  smallGapV,
-                  if (deleteInProgress || deleteDone)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text('Delete file'),
-                        smallGapH,
-                        Text('$cleanFileName',
-                            style: const TextStyle(color: Colors.red)),
-                        smallGapH,
-                        Text(
-                          remoteFileUrl ?? '',
-                          style: const TextStyle(color: Colors.blue),
-                        ),
-                        smallGapH,
-                        if (deleteDone)
-                          const Icon(Icons.done, color: Colors.green),
-                      ],
-                    ),
-                  smallGapV,
-                  deleteButton,
+                  if (uploadDone)
+                    const Icon(Icons.check_circle,
+                        color: Colors.green, size: 20),
                 ],
               ),
             ),
-
-            // Operation indicators.
-
-            if (uploadInProgress || downloadInProgress || deleteInProgress)
-              Positioned(
-                top: 20,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Column(
-                    children: [
-                      const CircularProgressIndicator(),
-                      smallGapV,
-                      Text(
-                        uploadInProgress
-                            ? 'Uploading...'
-                            : downloadInProgress
-                                ? 'Downloading...'
-                                : 'Deleting...',
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            // Back button.
-
-            Positioned(
-              top: 10,
-              left: 10,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Back to Home'),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final result = await FilePicker.platform.pickFiles();
+              if (result != null) {
+                setState(() {
+                  uploadFile = result.files.single.path!;
+                  uploadDone = false;
+                });
+              }
+            },
+            icon: const Icon(Icons.file_upload),
+            label: const Text('Choose File'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-          ],
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: (uploadFile == null ||
+                    uploadInProgress ||
+                    downloadInProgress ||
+                    deleteInProgress)
+                ? null
+                : handleUpload,
+            icon: Icon(Icons.cloud_upload,
+                color: Theme.of(context).colorScheme.onPrimary),
+            label: const Text('Upload'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            onPressed: (uploadFile == null ||
+                    uploadInProgress ||
+                    downloadInProgress ||
+                    deleteInProgress)
+                ? null
+                : handlePreview,
+            icon: const Icon(Icons.preview),
+            label: const Text('Preview File'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Builds the main UI layout for the file service.
+
+  @override
+  Widget build(BuildContext context) {
+    // Get screen width to determine layout.
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 800;
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+          tooltip: 'Back to Home',
         ),
+        title: const Text(
+          'File Management',
+        ),
+        backgroundColor: titleBackgroundColor,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
       ),
     );
   }
