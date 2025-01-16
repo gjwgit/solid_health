@@ -269,7 +269,7 @@ class HealthSurveyPage extends StatelessWidget {
 
     // Check login and security key status.
 
-    final isKeySaved = await fetchKeySavedStatus();
+    final isKeySaved = await fetchKeySavedStatus(context);
 
     if (!context.mounted) return;
 

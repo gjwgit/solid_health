@@ -52,12 +52,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
   @override
   void initState() {
     super.initState();
-    _initialiseFooterData();
+    _initialiseFooterData(context);
   }
 
-  Future<void> _initialiseFooterData() async {
+  Future<void> _initialiseFooterData(context) async {
     final webId = await fetchWebId();
-    final isKeySaved = await fetchKeySavedStatus();
+    final isKeySaved = await fetchKeySavedStatus(context);
 
     setState(() {
       _webId = webId;

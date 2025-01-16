@@ -25,12 +25,36 @@
 
 library;
 
-import 'package:solidpod/solidpod.dart' show KeyManager;
+import 'package:healthpod/utils/security_key/manager.dart';
+import 'package:solidpod/solidpod.dart'
+    show KeyManager, SolidFunctionCallStatus, getEncKeyPath, readPod;
 
 /// Check if the security key is saved locally.
-Future<bool> fetchKeySavedStatus() async {
+
+Future<bool> fetchKeySavedStatus(context) async {
   try {
-    return await KeyManager.hasSecurityKey();
+    // Get the path to the encrypted key file.
+
+    final filePath = await getEncKeyPath();
+
+    // Read the file content.
+
+    final fileContent = await readPod(
+      filePath,
+      context,
+      const SecurityKeyManager(),
+    );
+
+    // Check if the file content is valid.
+
+    bool hasLocalKey = ![
+      SolidFunctionCallStatus.notLoggedIn,
+      SolidFunctionCallStatus.fail
+    ].contains(fileContent);
+
+    // Return true if the key is saved locally or in the POD.
+
+    return await KeyManager.hasSecurityKey() || hasLocalKey;
   } catch (e) {
     return false;
   }
