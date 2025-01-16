@@ -20,13 +20,34 @@ class FileBrowser extends StatefulWidget {
 
 class _FileBrowserState extends State<FileBrowser> {
   List<FileItem> files = [];
+  List<String> directories = [];
   bool isLoading = true;
   String? selectedFile;
+  String currentPath = 'healthpod/data';
+  List<String> pathHistory = ['healthpod/data'];
 
   @override
   void initState() {
     super.initState();
     refreshFiles();
+  }
+
+  Future<void> navigateToDirectory(String dirName) async {
+    setState(() {
+      currentPath = '$currentPath/$dirName';
+      pathHistory.add(currentPath);
+    });
+    await refreshFiles();
+  }
+
+  Future<void> navigateUp() async {
+    if (pathHistory.length > 1) {
+      pathHistory.removeLast();
+      setState(() {
+        currentPath = pathHistory.last;
+      });
+      await refreshFiles();
+    }
   }
 
   Future<void> refreshFiles() async {
@@ -35,22 +56,26 @@ class _FileBrowserState extends State<FileBrowser> {
     });
 
     try {
-      // Get the base data directory path and URL
-      final baseDir = await getDataDirPath();
-      final dataDir = await getDirUrl(baseDir);
-      debugPrint('Data directory URL: $dataDir');
+      // Get URL for current directory
+      final dirUrl = await getDirUrl(currentPath);
+      debugPrint('Current directory URL: $dirUrl');
       
       // Get list of resources in the container
-      final resources = await getResourcesInContainer(dataDir);
-      final fileList = resources.files;
-      debugPrint('Found files: $fileList');
+      final resources = await getResourcesInContainer(dirUrl);
+      debugPrint('Subdirectories: ${resources.subDirs}');
+      debugPrint('Files: ${resources.files}');
       
       if (!mounted) return;
+
+      // Process directories
+      setState(() {
+        directories = resources.subDirs;
+      });
 
       // Process and filter files
       final processedFiles = <FileItem>[];
       
-      for (var fileName in fileList) {
+      for (var fileName in resources.files) {
         // Skip non-.enc.ttl files
         if (!fileName.endsWith('.enc.ttl')) {
           continue;
@@ -61,8 +86,8 @@ class _FileBrowserState extends State<FileBrowser> {
         
         // Only add if we haven't already added this file
         if (!processedFiles.any((f) => f.name == cleanName)) {
-          // Construct the relative path from the data directory
-          final relativePath = 'healthpod/data/$fileName';
+          // Construct the relative path from the current directory
+          final relativePath = '$currentPath/$fileName';
           debugPrint('Reading file with relative path: $relativePath');
           
           // Read file metadata using readPod with relative path
@@ -105,63 +130,105 @@ class _FileBrowserState extends State<FileBrowser> {
 
     return Column(
       children: [
-        // Toolbar
-        Padding(
+        // Navigation bar
+        Container(
           padding: const EdgeInsets.all(8.0),
+          color: Theme.of(context).colorScheme.surfaceVariant,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              if (pathHistory.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: navigateUp,
+                  tooltip: 'Go up',
+                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  currentPath,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
               IconButton(
                 icon: const Icon(Icons.refresh),
                 onPressed: refreshFiles,
-                tooltip: 'Refresh file list',
+                tooltip: 'Refresh',
               ),
             ],
           ),
         ),
         
-        // File list
+        // Directory and file list
         Expanded(
-          child: files.isEmpty
+          child: directories.isEmpty && files.isEmpty
               ? const Center(
-                  child: Text('No files found in your POD'),
+                  child: Text('This folder is empty'),
                 )
-              : ListView.builder(
-                  itemCount: files.length,
-                  itemBuilder: (context, index) {
-                    final file = files[index];
-                    final isSelected = selectedFile == file.name;
+              : ListView(
+                  children: [
+                    // Directories section
+                    if (directories.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Folders',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      ...directories.map((dir) => ListTile(
+                        leading: const Icon(Icons.folder),
+                        title: Text(dir),
+                        onTap: () => navigateToDirectory(dir),
+                      )),
+                      const Divider(),
+                    ],
                     
-                    return ListTile(
-                      leading: const Icon(Icons.insert_drive_file),
-                      title: Text(file.name),
-                      subtitle: Text(
-                        'Modified: ${file.dateModified.toString().split('.')[0]}',
-                      ),
-                      selected: isSelected,
-                      onTap: () {
-                        setState(() {
-                          selectedFile = file.name;
-                        });
-                        widget.onFileSelected?.call(file.name);
-                      },
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.download),
-                            onPressed: () => widget.onFileDownload?.call(file.name),
-                            tooltip: 'Download file',
+                    // Files section
+                    if (files.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Files',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => widget.onFileDelete?.call(file.name),
-                            tooltip: 'Delete file',
-                          ),
-                        ],
+                        ),
                       ),
-                    );
-                  },
+                      ...files.map((file) => ListTile(
+                        leading: const Icon(Icons.insert_drive_file),
+                        title: Text(file.name),
+                        subtitle: Text(
+                          'Modified: ${file.dateModified.toString().split('.')[0]}',
+                        ),
+                        selected: selectedFile == file.name,
+                        onTap: () {
+                          setState(() {
+                            selectedFile = file.name;
+                          });
+                          widget.onFileSelected?.call(file.name);
+                        },
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.download),
+                              onPressed: () => widget.onFileDownload?.call(file.name),
+                              tooltip: 'Download file',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => widget.onFileDelete?.call(file.name),
+                              tooltip: 'Delete file',
+                            ),
+                          ],
+                        ),
+                      )),
+                    ],
+                  ],
                 ),
         ),
       ],
