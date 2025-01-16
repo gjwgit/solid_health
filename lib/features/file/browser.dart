@@ -40,17 +40,17 @@ import 'package:healthpod/features/file/item.dart';
 /// such as selecting a file, downloading a file, and deleting a file.
 
 class FileBrowser extends StatefulWidget {
-  final Function(String)? onFileSelected;
-  final Function(String)? onFileDownload;
-  final Function(String)? onFileDelete;
-  final GlobalKey<FileBrowserState>? browserKey;
+  final Function(String) onFileSelected;
+  final Function(String) onFileDownload;
+  final Function(String) onFileDelete;
+  final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
     super.key,
-    this.onFileSelected,
-    this.onFileDownload,
-    this.onFileDelete,
-    this.browserKey,
+    required this.onFileSelected,
+    required this.onFileDownload,
+    required this.onFileDelete,
+    required this.browserKey,
   });
 
   @override
