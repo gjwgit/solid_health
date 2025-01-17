@@ -531,7 +531,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
     );
   }
 
-  /// Shows a confirmation dialog before forgetting the security key
+  /// Shows a confirmation dialog before forgetting the security key.
+
   Future<bool> _showForgetKeyConfirmation(BuildContext context) async {
     return await showDialog<bool>(
           context: context,

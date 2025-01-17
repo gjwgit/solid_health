@@ -65,6 +65,11 @@ class HealthPodHomeState extends State<HealthPodHome> {
     });
   }
 
+  /// Updates the key saved status in the state and triggers a rebuild.
+  ///
+  /// This method is passed as a callback to child widgets to notify the home screen
+  /// when the encryption key status changes.
+
   void _updateKeyStatus(bool status) {
     setState(() {
       _isKeySaved = status;
@@ -124,7 +129,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
           child: Footer(
             webId: _webId,
             isKeySaved: _isKeySaved,
-            onKeyStatusChanged: _updateKeyStatus,
+            onKeyStatusChanged:
+                _updateKeyStatus, // Callback to update key status.
           ),
         ),
       ),
