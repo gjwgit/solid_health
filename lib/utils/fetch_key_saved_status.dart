@@ -31,7 +31,8 @@ import 'package:solidpod/solidpod.dart'
 
 /// Check if the security key is saved locally.
 
-Future<bool> fetchKeySavedStatus(context, [Function(bool)? onKeyStatusChanged]) async {
+Future<bool> fetchKeySavedStatus(context,
+    [Function(bool)? onKeyStatusChanged]) async {
   try {
     // Get the path to the encrypted key file.
 

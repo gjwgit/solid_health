@@ -30,6 +30,7 @@ dependencies:
   build_runner: ^2.4.14
   url_launcher: ^6.3.1
   editable: ^2.0.0
+  http: ^1.2.2
 
 dev_dependencies:
 

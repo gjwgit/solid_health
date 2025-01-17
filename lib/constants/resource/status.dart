@@ -1,4 +1,4 @@
-/// Link constants.
+/// Resource status constants.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -25,10 +25,18 @@
 
 library;
 
-/// Link header for a generic resource type.
+/// Enum representing the status of a resource.
 
-String fileTypeLink = '<http://www.w3.org/ns/ldp#Resource>; rel="type"';
+enum ResourceStatus {
+  /// The resource exist.
 
-/// Link header for a directory or container type.
+  exist,
 
-String dirTypeLink = '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"';
+  /// The resource does not exist.
+
+  notExist,
+
+  /// Do not know if the resource exist (e.g. error occurred when checking the status).
+
+  unknown
+}

@@ -1,4 +1,4 @@
-/// Link constants.
+/// Resource content type constants.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -25,10 +25,34 @@
 
 library;
 
-/// Link header for a generic resource type.
+/// Types of the content of resources.
 
-String fileTypeLink = '<http://www.w3.org/ns/ldp#Resource>; rel="type"';
+enum ResourceContentType {
+  /// TTL text file.
+  
+  turtleText('text/turtle'),
 
-/// Link header for a directory or container type.
+  /// Plain text file.
+  
+  plainText('text/plain'),
 
-String dirTypeLink = '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"';
+  /// Directory.
+  
+  directory('application/octet-stream'),
+
+  /// Binary data.
+  
+  binary('application/octet-stream'),
+
+  /// Any.
+  
+  any('*/*');
+
+  /// Constructor.
+  
+  const ResourceContentType(this.value);
+
+  /// String value of the access type.
+  
+  final String value;
+}
