@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -33,6 +34,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/create_interactive_text.dart';
 import 'package:healthpod/utils/handle_logout.dart';
+import 'package:healthpod/utils/security_key/manager.dart';
 
 /// Footer widget to display server information, login status, and security key
 /// status.
@@ -51,14 +53,6 @@ class Footer extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     }
-  }
-
-  Widget _buildTextRow(String label, String value, {Color? valueColor}) {
-    return Text(
-      '$label: $value',
-      style: TextStyle(fontSize: 14, color: valueColor ?? Colors.black),
-      overflow: TextOverflow.ellipsis,
-    );
   }
 
   Widget buildServerInteractiveText(String serverUri, BuildContext context) {
@@ -129,7 +123,37 @@ class Footer extends StatelessWidget {
     );
   }
 
-  // TODO: build security key status interactive text
+  Widget buildSecurityKeyStatusInteractiveText(
+      String securityKeyStatus, BuildContext context) {
+    return MarkdownTooltip(
+      message: '''
+
+      **Security Key Manager:** Tap here to manage your security key settings.
+
+      - View your current security key status
+
+      - Save a new security key
+      
+      - Remove an existing security key
+      
+      Your security key is essential for encrypting and protecting your health data.
+      
+      ''',
+      child: createInteractiveText(
+        context: context,
+        text: securityKeyStatus,
+        onTap: () => showDialog(
+          context: context,
+          barrierColor: Colors.black12, // Makes the background more transparent
+          builder: (BuildContext context) => const SecurityKeyManager(),
+        ),
+        style: TextStyle(
+          fontSize: 14,
+          color: isKeySaved ? Colors.green : Colors.red,
+        ),
+      ),
+    );
+  }
 
   Widget _buildNarrowLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
@@ -146,7 +170,7 @@ class Footer extends StatelessWidget {
             const SizedBox(height: 2),
             buildLoginStatusInteractiveText(loginStatus, context),
             const SizedBox(height: 2),
-            _buildTextRow('Security Key', securityKeyStatus),
+            buildSecurityKeyStatusInteractiveText(securityKeyStatus, context),
           ],
         ),
       ),
@@ -172,7 +196,8 @@ class Footer extends StatelessWidget {
                 children: [
                   buildLoginStatusInteractiveText(loginStatus, context),
                   const SizedBox(width: 16),
-                  _buildTextRow('Security Key', securityKeyStatus),
+                  buildSecurityKeyStatusInteractiveText(
+                      securityKeyStatus, context),
                 ],
               ),
             ),
@@ -198,7 +223,7 @@ class Footer extends StatelessWidget {
             children: [
               buildLoginStatusInteractiveText(loginStatus, context),
               const SizedBox(width: 16),
-              _buildTextRow('Security Key', securityKeyStatus),
+              buildSecurityKeyStatusInteractiveText(securityKeyStatus, context),
             ],
           ),
         ],
@@ -217,7 +242,8 @@ class Footer extends StatelessWidget {
 
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
     final loginStatusColor = webId == null ? Colors.red : Colors.green;
-    final securityKeyStatus = isKeySaved ? "Saved" : "Not Saved";
+    final securityKeyStatus =
+        isKeySaved ? "Security Key: Saved" : "Security Key: Not Saved";
 
     return LayoutBuilder(
       builder: (context, constraints) {
