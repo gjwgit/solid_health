@@ -92,9 +92,9 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   }
 
   /// Checks if a security key exists.
-  /// 
+  ///
   /// Updates `_hasExistingKey` to reflect the current status.
-  
+
   Future<void> _checkKeyStatus() async {
     final hasKey =
         await fetchKeySavedStatus(context, widget.onKeyStatusChanged);
@@ -104,9 +104,9 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   }
 
   /// Defines consistent button styles.
-  /// 
+  ///
   /// Ensures a uniform user interface across dialogs.
-  
+
   ButtonStyle _getButtonStyle({bool isDestructive = false}) {
     return ElevatedButton.styleFrom(
       backgroundColor: isDestructive ? Colors.red : Colors.white,
@@ -124,7 +124,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   /// Returns decoration for input fields.
   ///
   /// Used to maintain a cohesive design across dialogs.
-  
+
   InputDecoration _getInputDecoration(String label) {
     return InputDecoration(
       labelText: label,
@@ -167,7 +167,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
       );
       return;
     }
-    
+
     // Show loading indicator while retrieving key data.
 
     setState(() {
@@ -213,7 +213,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   /// Prompts the user to input or change a security key.
   ///
   /// Handles both scenarios: setting a new key or updating an existing one.
-  
+
   Future<void> _showKeyInputDialog(BuildContext context) async {
     _keyController.clear();
     _confirmKeyController.clear();
@@ -340,7 +340,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   }
 
   /// Shows a snack bar with an error message.
-  
+
   void _showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -404,7 +404,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
               ),
             ),
             // Interactive options for the user.
-            
+
             Container(
               padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 32.0),
               child: _isLoading
@@ -428,7 +428,6 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                     ? Colors.blue
                                     : Colors.grey[400]!,
                               ),
-
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -438,7 +437,6 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                     await _showPrivateData(title, context);
                                   }
                                 : null,
-
                             child: const Text('Show Security Key'),
                           ),
                         ),
@@ -589,7 +587,6 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
         ) ??
         false;
   }
-
 
   /// Builds the dialog widget.
   ///
