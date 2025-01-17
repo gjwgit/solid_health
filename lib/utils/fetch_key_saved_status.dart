@@ -29,20 +29,28 @@ import 'package:healthpod/utils/security_key/manager.dart';
 import 'package:solidpod/solidpod.dart'
     show KeyManager, SolidFunctionCallStatus, getEncKeyPath, readPod;
 
-/// Check if the security key is saved locally.
+/// This function verifies if an encryption key is available for the user by:
+/// 1. Checking the encrypted key file in the POD
+/// 2. Verifying if a key exists in local storage
+///
+/// If a key exists, it triggers a callback to update the UI.
 
-Future<bool> fetchKeySavedStatus(context) async {
+Future<bool> fetchKeySavedStatus(context,
+    [Function(bool)? onKeyStatusChanged]) async {
   try {
     // Get the path to the encrypted key file.
 
     final filePath = await getEncKeyPath();
 
-    // Read the file content.
+    // Read the file content from the POD using the security key manager
 
     final fileContent = await readPod(
       filePath,
       context,
-      const SecurityKeyManager(),
+      SecurityKeyManager(
+        onKeyStatusChanged:
+            onKeyStatusChanged ?? (_) {}, // Callback to update key status.
+      ),
     );
 
     // Check if the file content is valid.
