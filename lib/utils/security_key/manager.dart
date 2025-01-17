@@ -26,16 +26,12 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/constants/resource_status.dart';
+import 'package:healthpod/utils/fetch_key_saved_status.dart';
+import 'package:healthpod/utils/security_key/check_resource_status.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show
-        AppInfo,
-        KeyManager,
-        SolidFunctionCallStatus,
-        changeKeyPopup,
-        getEncKeyPath,
-        getWebId,
-        readPod;
+    show AppInfo, KeyManager, SolidFunctionCallStatus, changeKeyPopup, deleteFile, getEncKeyPath, getFileUrl, getWebId, readPod;
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/security_key/view_keys.dart';
@@ -49,11 +45,17 @@ import 'package:healthpod/utils/security_key/view_keys.dart';
 /// Main widget for managing security keys.
 
 class SecurityKeyManager extends StatefulWidget {
-  const SecurityKeyManager({super.key});
+  final Function(bool) onKeyStatusChanged;
+  
+  const SecurityKeyManager({
+    super.key,
+    required this.onKeyStatusChanged,
+  });
 
   @override
   SecurityKeyManagerState createState() => SecurityKeyManagerState();
 }
+
 
 /// State class that powers `SecurityKeyManager` widget.
 /// It encapsulates all logic and UI rendering for the dialog.
@@ -63,32 +65,67 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   // A boolean flag to indicate when an operation is in progress.
 
   bool _isLoading = false;
+  bool _hasExistingKey = false;
+  final _keyController = TextEditingController();
+  final _confirmKeyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkKeyStatus();
+  }
+
+  Future<void> _checkKeyStatus() async {
+    final hasKey = await fetchKeySavedStatus(context, widget.onKeyStatusChanged);
+    setState(() {
+      _hasExistingKey = hasKey;
+    });
+  }
 
   /// Retrieves and displays private security key data when the user requests it.
 
   Future<void> _showPrivateData(String title, BuildContext context) async {
-    // The user inititaes an action. Start by indicating that a process is ongoing.
+    if (!_hasExistingKey) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Text('Notice'),
+          content: const Text('No security key found. Please set a security key first.'),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Find where the encryption key is stored.
-
       final filePath = await getEncKeyPath();
       if (!context.mounted) return;
-
-      // Retrieve the security key from the specified file.
 
       final fileContent = await readPod(
         filePath,
         context,
-        const SecurityKeyManager(),
+        SecurityKeyManager(onKeyStatusChanged: widget.onKeyStatusChanged),
       );
       if (!context.mounted) return;
-
-      // If the file content is valid and the user is logged in, navigate to view the key details.
 
       if (![SolidFunctionCallStatus.notLoggedIn, SolidFunctionCallStatus.fail]
           .contains(fileContent)) {
@@ -111,6 +148,119 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
         });
       }
     }
+  }
+
+  Future<void> _showKeyInputDialog(BuildContext context) async {
+    _keyController.clear();
+    _confirmKeyController.clear();
+    
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Text(_hasExistingKey ? 'Change Security Key' : 'Set Security Key'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _keyController,
+              decoration: const InputDecoration(
+                labelText: 'Enter Security Key',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _confirmKeyController,
+              decoration: const InputDecoration(
+                labelText: 'Confirm Security Key',
+                border: OutlineInputBorder(),
+              ),
+              obscureText: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              final key = _keyController.text;
+              final confirmKey = _confirmKeyController.text;
+
+              if (key.isEmpty || confirmKey.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter both keys')),
+                );
+                return;
+              }
+
+              if (key != confirmKey) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Keys do not match')),
+                );
+                return;
+              }
+
+              try {
+                setState(() {
+                  _isLoading = true;
+                });
+
+                // Check if this is first-time setup
+                final encKeyPath = await getEncKeyPath();
+                final encKeyUrl = await getFileUrl(encKeyPath);
+                final encKeyStatus = await checkResourceStatus(encKeyUrl);
+                
+                if (encKeyStatus == ResourceStatus.notExist) {
+                  // First time setup - initialize pod with encryption files
+                  await KeyManager.initPodKeys(key);
+                } else {
+                  // Existing setup - verify and set key
+                  await KeyManager.setSecurityKey(key);
+                }
+
+                widget.onKeyStatusChanged(true);
+                await _checkKeyStatus();
+                
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Security key set successfully')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${e.toString()}')),
+                  );
+                }
+              } finally {
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              }
+            },
+            child: const Text('Set Key'),
+          ),
+        ],
+      ),
+    );
   }
 
   // Retries app information for the title.
@@ -143,12 +293,9 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Introduction to the dialog's purpose.
-
             Container(
               color: titleBackgroundColor,
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
               child: const Row(
                 children: [
                   Text(
@@ -162,8 +309,6 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                 ],
               ),
             ),
-            // Interactive options for the user.
-
             Container(
               padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 32.0),
               child: _isLoading
@@ -176,16 +321,20 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                           height: 44,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.blue,
-                              side: const BorderSide(color: Colors.blue),
+                              backgroundColor: _hasExistingKey ? Colors.white : Colors.grey[300],
+                              foregroundColor: _hasExistingKey ? Colors.blue : Colors.grey[600],
+                              side: BorderSide(
+                                color: _hasExistingKey ? Colors.blue : Colors.grey[400]!,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () async {
-                              await _showPrivateData(title, context);
-                            },
+                            onPressed: _hasExistingKey
+                                ? () async {
+                                    await _showPrivateData(title, context);
+                                  }
+                                : null,
                             child: const Text('Show Security Key'),
                           ),
                         ),
@@ -201,62 +350,67 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () {
-                              changeKeyPopup(context, widget);
-                            },
-                            child: const Text('Change Key'),
-                          ),
-                        ),
-                        smallGapV,
-                        SizedBox(
-                          height: 44,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
                             onPressed: () async {
-                              late String msg;
-                              try {
-                                await KeyManager.forgetSecurityKey();
-                                msg = 'Successfully forgot local security key.';
-                              } on Exception catch (e) {
-                                msg = 'Failed to forget local security key: $e';
-                              }
-                              if (context.mounted) {
-                                await showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    title: const Text('Notice'),
-                                    content: Text(msg),
-                                    actions: [
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
+                              await _showKeyInputDialog(context);
                             },
-                            child: const Text('Forget Security Key'),
+                            child: Text(_hasExistingKey ? 'Change Key' : 'Set Key'),
                           ),
                         ),
+                        if (_hasExistingKey) ...[
+                          smallGapV,
+                          SizedBox(
+                            height: 44,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.red,
+                                side: const BorderSide(color: Colors.red),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () async {
+                                late String msg;
+                                try {
+                                  await KeyManager.forgetSecurityKey();
+                                  final encKeyPath = await getEncKeyPath();
+                                  await deleteFile(encKeyPath);
+                                  widget.onKeyStatusChanged(false);
+                                  await _checkKeyStatus();
+                                  msg = 'Successfully forgot local security key.';
+                                } on Exception catch (e) {
+                                  msg = 'Failed to forget local security key: $e';
+                                }
+                                if (context.mounted) {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      title: const Text('Notice'),
+                                      content: Text(msg),
+                                      actions: [
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('Forget Security Key'),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
             ),
@@ -274,8 +428,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       child: FutureBuilder<({String name, String? webId})>(
         future: _getInfo(),
         builder: (context, snapshot) {

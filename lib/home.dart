@@ -65,6 +65,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
     });
   }
 
+  void _updateKeyStatus(bool status) {
+    setState(() {
+      _isKeySaved = status;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,6 +124,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           child: Footer(
             webId: _webId,
             isKeySaved: _isKeySaved,
+            onKeyStatusChanged: _updateKeyStatus,
           ),
         ),
       ),

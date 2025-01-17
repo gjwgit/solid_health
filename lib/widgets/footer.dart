@@ -42,11 +42,13 @@ import 'package:healthpod/utils/security_key/manager.dart';
 class Footer extends StatelessWidget {
   final String? webId;
   final bool isKeySaved;
+  final Function(bool) onKeyStatusChanged;
 
   const Footer({
     super.key,
     required this.webId,
     required this.isKeySaved,
+    required this.onKeyStatusChanged,
   });
 
   Future<void> _launchUrl(String url) async {
@@ -145,7 +147,9 @@ class Footer extends StatelessWidget {
         onTap: () => showDialog(
           context: context,
           barrierColor: Colors.black12, // Makes the background more transparent
-          builder: (BuildContext context) => const SecurityKeyManager(),
+          builder: (BuildContext context) => SecurityKeyManager(
+            onKeyStatusChanged: onKeyStatusChanged,
+          ),
         ),
         style: TextStyle(
           fontSize: 14,
