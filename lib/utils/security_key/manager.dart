@@ -384,6 +384,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Introduction to the dialog's purpose.
+
             Container(
               color: titleBackgroundColor,
               padding:
@@ -401,6 +403,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                 ],
               ),
             ),
+            // Interactive options for the user.
+            
             Container(
               padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 32.0),
               child: _isLoading
@@ -424,6 +428,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                     ? Colors.blue
                                     : Colors.grey[400]!,
                               ),
+
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -433,6 +438,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                     await _showPrivateData(title, context);
                                   }
                                 : null,
+
                             child: const Text('Show Security Key'),
                           ),
                         ),
@@ -583,6 +589,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
         ) ??
         false;
   }
+
 
   /// Builds the dialog widget.
   ///

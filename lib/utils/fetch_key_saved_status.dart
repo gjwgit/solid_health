@@ -33,6 +33,7 @@ import 'package:solidpod/solidpod.dart'
 
 Future<bool> fetchKeySavedStatus(context,
     [Function(bool)? onKeyStatusChanged]) async {
+
   try {
     // Get the path to the encrypted key file.
 
