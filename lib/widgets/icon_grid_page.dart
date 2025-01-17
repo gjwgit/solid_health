@@ -26,7 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/widgets/health_survey/page.dart';
+import 'package:healthpod/features/survey/page.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -161,7 +161,9 @@ class IconGridPage extends StatelessWidget {
                 **File Management:** Tap here to access file management features.
                 This allows you to:
 
-                - Upload large files to your POD storage
+                - Browse your POD storage
+
+                - Upload files to your POD
 
                 - Download files from your POD
 
