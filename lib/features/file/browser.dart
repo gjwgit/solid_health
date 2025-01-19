@@ -90,7 +90,7 @@ class FileBrowserState extends State<FileBrowser> {
 
     // Notify parent about directory change.
 
-    widget.onDirectoryChanged?.call(currentPath);
+    widget.onDirectoryChanged.call(currentPath);
   }
 
   // Users can navigate up by removing the last directory from the path history.
@@ -103,7 +103,7 @@ class FileBrowserState extends State<FileBrowser> {
 
         // Notify parent about directory change.
 
-        widget.onDirectoryChanged?.call(currentPath);
+        widget.onDirectoryChanged.call(currentPath);
       });
       await refreshFiles();
     }
