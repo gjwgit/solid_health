@@ -82,57 +82,69 @@ class HealthSurveyPage extends StatelessWidget {
 
   Future<void> _saveResponsesLocally(
       BuildContext context, Map<String, dynamic> responses) async {
-    // Add timestamp to responses.
+    try { 
+      // Add timestamp to responses.
 
-    final responseData = {
-      'timestamp': DateTime.now().toIso8601String(),
-      'responses': responses,
-    };
+      final responseData = {
+        'timestamp': DateTime.now().toIso8601String(),
+        'responses': responses,
+      };
 
-    // Convert to JSON string with proper formatting.
+      // Convert to JSON string with proper formatting.
 
-    final jsonString = const JsonEncoder.withIndent('  ').convert(responseData);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(responseData);
 
-    // Generate default filename.
-    final timestamp =
-        DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+      // Generate default filename.
+      final timestamp =
+          DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
 
-    // Use blood_pressure file prefix for better organisation.
+      // Use blood_pressure file prefix for better organisation.
 
-    final defaultFileName = 'blood_pressure_$timestamp.json';
+      final defaultFileName = 'blood_pressure_$timestamp.json';
 
-    // Show file picker for save location.
+      // Show file picker for save location.
 
-    String? outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: 'Save Survey Response',
-      fileName: defaultFileName,
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
+      String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Survey Response',
+        fileName: defaultFileName,
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
 
-    if (outputFile == null) {
-      // User cancelled save.
+      if (outputFile == null) {
+        // User cancelled save.
 
-      throw Exception('Save cancelled by user');
+        throw Exception('Save cancelled by user');
+      }
+
+      // Ensure .json extension.
+      
+      if (!outputFile.toLowerCase().endsWith('.json')) {
+        outputFile = '$outputFile.json';
+      }
+
+      // Save the file.
+
+      final file = File(outputFile);
+      await file.writeAsString(jsonString);
+    }  catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving survey: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-
-    // Ensure .json extension.
-    
-    if (!outputFile.toLowerCase().endsWith('.json')) {
-      outputFile = '$outputFile.json';
-    }
-
-    // Save the file.
-    
-    final file = File(outputFile);
-    await file.writeAsString(jsonString);
   }
 
   /// Saves the survey responses to a POD.
 
   Future<void> _saveResponsesToPod(
       BuildContext context, Map<String, dynamic> responses) async {
-    // Add timestamp to responses.
+    try {
+      // Add timestamp to responses.
 
     final responseData = {
       'timestamp': DateTime.now().toIso8601String(),
@@ -189,6 +201,16 @@ class HealthSurveyPage extends StatelessWidget {
     if (verifyResult == SolidFunctionCallStatus.fail ||
         verifyResult == SolidFunctionCallStatus.notLoggedIn) {
       throw Exception('Failed to verify saved file');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving survey to POD: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
