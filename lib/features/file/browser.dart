@@ -43,7 +43,7 @@ class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileSelected;
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
-  final Function(String)? onDirectoryChanged;
+  final Function(String) onDirectoryChanged;
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -52,7 +52,7 @@ class FileBrowser extends StatefulWidget {
     required this.onFileDownload,
     required this.onFileDelete,
     required this.browserKey,
-    this.onDirectoryChanged,
+    required this.onDirectoryChanged,
   });
 
   @override
