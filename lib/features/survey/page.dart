@@ -82,7 +82,7 @@ class HealthSurveyPage extends StatelessWidget {
 
   Future<void> _saveResponsesLocally(
       BuildContext context, Map<String, dynamic> responses) async {
-    try { 
+    try {
       // Add timestamp to responses.
 
       final responseData = {
@@ -92,7 +92,8 @@ class HealthSurveyPage extends StatelessWidget {
 
       // Convert to JSON string with proper formatting.
 
-      final jsonString = const JsonEncoder.withIndent('  ').convert(responseData);
+      final jsonString =
+          const JsonEncoder.withIndent('  ').convert(responseData);
 
       // Generate default filename.
       final timestamp =
@@ -118,7 +119,7 @@ class HealthSurveyPage extends StatelessWidget {
       }
 
       // Ensure .json extension.
-      
+
       if (!outputFile.toLowerCase().endsWith('.json')) {
         outputFile = '$outputFile.json';
       }
@@ -127,7 +128,7 @@ class HealthSurveyPage extends StatelessWidget {
 
       final file = File(outputFile);
       await file.writeAsString(jsonString);
-    }  catch (e) {
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -146,61 +147,61 @@ class HealthSurveyPage extends StatelessWidget {
     try {
       // Add timestamp to responses.
 
-    final responseData = {
-      'timestamp': DateTime.now().toIso8601String(),
-      'responses': responses,
-    };
+      final responseData = {
+        'timestamp': DateTime.now().toIso8601String(),
+        'responses': responses,
+      };
 
-    // Convert to JSON string with proper formatting.
+      // Convert to JSON string with proper formatting.
 
-    final jsonString = jsonEncode(responseData);
+      final jsonString = jsonEncode(responseData);
 
-    // Generate default filename.
+      // Generate default filename.
 
-    final timestamp =
-        DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+      final timestamp =
+          DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
 
-    // Use blood_pressure file prefix for better organisation.
+      // Use blood_pressure file prefix for better organisation.
 
-    final defaultFileName = 'blood_pressure_$timestamp.enc.ttl';
+      final defaultFileName = 'blood_pressure_$timestamp.enc.ttl';
 
-    // Save file under `/healthpod/bp/`.
+      // Save file under `/healthpod/bp/`.
 
-    final savePath = '/bp/$defaultFileName';
+      final savePath = '/bp/$defaultFileName';
 
-    // Write the file to the POD.
+      // Write the file to the POD.
 
-    final result = await writePod(
-      savePath,
-      jsonString,
-      context,
-      const Text('Saving survey'),
-      encrypted: true,
-    );
+      final result = await writePod(
+        savePath,
+        jsonString,
+        context,
+        const Text('Saving survey'),
+        encrypted: true,
+      );
 
-    // Check if the file was saved successfully.
+      // Check if the file was saved successfully.
 
-    if (result != SolidFunctionCallStatus.success) {
-      throw Exception('Failed to save survey responses (Status: $result)');
-    }
+      if (result != SolidFunctionCallStatus.success) {
+        throw Exception('Failed to save survey responses (Status: $result)');
+      }
 
-    // Verify the save.
+      // Verify the save.
 
-    await Future.delayed(const Duration(seconds: 1));
-    final dataDir = await getDataDirPath();
-    final filePath = '$dataDir$savePath';
+      await Future.delayed(const Duration(seconds: 1));
+      final dataDir = await getDataDirPath();
+      final filePath = '$dataDir$savePath';
 
-    if (!context.mounted) return;
+      if (!context.mounted) return;
 
-    final verifyResult = await readPod(
-      filePath,
-      context,
-      const Text('Verifying save'),
-    );
+      final verifyResult = await readPod(
+        filePath,
+        context,
+        const Text('Verifying save'),
+      );
 
-    if (verifyResult == SolidFunctionCallStatus.fail ||
-        verifyResult == SolidFunctionCallStatus.notLoggedIn) {
-      throw Exception('Failed to verify saved file');
+      if (verifyResult == SolidFunctionCallStatus.fail ||
+          verifyResult == SolidFunctionCallStatus.notLoggedIn) {
+        throw Exception('Failed to verify saved file');
       }
     } catch (e) {
       if (context.mounted) {
