@@ -267,6 +267,9 @@ class HealthSurveyPage extends StatelessWidget {
                 ),
               ),
             ),
+            // Option to save to both places.
+            // Instead of saving to only one place, so that user has a backup.
+
             TextButton(
               onPressed:
                   isKeySaved ? () => Navigator.of(context).pop('both') : null,
