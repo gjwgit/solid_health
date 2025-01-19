@@ -284,7 +284,7 @@ class HealthSurveyPage extends StatelessWidget {
       );
 
       // Return to previous screen after brief delay.
-      
+
       await Future.delayed(const Duration(seconds: 1));
       if (!context.mounted) return;
       Navigator.of(context).pop();
