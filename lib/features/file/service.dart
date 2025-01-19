@@ -62,6 +62,12 @@ class _FileServiceState extends State<FileService> {
   String? remoteFileUrl;
   String? filePreview;
 
+  /// We store the current path separately from the FileBrowser's path.
+  /// This helps us track the current directory context for file operations
+  /// without relying on accessing the FileBrowser's state.
+
+  String? currentPath;
+
   // Boolean flags to track status of various file operations.
 
   bool uploadInProgress = false;
@@ -148,6 +154,8 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Handles file download by reading encrypted file from POD and saving it locally.
+  ///
+  /// Uses corrected path handling for nested directories.
 
   Future<void> handleDownload() async {
     if (downloadFile == null || remoteFileName == null) return;
@@ -158,8 +166,12 @@ class _FileServiceState extends State<FileService> {
         downloadDone = false;
       });
 
-      final dataDir = await getDataDirPath();
-      final filePath = '$dataDir/$remoteFileName';
+      // Similar to delete operation, we use currentPath directly.
+      // This ensures correct path resolution in both root and nested directories.
+
+      final filePath = currentPath == null
+          ? remoteFileName!
+          : '$currentPath/$remoteFileName';
 
       if (!mounted) return;
 
@@ -329,10 +341,19 @@ class _FileServiceState extends State<FileService> {
         deleteDone = false;
       });
 
-      final dataDir = await getDataDirPath();
-      final basePath = '$dataDir/$remoteFileName';
+      /// Path Construction
+      ///
+      /// We no longer prepend the data directory path (healthpod/data) here
+      /// because currentPath from FileBrowser already includes this prefix.
+      /// This prevents path duplication like `healthpod/data/healthpod/data/...`
+
+      final basePath = currentPath == null
+          ? remoteFileName!
+          : '$currentPath/$remoteFileName';
 
       if (!mounted) return;
+
+      // First try to delete the main file.
 
       bool mainFileDeleted = false;
       try {
@@ -341,6 +362,9 @@ class _FileServiceState extends State<FileService> {
         debugPrint('Successfully deleted main file: $basePath');
       } catch (e) {
         debugPrint('Error deleting main file: $e');
+        // Only rethrow if it's not a 404 error.
+        // 404 errors are expected in some cases (like when file is already deleted).
+
         if (!e.toString().contains('404') &&
             !e.toString().contains('NotFoundHttpError')) {
           rethrow;
@@ -349,11 +373,16 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
+      // If main file deletion succeeded, try to delete the ACL file.
+      // ACL files are auxiliary files that control access permissions.
+
       if (mainFileDeleted) {
         try {
           await deleteFile('$basePath.acl');
           debugPrint('Successfully deleted ACL file');
         } catch (e) {
+          // ACL files are optional and may not exist.
+
           if (e.toString().contains('404') ||
               e.toString().contains('NotFoundHttpError')) {
             debugPrint('ACL file not found (safe to ignore)');
@@ -367,7 +396,7 @@ class _FileServiceState extends State<FileService> {
           deleteDone = true;
         });
 
-        // Refresh the file browser after successful deletion.
+        // Refresh the file browser to show updated contents.
 
         _browserKey.currentState?.refreshFiles();
       }
@@ -377,6 +406,8 @@ class _FileServiceState extends State<FileService> {
       setState(() {
         deleteDone = false;
       });
+
+      // Provide user-friendly error messages.
 
       final message = e.toString().contains('404') ||
               e.toString().contains('NotFoundHttpError')
@@ -536,17 +567,24 @@ class _FileServiceState extends State<FileService> {
           child: FileBrowser(
             key: _browserKey,
             browserKey: _browserKey,
-            onFileSelected: (fileName) {
+            onFileSelected: (fileName, path) {
+              // Store both the file information and the current path.
+              // This ensures we maintain correct context for file operations.
+
               setState(() {
                 cleanFileName = fileName;
                 remoteFileName = '$fileName.enc.ttl';
+                currentPath = path;
               });
             },
-            onFileDownload: (fileName) async {
+            onFileDownload: (fileName, path) async {
               setState(() {
                 cleanFileName = fileName;
                 remoteFileName = '$fileName.enc.ttl';
+                currentPath = path;
               });
+
+              // Let user choose where to save the file.
 
               String? outputFile = await FilePicker.platform.saveFile(
                 dialogTitle: 'Save file as:',
@@ -560,10 +598,11 @@ class _FileServiceState extends State<FileService> {
                 await handleDownload();
               }
             },
-            onFileDelete: (fileName) async {
+            onFileDelete: (fileName, path) async {
               setState(() {
                 cleanFileName = fileName;
                 remoteFileName = '$fileName.enc.ttl';
+                currentPath = path; // Maintain path context for deletion.
               });
               await handleDelete();
             },
