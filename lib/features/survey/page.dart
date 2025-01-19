@@ -82,16 +82,26 @@ class HealthSurveyPage extends StatelessWidget {
 
   Future<void> _saveResponsesLocally(
       BuildContext context, Map<String, dynamic> responses) async {
-    // Add timestamp to responses
+    // Add timestamp to responses.
+
     final responseData = {
       'timestamp': DateTime.now().toIso8601String(),
       'responses': responses,
     };
 
+    // Convert to JSON string with proper formatting.
+
     final jsonString = const JsonEncoder.withIndent('  ').convert(responseData);
+
+    // Generate default filename.
     final timestamp =
         DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+
+    // Use blood_pressure file prefix for better organisation.
+
     final defaultFileName = 'blood_pressure_$timestamp.json';
+
+    // Show file picker for save location.
 
     String? outputFile = await FilePicker.platform.saveFile(
       dialogTitle: 'Save Survey Response',
@@ -101,15 +111,19 @@ class HealthSurveyPage extends StatelessWidget {
     );
 
     if (outputFile == null) {
+      // User cancelled save.
+
       throw Exception('Save cancelled by user');
     }
 
-    // Ensure .json extension
+    // Ensure .json extension.
+    
     if (!outputFile.toLowerCase().endsWith('.json')) {
       outputFile = '$outputFile.json';
     }
 
-    // Save the file
+    // Save the file.
+    
     final file = File(outputFile);
     await file.writeAsString(jsonString);
   }
