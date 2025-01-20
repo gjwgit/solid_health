@@ -260,11 +260,13 @@ class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
                                 1, // Ensure we only get labels at whole number intervals
                             getTitlesWidget: (value, meta) {
                               final index = value.toInt();
-                              // Only show label if it's an exact match for a data point index
+                              // Only show label if it's an exact match for a data point index.
+
                               if (index >= 0 &&
                                   index < widget.surveyData.length &&
                                   value == index.toDouble()) {
-                                // This ensures we only show labels at exact data points
+                                // This ensures we only show labels at exact data points.
+
                                 final date = DateTime.parse(
                                     widget.surveyData[index]['timestamp']);
                                 return Padding(
