@@ -211,6 +211,26 @@ class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
                   child: LineChart(
                     LineChartData(
                       backgroundColor: Colors.white,
+                      lineTouchData: LineTouchData(
+                        touchTooltipData: LineTouchTooltipData(
+                          tooltipRoundedRadius: 8,
+                          tooltipBorder: BorderSide(
+                            color: Colors.white,
+                            width: 1,
+                          ),
+                          getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                            return touchedSpots.map((LineBarSpot touchedSpot) {
+                              return LineTooltipItem(
+                                touchedSpot.y.toString(),
+                                const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                            }).toList();
+                          },
+                        ),
+                      ),
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: true,
@@ -338,6 +358,7 @@ class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              color: Colors.grey[100],
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: 24.0),
