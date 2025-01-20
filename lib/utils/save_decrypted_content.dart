@@ -33,10 +33,11 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 
 /// Saves decrypted content to a file, handling different file formats appropriately.
-/// 
+///
 /// Attempts to save as JSON if possible, falls back to binary or text based on file type.
 
-Future<void> saveDecryptedContent(String decryptedContent, String saveFilePath) async {
+Future<void> saveDecryptedContent(
+    String decryptedContent, String saveFilePath) async {
   final file = File(saveFilePath);
 
   try {
@@ -44,12 +45,13 @@ Future<void> saveDecryptedContent(String decryptedContent, String saveFilePath) 
 
     try {
       final jsonData = jsonDecode(decryptedContent);
-      await file.writeAsString(const JsonEncoder.withIndent('  ').convert(jsonData));
+      await file
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(jsonData));
       return;
     } catch (jsonError) {
       debugPrint('JSON parsing failed: $jsonError');
       debugPrint('Raw decrypted content: $decryptedContent');
-      
+
       // If not JSON, handle as binary or text.
 
       if (isTextFile(saveFilePath)) {

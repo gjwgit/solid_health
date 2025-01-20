@@ -178,7 +178,7 @@ class _FileServiceState extends State<FileService> {
   /// that in some cases files remained encrypted and users would see raw TTL content when
   /// downloading. This method now explicitly handles decryption using helper functions to
   /// ensure files are always properly decrypted before saving.
-  
+
   Future<void> handleDownload() async {
     if (downloadFile == null || remoteFileName == null) return;
 
@@ -190,7 +190,7 @@ class _FileServiceState extends State<FileService> {
 
       // Construct the relative path, being careful to handle nested directories correctly.
       // We use baseDir as the root directory for all file operations.
-    
+
       final baseDir = 'healthpod/data';
       final relativePath = currentPath == null
           ? '$baseDir/$remoteFileName'
@@ -204,7 +204,7 @@ class _FileServiceState extends State<FileService> {
       // before we attempt to read the file.
 
       await getKeyFromUserIfRequired(
-        context, 
+        context,
         const Text('Please enter your security key to download the file'),
       );
 
@@ -234,7 +234,8 @@ class _FileServiceState extends State<FileService> {
       // This is necessary because the file content may still be encrypted
       // even after readPod, appearing as a TTL file with encrypted data.
 
-      final decryptedContent = await extractAndDecryptContent(fileContent.toString());
+      final decryptedContent =
+          await extractAndDecryptContent(fileContent.toString());
 
       // Save the decrypted content to the user's chosen location.
       // We remove the .enc.ttl extension as it's no longer encrypted.
@@ -257,7 +258,6 @@ class _FileServiceState extends State<FileService> {
           ),
         );
       }
-
     } catch (e) {
       // Provide user-friendly error messages by removing the 'Exception:' prefix.
 

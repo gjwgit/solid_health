@@ -30,7 +30,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:encrypt/encrypt.dart';
 
 /// Extracts and decrypts content from a TTL file.
-/// 
+///
 /// Takes the raw TTL content string and returns the decrypted file content.
 /// Throws an exception if required fields are missing or parsing fails.
 
@@ -39,11 +39,12 @@ Future<String> extractAndDecryptContent(String ttlContent) async {
 
   final urlPattern = RegExp(r'<(https://[^>]+\.json\.enc\.ttl)>');
   final urlMatch = urlPattern.firstMatch(ttlContent);
-  
+
   // Extract IV and encrypted data.
 
   final ivMatch = RegExp(r'solidTerms:iv\s+"([^"]+)"').firstMatch(ttlContent);
-  final encDataMatch = RegExp(r'solidTerms:encData\s+"([^"]+)"').firstMatch(ttlContent);
+  final encDataMatch =
+      RegExp(r'solidTerms:encData\s+"([^"]+)"').firstMatch(ttlContent);
 
   if (ivMatch == null || encDataMatch == null || urlMatch == null) {
     throw Exception('Could not parse TTL content. Missing required fields.');
@@ -52,22 +53,24 @@ Future<String> extractAndDecryptContent(String ttlContent) async {
   // Extract the values and clean them up.
 
   String ivString = ivMatch.group(1)!.replaceAll(r'^^xsd:string', '').trim();
-  String encryptedData = encDataMatch.group(1)!.replaceAll(r'^^xsd:string', '').trim();
+  String encryptedData =
+      encDataMatch.group(1)!.replaceAll(r'^^xsd:string', '').trim();
   String resourceUrl = urlMatch.group(1)!.trim();
 
   debugPrint('Found IV: $ivString');
   debugPrint('Found URL: $resourceUrl');
-  debugPrint('Found encrypted data (first 50 chars): ${encryptedData.substring(0, 50)}...');
+  debugPrint(
+      'Found encrypted data (first 50 chars): ${encryptedData.substring(0, 50)}...');
 
   // Get the individual key for the file.
 
   final indKey = await KeyManager.getIndividualKey(resourceUrl);
-  
+
   // Create IV object from base64 string.
 
   final iv = IV.fromBase64(ivString);
 
   // Decrypt the data.
-  
+
   return decryptData(encryptedData, indKey, iv);
 }
