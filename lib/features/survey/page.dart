@@ -1,6 +1,6 @@
 /// Health survey page.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-01-20 16:54:30 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -51,7 +51,7 @@ class HealthSurveyPage extends StatelessWidget {
       max: 200,
     ),
     HealthSurveyQuestion(
-      question: "What's your diastolic measurement today?",
+      question: "What's your diastolic measurement?",
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 40,
@@ -65,12 +65,12 @@ class HealthSurveyPage extends StatelessWidget {
       max: 220,
     ),
     HealthSurveyQuestion(
-      question: "How are you feeling today?",
+      question: "How are you feeling?",
       type: HealthDataType.categorical,
       options: ["Excellent", "Good", "Fair", "Poor"],
     ),
     HealthSurveyQuestion(
-      question: "Any additional notes about your health today?",
+      question: "Any additional notes about your health?",
       type: HealthDataType.text,
       isRequired: false,
     ),
