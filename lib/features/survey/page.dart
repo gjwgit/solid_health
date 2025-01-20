@@ -96,7 +96,6 @@ class HealthSurveyPage extends StatelessWidget {
           const JsonEncoder.withIndent('  ').convert(responseData);
 
       // Generate default filename.
-
       final timestamp =
           DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
 
@@ -114,12 +113,9 @@ class HealthSurveyPage extends StatelessWidget {
       );
 
       if (outputFile == null) {
-        // User cancelled the save.
+        // User cancelled save.
 
-        if (context.mounted) {
-          Navigator.of(context).pop(); // Return to previous screen
-        }
-        return;
+        throw Exception('Save cancelled by user');
       }
 
       // Ensure .json extension.
@@ -132,16 +128,6 @@ class HealthSurveyPage extends StatelessWidget {
 
       final file = File(outputFile);
       await file.writeAsString(jsonString);
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Survey saved to ${file.path}'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop(); // Return to previous screen
-      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -159,37 +145,32 @@ class HealthSurveyPage extends StatelessWidget {
   Future<void> _saveResponsesToPod(
       BuildContext context, Map<String, dynamic> responses) async {
     try {
+      // Add timestamp to responses.
+
       final responseData = {
         'timestamp': DateTime.now().toIso8601String(),
         'responses': responses,
       };
 
+      // Convert to JSON string with proper formatting.
+
       final jsonString = jsonEncode(responseData);
+
+      // Generate default filename.
 
       final timestamp =
           DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
 
-      // Just use the filename without additional path.
+      // Use blood_pressure file prefix for better organisation.
 
-      final fileName = 'blood_pressure_$timestamp.enc.ttl';
+      final defaultFileName = 'blood_pressure_$timestamp.enc.ttl';
 
-      if (!context.mounted) return;
+      // Save file under `/healthpod/bp/`.
 
-      // Show saving indicator.
+      final savePath = '/bp/$defaultFileName';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Saving to POD...'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      // Write the file to the POD.
 
-      // Blood pressure data is stored in the 'bp' subdirectory
-      // within 'healthpod/data' for better organisation.
-
-      final savePath = 'bp/$fileName';
-
-      debugPrint('Attempting to save survey to POD: $savePath');
       final result = await writePod(
         savePath,
         jsonString,
@@ -198,26 +179,17 @@ class HealthSurveyPage extends StatelessWidget {
         encrypted: true,
       );
 
-      debugPrint('POD save result: $result');
+      // Check if the file was saved successfully.
 
       if (result != SolidFunctionCallStatus.success) {
         throw Exception('Failed to save survey responses (Status: $result)');
       }
 
-      if (!context.mounted) return;
-
-      // Wait briefly to ensure write completes.
+      // Verify the save.
 
       await Future.delayed(const Duration(seconds: 1));
-
-      if (!context.mounted) return;
-
-      // Verify the file exists by attempting to read it.
-
       final dataDir = await getDataDirPath();
       final filePath = '$dataDir$savePath';
-
-      debugPrint('Verifying file at path: $savePath');
 
       if (!context.mounted) return;
 
@@ -231,24 +203,12 @@ class HealthSurveyPage extends StatelessWidget {
           verifyResult == SolidFunctionCallStatus.notLoggedIn) {
         throw Exception('Failed to verify saved file');
       }
-
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Survey saved to POD successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.of(context).pop(); // Return to previous screen
     } catch (e) {
-      debugPrint('Error saving to POD: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving to POD: ${e.toString()}'),
+            content: Text('Error saving survey to POD: ${e.toString()}'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -259,108 +219,125 @@ class HealthSurveyPage extends StatelessWidget {
 
   Future<void> _handleSubmit(
       BuildContext context, Map<String, dynamic> responses) async {
-    // First show submission success.
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Survey submitted successfully!'),
-        duration: Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    // Wait a moment for the success message to be visible.
-
-    await Future.delayed(const Duration(seconds: 2));
-
     if (!context.mounted) return;
 
-    // Check login and security key status.
+    // Check login and security key status first.
 
     final isKeySaved = await fetchKeySavedStatus(context);
 
     if (!context.mounted) return;
 
-    // Then ask about saving.
+    // Show save location options dialog.
 
-    await showDialog(
+    final saveChoice = await showDialog<String>(
       context: context,
+      barrierDismissible: false, // User must make a choice
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Save Survey Results'),
-          content: const Text('Would you like to save your survey results?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Choose how to save your results:'),
+              if (!isKeySaved) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  'Note: POD saving requires setting up your security key first.',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+          ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Return to previous screen
-              },
-              child: const Text('No, Return Home'),
+              onPressed: () => Navigator.of(context).pop('local'),
+              child: const Text('Save Locally'),
             ),
             TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop(); // Close current dialog
-                // Show save location options.
+              onPressed:
+                  isKeySaved ? () => Navigator.of(context).pop('pod') : null,
+              child: Text(
+                'Save to POD',
+                style: TextStyle(
+                  color: isKeySaved ? null : Colors.grey,
+                ),
+              ),
+            ),
+            // Option to save to both places.
+            // Instead of saving to only one place, so that user has a backup.
 
-                if (!context.mounted) return;
-                await showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Choose Save Location'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                              'Where would you like to save your results?'),
-                          if (!isKeySaved) ...[
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Note: Saving to POD requires setting up your security key first.',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(); // Close dialog
-                            _saveResponsesLocally(context, responses);
-                            Navigator.of(context).pop(); // Return home
-                          },
-                          child: const Text('Save Locally'),
-                        ),
-                        TextButton(
-                          onPressed: isKeySaved
-                              ? () {
-                                  Navigator.of(context).pop(); // Close dialog
-                                  _saveResponsesToPod(context, responses);
-                                  Navigator.of(context).pop(); // Return home
-                                }
-                              : null, // Disable if key not set
-                          child: Text(
-                            'Save to POD',
-                            style: TextStyle(
-                              color: isKeySaved ? null : Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: const Text('Yes, Save Results'),
+            TextButton(
+              onPressed:
+                  isKeySaved ? () => Navigator.of(context).pop('both') : null,
+              child: Text(
+                'Save Both Places',
+                style: TextStyle(
+                  color: isKeySaved ? null : Colors.grey,
+                ),
+              ),
             ),
           ],
         );
       },
     );
+
+    if (saveChoice == null) return; // User cancelled
+
+    if (!context.mounted) return;
+
+    try {
+      // Show saving indicator.
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Saving survey results...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // Perform the selected save operations.
+
+      if (saveChoice == 'local' || saveChoice == 'both') {
+        await _saveResponsesLocally(context, responses);
+      }
+
+      if (!context.mounted) return;
+
+      if (saveChoice == 'pod' || saveChoice == 'both') {
+        await _saveResponsesToPod(context, responses);
+      }
+
+      if (!context.mounted) return;
+
+      // Show final success message.
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Survey submitted and saved successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      // Return to previous screen after brief delay.
+
+      await Future.delayed(const Duration(seconds: 1));
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving survey: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
   /// Builds the health survey page.
