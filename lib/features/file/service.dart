@@ -110,17 +110,33 @@ class _FileServiceState extends State<FileService> {
 
       // Sanitise file name and append encryption extension.
 
-      remoteFileName =
-          '${path.basename(uploadFile!).replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_').replaceAll(RegExp(r'\.enc\.ttl$'), '')}.enc.ttl';
+      String sanitizedFileName = path
+          .basename(uploadFile!)
+          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
+          .replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
-      cleanFileName = remoteFileName?.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+      remoteFileName = '$sanitizedFileName.enc.ttl';
+      cleanFileName = sanitizedFileName;
+
+      // Extract the subdirectory path by removing `healthpod/data/` prefix.
+      // This is because `healthpod/data` is the root directory for all files.
+
+      String? subPath = currentPath?.replaceFirst('healthpod/data', '').trim();
+
+      // If we have a subdirectory (not in root), include it in the path.
+
+      String uploadPath = subPath == null || subPath.isEmpty
+          ? remoteFileName!
+          : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
+
+      debugPrint('Upload path: $uploadPath');
 
       if (!mounted) return;
 
       // Upload file with encryption.
 
       final result = await writePod(
-        remoteFileName!,
+        uploadPath,
         fileContent,
         context,
         const Text('Upload'),
@@ -135,6 +151,7 @@ class _FileServiceState extends State<FileService> {
 
       if (result == SolidFunctionCallStatus.success) {
         // Refresh the file browser after successful upload.
+
         _browserKey.currentState?.refreshFiles();
       } else if (mounted) {
         showAlert(context,
@@ -605,6 +622,11 @@ class _FileServiceState extends State<FileService> {
                 currentPath = path; // Maintain path context for deletion.
               });
               await handleDelete();
+            },
+            onDirectoryChanged: (newPath) {
+              setState(() {
+                currentPath = newPath;
+              });
             },
           ),
         ),

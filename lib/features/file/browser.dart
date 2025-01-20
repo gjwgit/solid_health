@@ -43,6 +43,7 @@ class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileSelected;
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
+  final Function(String) onDirectoryChanged;
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -51,6 +52,7 @@ class FileBrowser extends StatefulWidget {
     required this.onFileDownload,
     required this.onFileDelete,
     required this.browserKey,
+    required this.onDirectoryChanged,
   });
 
   @override
@@ -85,6 +87,10 @@ class FileBrowserState extends State<FileBrowser> {
       pathHistory.add(currentPath);
     });
     await refreshFiles();
+
+    // Notify parent about directory change.
+
+    widget.onDirectoryChanged.call(currentPath);
   }
 
   // Users can navigate up by removing the last directory from the path history.
@@ -94,6 +100,10 @@ class FileBrowserState extends State<FileBrowser> {
       pathHistory.removeLast();
       setState(() {
         currentPath = pathHistory.last;
+
+        // Notify parent about directory change.
+
+        widget.onDirectoryChanged.call(currentPath);
       });
       await refreshFiles();
     }
