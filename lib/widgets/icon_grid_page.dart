@@ -26,7 +26,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/data/visualisation.dart';
 import 'package:healthpod/features/survey/page.dart';
+import 'package:healthpod/features/survey/service/data.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -89,7 +91,7 @@ class IconGridPage extends StatelessWidget {
             );
 
             final gestureDetector = GestureDetector(
-              onTap: () {
+              onTap: () async {
                 // TODO 20250113 gjw MOVE INTO constants/features.dart AND USE map() HERE
                 switch (icon) {
                   case Icons.calendar_today:
@@ -133,6 +135,65 @@ class IconGridPage extends StatelessWidget {
                       MaterialPageRoute(
                           builder: (context) => HealthSurveyPage()),
                     );
+                    break;
+                  case Icons.bar_chart:
+                    // Show loading indicator
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                    );
+
+                    try {
+                      // Fetch survey data
+                      final surveyData =
+                          await SurveyDataService.fetchAllSurveyData(context);
+
+                      // Close loading indicator
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+
+                      // Navigate to visualization page if we have data
+                      if (surveyData.isNotEmpty) {
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HealthDataVisualisation(
+                                  surveyData: surveyData),
+                            ),
+                          );
+                        }
+                      } else {
+                        // Show message if no data available
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('No survey data available to visualize'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      // Close loading indicator and show error
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error loading survey data: $e'),
+                            backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    }
                     break;
                   default:
                     showComingSoon(context); // For other features.
@@ -211,7 +272,7 @@ class IconGridPage extends StatelessWidget {
                   - Analyse patterns in your health data
 
                   - Generate comprehensive health reports
-                  
+
                   - Track progress towards health goals
                   
                   ''',
