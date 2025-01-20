@@ -40,9 +40,10 @@ import 'package:healthpod/features/file/item.dart';
 /// such as selecting a file, downloading a file, and deleting a file.
 
 class FileBrowser extends StatefulWidget {
-  final Function(String) onFileSelected;
-  final Function(String) onFileDownload;
-  final Function(String) onFileDelete;
+  final Function(String, String) onFileSelected;
+  final Function(String, String) onFileDownload;
+  final Function(String, String) onFileDelete;
+  final Function(String) onDirectoryChanged;
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -51,6 +52,7 @@ class FileBrowser extends StatefulWidget {
     required this.onFileDownload,
     required this.onFileDelete,
     required this.browserKey,
+    required this.onDirectoryChanged,
   });
 
   @override
@@ -85,6 +87,10 @@ class FileBrowserState extends State<FileBrowser> {
       pathHistory.add(currentPath);
     });
     await refreshFiles();
+
+    // Notify parent about directory change.
+
+    widget.onDirectoryChanged.call(currentPath);
   }
 
   // Users can navigate up by removing the last directory from the path history.
@@ -94,6 +100,10 @@ class FileBrowserState extends State<FileBrowser> {
       pathHistory.removeLast();
       setState(() {
         currentPath = pathHistory.last;
+
+        // Notify parent about directory change.
+
+        widget.onDirectoryChanged.call(currentPath);
       });
       await refreshFiles();
     }
@@ -355,8 +365,9 @@ class FileBrowserState extends State<FileBrowser> {
                                             setState(() {
                                               selectedFile = file.name;
                                             });
-                                            widget.onFileSelected
-                                                .call(file.name);
+                                            widget.onFileSelected.call(
+                                                file.name,
+                                                currentPath); // Maintain path context for selection.
                                           },
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -453,7 +464,8 @@ class FileBrowserState extends State<FileBrowser> {
                                                     ),
                                                     onPressed: () => widget
                                                         .onFileDownload
-                                                        .call(file.name),
+                                                        .call(file.name,
+                                                            currentPath), // Maintain path context for download.
                                                     style: IconButton.styleFrom(
                                                       backgroundColor:
                                                           Theme.of(context)
@@ -478,7 +490,8 @@ class FileBrowserState extends State<FileBrowser> {
                                                     ),
                                                     onPressed: () => widget
                                                         .onFileDelete
-                                                        .call(file.name),
+                                                        .call(file.name,
+                                                            currentPath), // Maintain path context for deletion.
                                                     style: IconButton.styleFrom(
                                                       backgroundColor:
                                                           Theme.of(context)
