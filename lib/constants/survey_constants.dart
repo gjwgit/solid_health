@@ -39,33 +39,33 @@ class HealthSurveyConstants {
 
   static final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
-      question: "What's your systolic blood pressure?",
+      question: systolicBP,
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 70,
       max: 200,
     ),
     HealthSurveyQuestion(
-      question: "What's your diastolic measurement?",
+      question: diastolicBP,
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 40,
       max: 220,
     ),
     HealthSurveyQuestion(
-      question: "What's your heart rate?",
+      question: heartRate,
       type: HealthDataType.number,
       unit: "bpm",
       min: 40,
       max: 220,
     ),
     HealthSurveyQuestion(
-      question: "How are you feeling?",
+      question: feeling,
       type: HealthDataType.categorical,
       options: ["Excellent", "Good", "Fair", "Poor"],
     ),
     HealthSurveyQuestion(
-      question: "Any additional notes about your health?",
+      question: notes,
       type: HealthDataType.text,
       isRequired: false,
     ),
