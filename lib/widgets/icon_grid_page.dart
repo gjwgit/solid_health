@@ -45,6 +45,7 @@ class IconGridPage extends StatelessWidget {
     Icons.vaccines,
     Icons.quiz,
     Icons.bar_chart,
+    Icons.bar_chart,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
