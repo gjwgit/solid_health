@@ -31,7 +31,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey_constants.dart';
-import 'package:healthpod/features/data/stat_item.dart';
+import 'package:healthpod/features/visualise/stat_item.dart';
 
 /// Data visualisation widget.
 ///

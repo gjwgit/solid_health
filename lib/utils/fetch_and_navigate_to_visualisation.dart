@@ -26,8 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/data/visualisation.dart';
-import 'package:healthpod/features/survey/service/data.dart';
+import 'package:healthpod/features/visualise/visualisation.dart';
+import 'package:healthpod/features/survey/data.dart';
 
 /// Helper function to fetch and handle survey data.
 
@@ -47,7 +47,7 @@ Future<void> fetchAndNavigateToVisualization(BuildContext context) async {
   try {
     // Fetch survey data.
 
-    final surveyData = await SurveyDataService.fetchAllSurveyData(context);
+    final surveyData = await SurveyData.fetchAllSurveyData(context);
 
     // Close loading indicator.
 
