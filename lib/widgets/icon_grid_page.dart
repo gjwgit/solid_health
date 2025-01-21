@@ -43,6 +43,7 @@ class IconGridPage extends StatelessWidget {
     Icons.folder,
     Icons.vaccines,
     Icons.quiz,
+    Icons.bar_chart,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -73,7 +74,8 @@ class IconGridPage extends StatelessWidget {
                   Icons.calendar_today,
                   Icons.folder,
                   Icons.vaccines,
-                  Icons.quiz
+                  Icons.quiz,
+                  Icons.bar_chart,
                 }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
@@ -195,6 +197,23 @@ class IconGridPage extends StatelessWidget {
                   track your responses, and share them securely with your healthcare 
                   provider if needed.
 
+                  ''',
+                  child: gestureDetector,
+                ),
+              Icons.bar_chart => MarkdownTooltip(
+                  message: '''
+
+                  **Data Visualisation:** Tap here to access interactive data
+                  visualisation tools. You can:
+
+                  - View health trends over time
+
+                  - Analyse patterns in your health data
+
+                  - Generate comprehensive health reports
+                  
+                  - Track progress towards health goals
+                  
                   ''',
                   child: gestureDetector,
                 ),

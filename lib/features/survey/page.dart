@@ -31,6 +31,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/utils/upload_json_to_pod.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
@@ -90,17 +91,16 @@ class HealthSurveyPage extends StatelessWidget {
         'responses': responses,
       };
 
-      // Convert to JSON string with proper formatting.
+      // Convert to JSON string with proper formatting and base64 encode.
 
       final jsonString =
           const JsonEncoder.withIndent('  ').convert(responseData);
+      final base64Content = base64Encode(utf8.encode(jsonString));
 
       // Generate default filename.
+
       final timestamp =
           DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
-
-      // Use blood_pressure file prefix for better organisation.
-
       final defaultFileName = 'blood_pressure_$timestamp.json';
 
       // Show file picker for save location.
@@ -113,8 +113,6 @@ class HealthSurveyPage extends StatelessWidget {
       );
 
       if (outputFile == null) {
-        // User cancelled save.
-
         throw Exception('Save cancelled by user');
       }
 
@@ -124,10 +122,10 @@ class HealthSurveyPage extends StatelessWidget {
         outputFile = '$outputFile.json';
       }
 
-      // Save the file.
+      // Save the base64 encoded file.
 
       final file = File(outputFile);
-      await file.writeAsString(jsonString);
+      await file.writeAsString(base64Content);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -140,67 +138,38 @@ class HealthSurveyPage extends StatelessWidget {
     }
   }
 
-  /// Saves the survey responses to a POD.
+  /// Saves the survey responses directly to POD.
+  ///
+  /// Uses uploadJsonToPod utility which:
+  /// 1. Creates a properly formatted JSON file
+  /// 2. Uses uploadFileToPod internally for consistent file handling
+  /// 3. Ensures proper encryption and file naming
+  /// 4. Manages temporary file cleanup
+  ///
+  /// This provides the same file format and handling as manual uploads
+  /// through the file browser.
 
   Future<void> _saveResponsesToPod(
       BuildContext context, Map<String, dynamic> responses) async {
     try {
-      // Add timestamp to responses.
+      // Prepare response data with timestamp.
 
       final responseData = {
         'timestamp': DateTime.now().toIso8601String(),
         'responses': responses,
       };
 
-      // Convert to JSON string with proper formatting.
+      // Use utility to handle the upload process.
 
-      final jsonString = jsonEncode(responseData);
-
-      // Generate default filename.
-
-      final timestamp =
-          DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
-
-      // Use blood_pressure file prefix and include both .json and .enc.ttl extensions
-
-      final defaultFileName = 'blood_pressure_$timestamp.json.enc.ttl';
-
-      // Save file under `/healthpod/bp/`.
-
-      final savePath = '/bp/$defaultFileName';
-
-      // Write the file to the POD.
-
-      final result = await writePod(
-        savePath,
-        jsonString,
-        context,
-        const Text('Saving survey'),
-        encrypted: true,
+      final result = await uploadJsonToPod(
+        data: responseData, // Our structured survey data
+        targetPath: '/bp', // Store in blood pressure directory
+        fileNamePrefix: 'blood_pressure', // Consistent file naming
+        context: context,
       );
-      // Check if the file was saved successfully.
 
       if (result != SolidFunctionCallStatus.success) {
         throw Exception('Failed to save survey responses (Status: $result)');
-      }
-
-      // Verify the save.
-
-      await Future.delayed(const Duration(seconds: 1));
-      final dataDir = await getDataDirPath();
-      final filePath = '$dataDir$savePath';
-
-      if (!context.mounted) return;
-
-      final verifyResult = await readPod(
-        filePath,
-        context,
-        const Text('Verifying save'),
-      );
-
-      if (verifyResult == SolidFunctionCallStatus.fail ||
-          verifyResult == SolidFunctionCallStatus.notLoggedIn) {
-        throw Exception('Failed to verify saved file');
       }
     } catch (e) {
       if (context.mounted) {
