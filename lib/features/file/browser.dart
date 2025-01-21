@@ -113,66 +113,78 @@ class FileBrowserState extends State<FileBrowser> {
   // We fetch the list of directories and files, processing each file for metadata.
 
   Future<void> refreshFiles() async {
+    // Set loading state to show progress indicator.
+
     setState(() {
       isLoading = true;
     });
 
     try {
-      // Get current directory URL and resources (subdirectories and files).
+      // Get current directory URL and its resources.
 
       final dirUrl = await getDirUrl(currentPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       if (!mounted) return;
 
+      // Update directories list immediately.
+
       setState(() {
         directories = resources.subDirs;
       });
 
-      // Process each file. We are interested in files with a specific extension (.enc.ttl)
+      // Process and validate files.
 
       final processedFiles = <FileItem>[];
 
       for (var fileName in resources.files) {
+        // Filter for .enc.ttl files while preserving the full extension.
+        // This ensures we only show encrypted turtle files that our app can handle.
+
         if (!fileName.endsWith('.enc.ttl')) {
           continue;
         }
 
-        final cleanName = fileName.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+        // Construct the full path for the file.
 
-        if (!processedFiles.any((f) => f.name == cleanName)) {
-          final relativePath = '$currentPath/$fileName';
+        final relativePath = '$currentPath/$fileName';
 
-          // Fetch metadata for the file.
+        // Validate file accessibility and metadata.
+        // This step ensures we only display files that are properly formatted
+        // and accessible to the current user.
 
-          final metadata = await readPod(
-            relativePath,
-            context,
-            const Text('Reading file info'),
-          );
+        final metadata = await readPod(
+          relativePath,
+          context,
+          const Text('Reading file info'),
+        );
 
-          // If metadata is valid, add the file to the list.
+        // Only add files that pass validation.
+        // This prevents displaying corrupt or inaccessible files.
 
-          if (metadata != SolidFunctionCallStatus.fail &&
-              metadata != SolidFunctionCallStatus.notLoggedIn) {
-            processedFiles.add(FileItem(
-              name: cleanName,
-              path: relativePath,
-              dateModified: DateTime.now(),
-            ));
-          }
+        if (metadata != SolidFunctionCallStatus.fail &&
+            metadata != SolidFunctionCallStatus.notLoggedIn) {
+          processedFiles.add(FileItem(
+            name: fileName, // Use complete filename with extension
+            path: relativePath,
+            dateModified: DateTime.now(),
+          ));
         }
       }
 
+      // Update UI with processed files.
+
       setState(() {
-        files = processedFiles; // Update list of files.
+        files = processedFiles;
         isLoading = false;
       });
     } catch (e) {
+      // Handle any errors during the refresh process.
+
       debugPrint('Error loading files: $e');
       if (mounted) {
         setState(() {
-          isLoading = false; // Stop loading if there's an error.
+          isLoading = false;
         });
       }
     }
