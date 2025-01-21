@@ -340,8 +340,7 @@ class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
                             },
                           ),
                           belowBarData: BarAreaData(
-                            show: true,
-                            color: Theme.of(context).colorScheme.primary,
+                            show: false, // remove filled area below line chart
                           ),
                         ),
                       ],
