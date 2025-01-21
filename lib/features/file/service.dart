@@ -29,6 +29,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/utils/upload_file_to_pod.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
@@ -85,6 +86,16 @@ class _FileServiceState extends State<FileService> {
   final largeGapV = const SizedBox(height: 50);
 
   /// Handles file upload by reading its contents and encrypting it for upload.
+  ///
+  /// Uses the uploadFileToPod utility to ensure consistent handling of file uploads.
+  /// The utility handles:
+  /// - Text vs binary file detection
+  /// - Base64 encoding when needed
+  /// - Proper file naming and extension
+  /// - Encryption for POD storage
+  ///
+  /// This method manages the UI state (progress, completion) while delegating
+  /// the actual upload logic to the utility.
 
   Future<void> handleUpload() async {
     if (uploadFile == null) return;
@@ -95,78 +106,34 @@ class _FileServiceState extends State<FileService> {
         uploadDone = false;
       });
 
-      final file = File(uploadFile!);
-      String fileContent;
+      final result = await uploadFileToPod(
+        filePath: uploadFile!,
+        targetPath: currentPath ?? '', // Use current browser path as target
+        context: context,
+        onProgressChange: (inProgress) {
+          // Update UI to show upload progress.
 
-      // For text files, we directly read the content.
-      // For binary files, we encode them into base64 format.
-
-      if (isTextFile(uploadFile!)) {
-        fileContent = await file.readAsString();
-      } else {
-        final bytes = await file.readAsBytes();
-        fileContent = base64Encode(bytes);
-      }
-
-      // Sanitise file name and append encryption extension.
-
-      String sanitizedFileName = path
-          .basename(uploadFile!)
-          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
-          .replaceAll(RegExp(r'\.enc\.ttl$'), '');
-
-      remoteFileName = '$sanitizedFileName.enc.ttl';
-      cleanFileName = sanitizedFileName;
-
-      // Extract the subdirectory path by removing `healthpod/data/` prefix.
-      // This is because `healthpod/data` is the root directory for all files.
-
-      String? subPath = currentPath?.replaceFirst('healthpod/data', '').trim();
-
-      // If we have a subdirectory (not in root), include it in the path.
-
-      String uploadPath = subPath == null || subPath.isEmpty
-          ? remoteFileName!
-          : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
-
-      debugPrint('Upload path: $uploadPath');
-
-      if (!mounted) return;
-
-      // Upload file with encryption.
-
-      final result = await writePod(
-        uploadPath,
-        fileContent,
-        context,
-        const Text('Upload'),
-        encrypted: true,
+          if (mounted) {
+            setState(() {
+              uploadInProgress = inProgress;
+            });
+          }
+        },
+        onSuccess: () {
+          _browserKey.currentState?.refreshFiles();
+        },
       );
 
-      if (!mounted) return;
-
-      setState(() {
-        uploadDone = result == SolidFunctionCallStatus.success;
-      });
-
-      if (result == SolidFunctionCallStatus.success) {
-        // Refresh the file browser after successful upload.
-
-        _browserKey.currentState?.refreshFiles();
-      } else if (mounted) {
-        showAlert(context,
-            'Upload failed - please check your connection and permissions.');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      showAlert(context, 'Upload error: ${e.toString()}');
-      debugPrint('Upload error: $e');
-    } finally {
       if (mounted) {
         setState(() {
-          uploadInProgress = false;
+          uploadDone = result == SolidFunctionCallStatus.success;
         });
       }
+    } catch (e) {
+      if (mounted) {
+        showAlert(context, 'Upload error: ${e.toString()}');
+      }
+      debugPrint('Upload error: $e');
     }
   }
 
