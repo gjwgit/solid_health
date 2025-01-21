@@ -136,7 +136,7 @@ class IconGridPage extends StatelessWidget {
                     );
                     break;
                   case Icons.bar_chart:
-                    await fetchAndNavigateToVisualization(context);
+                    await fetchAndNavigateToVisualisation(context);
                     break;
                   default:
                     showComingSoon(context); // For other features.

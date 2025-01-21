@@ -31,7 +31,7 @@ import 'package:healthpod/features/survey/data.dart';
 
 /// Helper function to fetch and handle survey data.
 
-Future<void> fetchAndNavigateToVisualization(BuildContext context) async {
+Future<void> fetchAndNavigateToVisualisation(BuildContext context) async {
   // Show loading indicator.
 
   showDialog(
