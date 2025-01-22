@@ -116,8 +116,9 @@ class _FileServiceState extends State<FileService> {
           .basename(uploadFile!)
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
           .replaceAll(RegExp(r'\.enc\.ttl$'), '');
+      
 
-      remoteFileName = '$sanitizedFileName.enc.ttl';
+      remoteFileName = '$sanitizedFileName.enc.ttl'; // add `.enc.ttl` extension for new upload file
       cleanFileName = sanitizedFileName;
 
       // Extract the subdirectory path by removing `healthpod/data/` prefix.
@@ -192,9 +193,9 @@ class _FileServiceState extends State<FileService> {
       // We use baseDir as the root directory for all file operations.
 
       final baseDir = 'healthpod/data';
-      final relativePath = currentPath == null
-          ? '$baseDir/$remoteFileName'
-          : '$baseDir/${currentPath!.replaceFirst("$baseDir/", "")}/$remoteFileName';
+      final relativePath = currentPath == baseDir
+          ? '$baseDir/$remoteFileName'  // We're at root, so just append the filename
+          : '$currentPath/$remoteFileName';  // We're in a subfolder, use the full path
 
       debugPrint('Attempting to download from path: $relativePath');
 
@@ -230,18 +231,13 @@ class _FileServiceState extends State<FileService> {
             'Download failed - please check your connection and permissions');
       }
 
-      // Extract and decrypt the content from the TTL file.
-      // This is necessary because the file content may still be encrypted
-      // even after readPod, appearing as a TTL file with encrypted data.
+      /// We can directly use the decrypted fileContent from readPod.
+      /// 
+      /// This is because we encrypted a JSON file upon upload using the utility function.
+      /// And upon decrypting, we expect a JSON file instead of TTL content.
 
-      final decryptedContent =
-          await extractAndDecryptContent(fileContent.toString());
-
-      // Save the decrypted content to the user's chosen location.
-      // We remove the .enc.ttl extension as it's no longer encrypted.
-
-      final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
-      await saveDecryptedContent(decryptedContent, saveFileName);
+      final saveFileName = remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+      await saveDecryptedContent(fileContent, saveFileName);
 
       if (!mounted) return;
       setState(() {
@@ -385,6 +381,7 @@ class _FileServiceState extends State<FileService> {
         deleteInProgress = true;
         deleteDone = false;
       });
+      
 
       /// Path Construction
       ///
@@ -618,22 +615,26 @@ class _FileServiceState extends State<FileService> {
 
               setState(() {
                 cleanFileName = fileName;
-                remoteFileName = '$fileName.enc.ttl';
+                remoteFileName = fileName; // fileName already has existing `.enc.ttl` extension.
                 currentPath = path;
               });
             },
             onFileDownload: (fileName, path) async {
               setState(() {
                 cleanFileName = fileName;
-                remoteFileName = '$fileName.enc.ttl';
+                remoteFileName = fileName; // fileName already has existing `.enc.ttl` extension.
                 currentPath = path;
               });
+
+              // Remove encryption extensions before showing save dialog.
+
+              String cleanedFileName = fileName.replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
               // Let user choose where to save the file.
 
               String? outputFile = await FilePicker.platform.saveFile(
                 dialogTitle: 'Save file as:',
-                fileName: fileName,
+                fileName: cleanedFileName,
               );
 
               if (outputFile != null) {
@@ -646,7 +647,7 @@ class _FileServiceState extends State<FileService> {
             onFileDelete: (fileName, path) async {
               setState(() {
                 cleanFileName = fileName;
-                remoteFileName = '$fileName.enc.ttl';
+                remoteFileName = fileName; // fileName already has existing `.enc.ttl` extension.
                 currentPath = path; // Maintain path context for deletion.
               });
               await handleDelete();
