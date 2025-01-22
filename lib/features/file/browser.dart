@@ -44,7 +44,8 @@ class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
   final Function(String) onDirectoryChanged;
-  final Function(String, String) onImportCsv;
+  final Function(String, String)
+      onImportCsv; // Callback for handling CSV file imports.
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -53,7 +54,7 @@ class FileBrowser extends StatefulWidget {
     required this.onFileDownload,
     required this.onFileDelete,
     required this.browserKey,
-    required this.onImportCsv, // Callback for handling CSV file imports.
+    required this.onImportCsv,
     required this.onDirectoryChanged,
   });
 

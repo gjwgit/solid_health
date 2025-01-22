@@ -67,7 +67,8 @@ Future<bool> processCsvToJson(
       for (var j = 0; j < headers.length; j++) {
         if (j < fields[i].length) {
           final value = fields[i][j];
-          // Try to parse numbers if possible
+          // Try to parse numbers if possible.
+
           if (value is num) {
             row[headers[j]] = value;
           } else if (value is String && double.tryParse(value) != null) {
