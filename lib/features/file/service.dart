@@ -29,6 +29,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/utils/process_csv_import.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
@@ -75,6 +76,7 @@ class _FileServiceState extends State<FileService> {
   bool uploadInProgress = false;
   bool downloadInProgress = false;
   bool deleteInProgress = false;
+  bool importInProgress = false;
   bool uploadDone = false;
   bool downloadDone = false;
   bool deleteDone = false;
@@ -470,6 +472,41 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
+  /// Handles the import of CSV files and conversion to JSON
+  Future<void> handleCsvImport(String filePath, String dirPath) async {
+    if (importInProgress) return;
+
+    try {
+      setState(() {
+        importInProgress = true;
+      });
+
+      final success = await processCsvToJson(filePath, dirPath, context);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('CSV imported and converted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Refresh the file browser to show the new file
+        _browserKey.currentState?.refreshFiles();
+      } else {
+        showAlert(context, 'Failed to import CSV file');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          importInProgress = false;
+        });
+      }
+    }
+  }
+
+
   Widget _buildDesktopLayout() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -584,7 +621,7 @@ class _FileServiceState extends State<FileService> {
               ),
               if (uploadInProgress ||
                   downloadInProgress ||
-                  deleteInProgress) ...[
+                  deleteInProgress || importInProgress) ...[
                 const SizedBox(width: 16),
                 const SizedBox(
                   width: 16,
@@ -597,7 +634,9 @@ class _FileServiceState extends State<FileService> {
                       ? 'Uploading...'
                       : downloadInProgress
                           ? 'Downloading...'
-                          : 'Deleting...',
+                          : importInProgress
+                              ? 'Importing...'
+                              : 'Deleting...',
                   style: const TextStyle(
                     color: Colors.blue,
                     fontStyle: FontStyle.italic,
@@ -656,6 +695,7 @@ class _FileServiceState extends State<FileService> {
                 currentPath = newPath;
               });
             },
+            onImportCsv: handleCsvImport,
           ),
         ),
       ],

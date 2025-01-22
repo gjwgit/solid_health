@@ -32,6 +32,7 @@ dependencies:
   editable: ^2.0.0
   http: ^1.2.2
   encrypt: ^5.0.3
+  csv: ^6.0.0
 
 
 dev_dependencies:

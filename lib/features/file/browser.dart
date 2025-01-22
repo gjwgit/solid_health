@@ -23,6 +23,7 @@
 
 library;
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
@@ -44,6 +45,7 @@ class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
   final Function(String) onDirectoryChanged;
+  final Function(String, String) onImportCsv;
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -52,6 +54,7 @@ class FileBrowser extends StatefulWidget {
     required this.onFileDownload,
     required this.onFileDelete,
     required this.browserKey,
+    required this.onImportCsv,
     required this.onDirectoryChanged,
   });
 
@@ -190,6 +193,24 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
+  Future<void> handleImportCsv() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          widget.onImportCsv(file.path!, currentPath);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking CSV file: $e');
+    }
+  }
+
   // Build the UI that will be displayed to the user.
 
   @override
@@ -248,6 +269,21 @@ class FileBrowserState extends State<FileBrowser> {
                   // Add Spacer to push the refresh icon to the far right.
 
                   const Spacer(),
+
+                  IconButton(
+                    icon: Icon(
+                      Icons.file_upload,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: handleImportCsv,
+                    tooltip: 'Import CSV',
+                    style: IconButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(10),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
                   IconButton(
                     icon: Icon(
                       Icons.refresh,
