@@ -235,8 +235,8 @@ class _FileServiceState extends State<FileService> {
       /// This is because we encrypted a JSON file upon upload using the utility function.
       /// And upon decrypting, we expect a JSON file instead of TTL content.
 
-      final saveFileName =
-          remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
+      final saveFileName = downloadFile!.replaceAll(
+          RegExp(r'\.enc\.ttl$'), ''); // use save path selected by user
       await saveDecryptedContent(fileContent, saveFileName);
 
       if (!mounted) return;
