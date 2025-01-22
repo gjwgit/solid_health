@@ -117,7 +117,7 @@ class _FileServiceState extends State<FileService> {
           .replaceAll(RegExp(r'\.enc\.ttl$'), '');
 
       remoteFileName =
-          '$sanitizedFileName.enc.ttl'; // add `.enc.ttl` extension for new upload file
+          '$sanitizedFileName.enc.ttl'; // Add `.enc.ttl` extension for new upload file.
       cleanFileName = sanitizedFileName;
 
       // Extract the subdirectory path by removing `healthpod/data/` prefix.
@@ -193,8 +193,8 @@ class _FileServiceState extends State<FileService> {
 
       final baseDir = 'healthpod/data';
       final relativePath = currentPath == baseDir
-          ? '$baseDir/$remoteFileName' // We're at root, so just append the filename
-          : '$currentPath/$remoteFileName'; // We're in a subfolder, use the full path
+          ? '$baseDir/$remoteFileName' // We're at root, so just append the filename.
+          : '$currentPath/$remoteFileName'; // We're in a subfolder, use the full path.
 
       debugPrint('Attempting to download from path: $relativePath');
 
@@ -236,7 +236,7 @@ class _FileServiceState extends State<FileService> {
       /// And upon decrypting, we expect a JSON file instead of TTL content.
 
       final saveFileName = downloadFile!.replaceAll(
-          RegExp(r'\.enc\.ttl$'), ''); // use save path selected by user
+          RegExp(r'\.enc\.ttl$'), ''); // Use save path selected by user.
       await saveDecryptedContent(fileContent, saveFileName);
 
       if (!mounted) return;
