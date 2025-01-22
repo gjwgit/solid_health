@@ -88,7 +88,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   }
 
   /// Controls focus movement between questions in logical order
-  /// regardless of their visual layout in columns
+  /// regardless of their visual layout in columns.
 
   void _handleFieldSubmitted(int questionIndex) {
     if (questionIndex < widget.questions.length - 1) {
@@ -104,7 +104,8 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
   Widget _buildTextInput(HealthSurveyQuestion question, int questionIndex) {
     return TextFormField(
-      focusNode: _focusNodes[questionIndex][0],
+      focusNode: _focusNodes[questionIndex]
+          [0], // First/primary focus node for this question
       decoration: InputDecoration(
         hintText: 'Enter your response',
         suffixText: question.unit,
