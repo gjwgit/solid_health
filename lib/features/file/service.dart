@@ -34,7 +34,6 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/browser.dart';
-import 'package:healthpod/utils/extract_and_decrypt_content.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/show_alert.dart';
