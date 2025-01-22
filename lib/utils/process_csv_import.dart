@@ -98,6 +98,12 @@ Future<bool> processCsvToJson(
 
     debugPrint('Saving to path: $savePath');
 
+    if (!context.mounted) {
+      debugPrint('Widget is no longer mounted, skipping upload.');
+      return false;
+    }
+
+
     // Write the encrypted JSON file to POD.
 
     final result = await writePod(
