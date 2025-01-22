@@ -103,7 +103,6 @@ Future<bool> processCsvToJson(
       return false;
     }
 
-
     // Write the encrypted JSON file to POD.
 
     final result = await writePod(
