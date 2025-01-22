@@ -75,7 +75,7 @@ class _FileServiceState extends State<FileService> {
   bool uploadInProgress = false;
   bool downloadInProgress = false;
   bool deleteInProgress = false;
-  bool importInProgress = false;
+  bool importInProgress = false; // CSV import state tracking
   bool uploadDone = false;
   bool downloadDone = false;
   bool deleteDone = false;
@@ -468,7 +468,11 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
-  /// Handles the import of CSV files and conversion to JSON
+  /// Handles the import of CSV files and conversion to JSON.
+  ///
+  /// The imported CSV is processed and stored in the POD as an encrypted JSON file.
+  /// This enables better querying and data manipulation compared to raw CSV.
+
   Future<void> handleCsvImport(String filePath, String dirPath) async {
     if (importInProgress) return;
 
@@ -476,6 +480,8 @@ class _FileServiceState extends State<FileService> {
       setState(() {
         importInProgress = true;
       });
+
+      // Process CSV and convert to JSON format, then save to POD.
 
       final success = await processCsvToJson(filePath, dirPath, context);
 
@@ -488,7 +494,8 @@ class _FileServiceState extends State<FileService> {
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh the file browser to show the new file
+        // Refresh the file browser to show the new file.
+
         _browserKey.currentState?.refreshFiles();
       } else {
         showAlert(context, 'Failed to import CSV file');
@@ -501,7 +508,6 @@ class _FileServiceState extends State<FileService> {
       }
     }
   }
-
 
   Widget _buildDesktopLayout() {
     return Row(
@@ -617,7 +623,8 @@ class _FileServiceState extends State<FileService> {
               ),
               if (uploadInProgress ||
                   downloadInProgress ||
-                  deleteInProgress || importInProgress) ...[
+                  deleteInProgress ||
+                  importInProgress) ...[
                 const SizedBox(width: 16),
                 const SizedBox(
                   width: 16,
@@ -706,7 +713,10 @@ class _FileServiceState extends State<FileService> {
     );
   }
 
-  /// Builds the upload panel for desktop layout.
+  /// The Upload Panel UI provides two main actions:
+  ///
+  /// 1. Choose File - For general file upload.
+  /// 2. Import CSV - Specifically for importing CSV data, which gets converted to JSON.
 
   Widget _buildUploadPanel() {
     return Padding(
@@ -752,26 +762,71 @@ class _FileServiceState extends State<FileService> {
               ),
             ),
           const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await FilePicker.platform.pickFiles();
-              if (result != null) {
-                setState(() {
-                  uploadFile = result.files.single.path!;
-                  uploadDone = false;
-                });
-              }
-            },
-            icon: const Icon(Icons.file_upload),
-            label: const Text('Choose File'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final result = await FilePicker.platform.pickFiles();
+                    if (result != null) {
+                      setState(() {
+                        uploadFile = result.files.single.path!;
+                        uploadDone = false;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.file_upload),
+                  label: const Text('Choose File'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              // Add Import CSV button next to Choose File.
+
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    try {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['csv'],
+                      );
+
+                      if (result != null && result.files.isNotEmpty) {
+                        final file = result.files.first;
+                        if (file.path != null) {
+                          handleCsvImport(
+                              file.path!, currentPath ?? 'healthpod/data');
+                        }
+                      }
+                    } catch (e) {
+                      debugPrint('Error picking CSV file: $e');
+                    }
+                  },
+                  icon: const Icon(Icons.table_chart),
+                  label: const Text('Import CSV'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onSecondaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
