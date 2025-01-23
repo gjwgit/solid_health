@@ -29,14 +29,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:healthpod/utils/process_csv_import.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/browser.dart';
-import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/is_text_file.dart';
+import 'package:healthpod/utils/process_bp_csv_to_json.dart';
+import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// File service.
@@ -477,11 +477,10 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
-  /// Handles the import of CSV files and conversion to JSON.
+  /// Handles the import of BP CSV files and conversion to individual JSON files.
   ///
-  /// The imported CSV is processed and stored in the POD as an encrypted JSON file.
-  /// This enables better querying and data manipulation compared to raw CSV.
-
+  /// Each row of the CSV is processed and stored as a separate encrypted JSON file in the POD.
+  /// Files are named using the timestamp from the data.
   Future<void> handleCsvImport(String filePath, String dirPath) async {
     if (importInProgress) return;
 
@@ -490,25 +489,27 @@ class _FileServiceState extends State<FileService> {
         importInProgress = true;
       });
 
-      // Process CSV and convert to JSON format, then save to POD.
-
-      final success = await processCsvToJson(filePath, dirPath, context);
+      // Process CSV and create individual JSON files for each row
+      final success = await processBpCsvToJson(filePath, dirPath, context);
 
       if (!mounted) return;
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('CSV imported and converted successfully'),
+            content: Text('BP data imported and converted successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh the file browser to show the new file.
-
+        // Refresh the file browser to show the new files
         _browserKey.currentState?.refreshFiles();
       } else {
-        showAlert(context, 'Failed to import CSV file');
+        showAlert(context,
+            'Some rows failed to import. Please check the format and try again.');
       }
+    } catch (e) {
+      if (!mounted) return;
+      showAlert(context, 'Failed to import BP data: ${e.toString()}');
     } finally {
       if (mounted) {
         setState(() {
