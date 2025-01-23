@@ -803,7 +803,8 @@ class _FileServiceState extends State<FileService> {
               // Add Import CSV button next to Choose File.
 
               if (isInBpDirectory) ...[
-                // Only show Import CSV button in bp/ directory
+                // Only show Import CSV button in bp/ directory.
+                
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
