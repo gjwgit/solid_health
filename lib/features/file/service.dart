@@ -68,7 +68,8 @@ class _FileServiceState extends State<FileService> {
   /// This helps us track the current directory context for file operations
   /// without relying on accessing the FileBrowser's state.
 
-  String? currentPath;
+  String? currentPath =
+      'healthpod/data'; // Initialise with the default root path
 
   // Boolean flags to track status of various file operations.
 
@@ -86,6 +87,14 @@ class _FileServiceState extends State<FileService> {
   final smallGapH = const SizedBox(width: 10);
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
+
+  // Helper method to check if we're in the bp/ directory
+
+  bool get isInBpDirectory {
+    return currentPath!.endsWith('/bp') ||
+        currentPath!.contains('/bp/') ||
+        currentPath == 'healthpod/data/bp';
+  }
 
   /// Handles file upload by reading its contents and encrypting it for upload.
 
@@ -792,40 +801,44 @@ class _FileServiceState extends State<FileService> {
               const SizedBox(width: 8),
               // Add Import CSV button next to Choose File.
 
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    try {
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['csv'],
-                      );
+              if (isInBpDirectory) ...[
+                // Only show Import CSV button in bp/ directory
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        final result = await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['csv'],
+                        );
 
-                      if (result != null && result.files.isNotEmpty) {
-                        final file = result.files.first;
-                        if (file.path != null) {
-                          handleCsvImport(
-                              file.path!, currentPath ?? 'healthpod/data');
+                        if (result != null && result.files.isNotEmpty) {
+                          final file = result.files.first;
+                          if (file.path != null) {
+                            handleCsvImport(
+                                file.path!, currentPath ?? 'healthpod/data');
+                          }
                         }
+                      } catch (e) {
+                        debugPrint('Error picking CSV file: $e');
                       }
-                    } catch (e) {
-                      debugPrint('Error picking CSV file: $e');
-                    }
-                  },
-                  icon: const Icon(Icons.table_chart),
-                  label: const Text('Import CSV'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onSecondaryContainer,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    },
+                    icon: const Icon(Icons.table_chart),
+                    label: const Text('Import CSV'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.secondaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onSecondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: 12),
