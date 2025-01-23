@@ -40,6 +40,10 @@ Future<void> saveDecryptedContent(
     String decryptedContent, String saveFilePath) async {
   final file = File(saveFilePath);
 
+  // Ensure the parent directory exists.
+
+  await file.parent.create(recursive: true);
+
   try {
     // Try to parse and save as formatted JSON first.
 
