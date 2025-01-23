@@ -38,6 +38,12 @@ import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 import 'package:healthpod/widgets/footer.dart';
 
+/// The home screen for the HealthPod app.
+///
+/// This screen serves as the main entry point for the HealthPod application,
+/// providing users with a dashboard of features, a footer with user-specific
+/// information, and options to log out or view information about the app.
+
 class HealthPodHome extends StatefulWidget {
   const HealthPodHome({super.key});
 
@@ -54,6 +60,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
     super.initState();
     _initialiseFooterData(context);
   }
+
+  /// Initialises the footer data by fetching the Web ID and encryption key status.
 
   Future<void> _initialiseFooterData(context) async {
     final webId = await fetchWebId();

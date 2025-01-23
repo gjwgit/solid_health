@@ -35,6 +35,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 
 /// Handles file upload to POD with encryption.
+///
 /// Returns a [Future<SolidFunctionCallStatus>] indicating the upload result.
 
 Future<SolidFunctionCallStatus> uploadFileToPod({
