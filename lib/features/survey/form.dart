@@ -54,12 +54,80 @@ class HealthSurveyForm extends StatefulWidget {
 class _HealthSurveyFormState extends State<HealthSurveyForm> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, dynamic> _responses = {};
+
+  // Focus nodes for each question, enabling custom tab order traversal.
+  //
+  // List of lists to support multiple focus points per question if needed.
+
+  List<List<FocusNode>> _focusNodes = [];
+
   final TextEditingController _notesController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Initialise one focus node per question regardless of type.
+
+    _focusNodes = List.generate(
+      widget.questions.length,
+      (_) => [FocusNode()],
+    );
+  }
+
+  @override
   void dispose() {
+    // Clean up all focus nodes.
+
+    for (var nodeList in _focusNodes) {
+      for (var node in nodeList) {
+        node.dispose();
+      }
+    }
     _notesController.dispose();
     super.dispose();
+  }
+
+  /// Controls focus movement between questions in logical order
+  /// regardless of their visual layout in columns.
+
+  void _handleFieldSubmitted(int questionIndex) {
+    if (questionIndex < widget.questions.length - 1) {
+      // Always move to the first (and only) focus node of the next question.
+
+      _focusNodes[questionIndex + 1][0].requestFocus();
+    } else {
+      _submitForm();
+    }
+  }
+
+  /// Builds a text input field for a health survey question.
+
+  Widget _buildTextInput(HealthSurveyQuestion question, int questionIndex) {
+    return TextFormField(
+      focusNode: _focusNodes[questionIndex]
+          [0], // First/primary focus node for this question
+      decoration: InputDecoration(
+        hintText: 'Enter your response',
+        suffixText: question.unit,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      ),
+      validator: (value) {
+        if (question.isRequired && (value == null || value.isEmpty)) {
+          return 'Please enter a value';
+        }
+        return null;
+      },
+      onFieldSubmitted: (_) => _handleFieldSubmitted(questionIndex),
+      onSaved: (value) {
+        _responses[question.question] = value;
+      },
+    );
   }
 
   /// Generates UI for each survey question, including text, number, and categorical options.
@@ -96,6 +164,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _notesController,
+                  focusNode: _focusNodes[index][0],
                   maxLines: null,
                   minLines: 3,
                   decoration: InputDecoration(
@@ -114,6 +183,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                     }
                     return null;
                   },
+                  onFieldSubmitted: (_) => _handleFieldSubmitted(index),
                   onSaved: (value) {
                     _responses[question.question] = value;
                   },
@@ -154,9 +224,9 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
               ),
               const SizedBox(height: 12),
               if (question.type != HealthDataType.categorical)
-                _buildInputField(question)
+                _buildInputField(question, index)
               else
-                _buildCategoricalQuestion(question),
+                _buildCategoricalQuestion(question, index),
             ],
           ),
         ),
@@ -167,7 +237,8 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   /// Returns an icon based on the question type and content.
 
   IconData _getQuestionIcon(HealthDataType type, String question) {
-    // Return specific icons based on both type and question content
+    // Return specific icons based on both type and question content.
+
     if (type == HealthDataType.number) {
       if (question.toLowerCase().contains('blood pressure') ||
           question.toLowerCase().contains('systolic') ||
@@ -220,48 +291,25 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
   /// Builds an input field for a health survey question.
 
-  Widget _buildInputField(HealthSurveyQuestion question) {
+  Widget _buildInputField(HealthSurveyQuestion question, int index) {
     return SizedBox(
       width: double.infinity,
       child: switch (question.type) {
-        HealthDataType.number => _buildNumberInput(question),
-        HealthDataType.text => _buildTextInput(question),
+        HealthDataType.number => _buildNumberInput(question, index),
+        HealthDataType.text => _buildTextInput(question, index),
         _ => const SizedBox(),
       },
     );
   }
 
   /// Builds a text input field for a health survey question.
+  ///
+  /// Applies visual styling and validation to number inputs.
+  /// Handles range validation and unit display.
 
-  Widget _buildTextInput(HealthSurveyQuestion question) {
+  Widget _buildNumberInput(HealthSurveyQuestion question, int questionIndex) {
     return TextFormField(
-      decoration: InputDecoration(
-        hintText: 'Enter your response',
-        suffixText: question.unit,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      ),
-      validator: (value) {
-        if (question.isRequired && (value == null || value.isEmpty)) {
-          return 'Please enter a value';
-        }
-        return null;
-      },
-      onSaved: (value) {
-        _responses[question.question] = value;
-      },
-    );
-  }
-
-  /// Builds a number input field for a health survey question.
-
-  Widget _buildNumberInput(HealthSurveyQuestion question) {
-    return TextFormField(
+      focusNode: _focusNodes[questionIndex][0],
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
         hintText: 'Enter value',
@@ -290,61 +338,73 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
         }
         return null;
       },
+      onFieldSubmitted: (_) => _handleFieldSubmitted(questionIndex),
       onSaved: (value) {
         _responses[question.question] = double.tryParse(value ?? '');
       },
     );
   }
 
-  /// Builds a categorical question for a health survey.
+  /// Creates categorical input with radio buttons.
+  ///
+  /// Maintains logical focus order within options
+  /// while providing keyboard navigation support.
 
-  Widget _buildCategoricalQuestion(HealthSurveyQuestion question) {
-    return FormField<String>(
-      validator: (value) {
-        if (question.isRequired && (value == null || value.isEmpty)) {
-          return 'Please select an option';
-        }
-        return null;
-      },
-      builder: (FormFieldState<String> field) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...question.options!.map(
-              (option) => Container(
-                margin: const EdgeInsets.only(bottom: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: RadioListTile<String>(
-                  dense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  title: Text(option),
-                  value: option,
-                  groupValue: field.value,
-                  onChanged: (value) {
-                    field.didChange(value);
-                    _responses[question.question] = value;
-                  },
-                ),
+  Widget _buildCategoricalQuestion(
+      HealthSurveyQuestion question, int questionIndex) {
+    return Focus(
+      focusNode: _focusNodes[questionIndex][0],
+      child: FormField<String>(
+        validator: (value) {
+          if (question.isRequired && (value == null || value.isEmpty)) {
+            return 'Please select an option';
+          }
+          return null;
+        },
+        builder: (FormFieldState<String> field) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ...question.options!.asMap().entries.map(
+                (entry) {
+                  final option = entry.value;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: RadioListTile<String>(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      title: Text(option),
+                      value: option,
+                      groupValue: field.value,
+                      onChanged: (value) {
+                        field.didChange(value);
+                        _responses[question.question] = value;
+                        _handleFieldSubmitted(questionIndex);
+                      },
+                    ),
+                  );
+                },
               ),
-            ),
-            if (field.hasError)
-              Padding(
-                padding: const EdgeInsets.only(left: 12, top: 8),
-                child: Text(
-                  field.errorText!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 12,
+              if (field.hasError)
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, top: 8),
+                  child: Text(
+                    field.errorText!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -357,9 +417,14 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     }
   }
 
+  /// Generates responsive grid layout while maintaining logical tab order.
+  ///
+  /// Questions are arranged in rows based on available width
+  /// but focus traversal follows question index order.
+
   @override
   Widget build(BuildContext context) {
-    // Build the form UI
+    // Build the form UI.
 
     return Form(
       key: _formKey,
@@ -367,6 +432,8 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            /// Determines optimal column count based on screen width
+            /// while preserving logical question sequence for keyboard navigation.
             LayoutBuilder(
               builder: (context, constraints) {
                 final optimalCount = constraints.maxWidth > 900
@@ -399,13 +466,14 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
                   rows.add(
                     Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: rowItems
-                              .map((item) => Expanded(child: item))
-                              .toList(),
-                        )),
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: rowItems
+                            .map((item) => Expanded(child: item))
+                            .toList(),
+                      ),
+                    ),
                   );
                 }
 
