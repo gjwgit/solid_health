@@ -723,10 +723,11 @@ class _FileServiceState extends State<FileService> {
     );
   }
 
-  /// The Upload Panel UI provides two main actions:
+  /// Builds and returns the upload panel widget which contains
+  /// file upload functionality and CSV import options.
   ///
-  /// 1. Choose File - For general file upload.
-  /// 2. Import CSV - Specifically for importing CSV data, which gets converted to JSON.
+  /// This panel appears on the right side in desktop layout
+  /// and as an expandable section in mobile layout.
 
   Widget _buildUploadPanel() {
     return Padding(
@@ -735,8 +736,13 @@ class _FileServiceState extends State<FileService> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Display preview card if a file is selected and preview is enabled.
+
           _buildPreviewCard(),
           const SizedBox(height: 16),
+
+          // Show selected file info container when a file is chosen.
+
           if (uploadFile != null)
             Container(
               padding: const EdgeInsets.all(12),
@@ -755,6 +761,8 @@ class _FileServiceState extends State<FileService> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
+                  // Display filename with overflow protection.
+
                   Expanded(
                     child: Text(
                       path.basename(uploadFile!),
@@ -765,6 +773,8 @@ class _FileServiceState extends State<FileService> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  // Show success checkmark when upload completes.
+
                   if (uploadDone)
                     const Icon(Icons.check_circle,
                         color: Colors.green, size: 20),
@@ -772,21 +782,33 @@ class _FileServiceState extends State<FileService> {
               ),
             ),
           const SizedBox(height: 16),
+
           Row(
             children: [
+              // Main upload button - handles both file selection and upload.
+
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final result = await FilePicker.platform.pickFiles();
-                    if (result != null) {
-                      setState(() {
-                        uploadFile = result.files.single.path!;
-                        uploadDone = false;
-                      });
-                    }
-                  },
+                  onPressed: (uploadInProgress ||
+                          downloadInProgress ||
+                          deleteInProgress)
+                      ? null // Disable button during any ongoing operation.
+                      : () async {
+                          // Open file picker and trigger upload if file is selected.
+
+                          final result = await FilePicker.platform.pickFiles();
+                          if (result != null) {
+                            setState(() {
+                              uploadFile = result.files.single.path!;
+                              uploadDone = false;
+                            });
+                            // Immediately trigger upload after file selection.
+
+                            await handleUpload();
+                          }
+                        },
                   icon: const Icon(Icons.file_upload),
-                  label: const Text('Choose File'),
+                  label: const Text('Upload'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor:
@@ -799,17 +821,17 @@ class _FileServiceState extends State<FileService> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              // Add Import CSV button next to Choose File.
+
+              // Show CSV import button only when in blood pressure directory.
 
               if (isInBpDirectory) ...[
-                // Only show Import CSV button in bp/ directory.
-
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
+                        // Open file picker configured for CSV files only.
+
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['csv'],
@@ -818,6 +840,8 @@ class _FileServiceState extends State<FileService> {
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
+                            // Process and import CSV data.
+
                             handleCsvImport(
                                 file.path!, currentPath ?? 'healthpod/data');
                           }
@@ -844,27 +868,9 @@ class _FileServiceState extends State<FileService> {
             ],
           ),
           const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: (uploadFile == null ||
-                    uploadInProgress ||
-                    downloadInProgress ||
-                    deleteInProgress)
-                ? null
-                : handleUpload,
-            icon: Icon(Icons.cloud_upload,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: const Text('Upload'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 2,
-            ),
-          ),
-          const SizedBox(height: 12),
+
+          // Preview button - enabled only when a file is selected and no operation is in progress.
+
           TextButton.icon(
             onPressed: (uploadFile == null ||
                     uploadInProgress ||
