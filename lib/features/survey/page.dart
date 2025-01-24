@@ -35,7 +35,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/health_data_type.dart';
-import 'package:healthpod/constants/survey_constants.dart';
+import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 import 'package:healthpod/features/survey/form.dart';

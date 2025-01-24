@@ -30,7 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/constants/survey_constants.dart';
+import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
 
 /// Data visualisation widget.
