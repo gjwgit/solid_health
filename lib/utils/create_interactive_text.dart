@@ -28,6 +28,13 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+/// Creates an interactive text widget with consistent styling and behavior.
+///
+/// This function generates a widget that allows for selectable and optionally
+/// clickable text. When `isClickable` is true, the text will respond to user
+/// taps by executing the provided `onTap` callback. The cursor will also change
+/// to indicate interactivity.
+
 Widget createInteractiveText({
   required BuildContext context,
   required String text,

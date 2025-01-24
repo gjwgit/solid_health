@@ -36,8 +36,8 @@ import 'package:healthpod/utils/create_interactive_text.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/security_key/manager.dart';
 
-/// Footer widget to display server information, login status, and security key
-/// status.
+/// Footer widget to display server information, login status,
+/// and security key status.
 
 class Footer extends StatelessWidget {
   final String? webId;

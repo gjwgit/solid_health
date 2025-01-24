@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+/// Determines the height of a footer based on the screen width.
+
 double getFooterHeight(BuildContext context) {
   final width = MediaQuery.of(context).size.width;
   // For very narrow screens (mobile), use three lines.

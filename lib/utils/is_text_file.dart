@@ -41,6 +41,8 @@ final textFileExtensions = [
   '.yml'
 ];
 
+/// Checks if a file is a text file based on its extension.
+
 bool isTextFile(String filePath) {
   return textFileExtensions.contains(path.extension(filePath).toLowerCase());
 }

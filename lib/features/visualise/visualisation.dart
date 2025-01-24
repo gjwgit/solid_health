@@ -40,6 +40,7 @@ import 'package:healthpod/features/visualise/stat_item.dart';
 /// track their health.
 
 /// Main widget for health data visualisation.
+///
 /// Displays a line chart and summary statistics for key health metrics.
 
 class HealthDataVisualisation extends StatefulWidget {
@@ -61,6 +62,7 @@ class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
   String _selectedMetric = 'systolic'; // Default selected metric
 
   /// Processes survey data and converts it into chart-friendly FlSpot objects.
+  ///
   /// Each FlSpot represents a data point in the chart.
 
   List<FlSpot> _getChartData(String metric) {
@@ -87,6 +89,7 @@ class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
   }
 
   /// Helper function to handle numeric parsing for various data formats.
+  ///
   /// Ensures robust handling of integers, doubles and strings.
 
   double _parseNumericValue(dynamic value) {
