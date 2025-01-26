@@ -80,17 +80,28 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
     try {
       setState(() {
         isLoading = true;
-        error = null;
+        error = null;  // Clear any previous error message.
       });
 
+      // Get URL of directory containing blood pressure data.
+
       final dirUrl = await getDirUrl('healthpod/data/bp');
+
+      // Retrieve list of files in directory.
+
       final resources = await getResourcesInContainer(dirUrl);
 
       final List<DataRecord> loadedRecords = [];
       for (final file in resources.files) {
+        // Skip files that don't match expected naming pattern.
+
         if (!file.endsWith('.enc.ttl')) continue;
 
+        // Prevent processing if widget is no longer mounted.
+
         if (!mounted) break;
+
+        // Read encrypted file content.
 
         final content = await readPod(
           'healthpod/data/bp/$file',
@@ -98,10 +109,13 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
           const Text('Loading file'),
         );
 
+        // Check if content was successfully retrieved.
+
         if (content != SolidFunctionCallStatus.fail &&
             content != SolidFunctionCallStatus.notLoggedIn &&
             content != null) {
           try {
+            // Parse JSON content into a `DataRecord`.
             final data = json.decode(content.toString());
             loadedRecords.add(DataRecord.fromJson(data));
           } catch (e) {
@@ -110,12 +124,16 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         }
       }
 
+      // Update UI with loaded and sorted records.
+
       setState(() {
         records = loadedRecords
           ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
         isLoading = false;
       });
     } catch (e) {
+      // Handle errors during data loading.
+
       setState(() {
         error = e.toString();
         isLoading = false;
@@ -131,8 +149,12 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
   Future<void> saveRecord(DataRecord record) async {
     try {
+      // Generate a unique filename using timestamp.
+
       final filename =
           'blood_pressure_${record.timestamp.toIso8601String().replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
+      
+      // Write record data to file.
 
       await writePod(
         'bp/$filename',
@@ -142,8 +164,9 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         encrypted: true,
       );
 
-      if (!mounted) return; // Check if the widget is still mounted
+      // Refresh the record list after saving.
 
+      if (!mounted) return; // Check if the widget is still mounted
       setState(() {
         editingIndex = null;
       });
@@ -151,7 +174,8 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
       await loadData();
     } catch (e) {
       if (mounted) {
-        // Only use context when the widget is mounted
+        // Handle errors during save operation.
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to save: ${e.toString()}')),
         );
@@ -165,16 +189,23 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
   Future<void> deleteRecord(DataRecord record) async {
     try {
+      // Generate the filename from the record's timestamp.
+
       final filename =
           'blood_pressure_${record.timestamp.toIso8601String().replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
-
+      
+      // Delete the file from the POD.
+      
       await deleteFile('bp/$filename');
 
-      if (!mounted) return;
+      // Reload the data to reflect the deletion.
 
+      if (!mounted) return;
       await loadData();
     } catch (e) {
       if (mounted) {
+        // Handle errors during delete operation.
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to delete: ${e.toString()}')),
         );
@@ -198,7 +229,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
             feeling: '',
             notes: '',
           ));
-      editingIndex = 0;
+      editingIndex = 0; // Start editing the new record.
     });
   }
 
@@ -210,6 +241,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   DataRow _buildDisplayRow(DataRecord record, int index) {
     return DataRow(
       cells: [
+        // Timestamp, systolic, diastolic, heart rate, feeling, and notes.
         DataCell(
             Text(DateFormat('yyyy-MM-dd HH:mm:ss').format(record.timestamp))),
         DataCell(Text(record.systolic.toString())),
@@ -229,10 +261,14 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         DataCell(Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Edit button.
+
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => editingIndex = index),
             ),
+            // Delete button.
+
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () => deleteRecord(record),
@@ -260,9 +296,13 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
     return DataRow(
       cells: [
+        // Editable timestamp with date and time pickers.
+
         DataCell(
           InkWell(
             onTap: () async {
+              // Date and time picker logic.
+
               final date = await showDatePicker(
                 context: context,
                 initialDate: record.timestamp,
@@ -285,7 +325,8 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
                     time.minute,
                   );
 
-                  // Check for duplicate timestamp
+                  // Check for duplicate timestamp.
+
                   if (records.any((r) =>
                       r.timestamp == newTimestamp &&
                       records.indexOf(r) != index)) {
@@ -298,6 +339,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
                     }
                     return;
                   }
+                  // Update the record with the new timestamp.
 
                   setState(() {
                     records[index] = record.copyWith(timestamp: newTimestamp);
@@ -317,6 +359,8 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
             ),
           ),
         ),
+        // Editable systolic, diastolic, heart rate, feeling, and notes fields.
+
         DataCell(TextField(
           controller: systolicController,
           keyboardType: TextInputType.number,
@@ -361,7 +405,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         DataCell(
           Container(
             constraints:
-                const BoxConstraints(maxWidth: 200), // Adjust width as needed
+                const BoxConstraints(maxWidth: 200), 
             child: TextField(
               controller: notesController,
               maxLines: null,
@@ -378,10 +422,14 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         DataCell(Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Save button.
+
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: () => saveRecord(records[index]),
             ),
+            // Cancel button.
+
             IconButton(
               icon: const Icon(Icons.cancel),
               onPressed: () => setState(() => editingIndex = null),
@@ -399,6 +447,8 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         title: const Text('Blood Pressure Records'),
         backgroundColor: titleBackgroundColor,
         actions: [
+          // Add new record button.
+          
           if (!isLoading)
             IconButton(
               icon: const Icon(Icons.add),
