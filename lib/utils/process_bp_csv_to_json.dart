@@ -32,6 +32,8 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/utils/show_alert.dart';
+
 /// Process BP CSV file import, creating individual JSON files for each row.
 ///
 /// Each row is saved as a separate JSON file with timestamp and responses.
@@ -43,8 +45,6 @@ Future<bool> processBpCsvToJson(
   BuildContext context,
 ) async {
   try {
-    // Read the CSV file.
-
     final file = File(filePath);
     final input = file.openRead();
     final fields = await input
@@ -56,56 +56,82 @@ Future<bool> processBpCsvToJson(
       throw Exception('CSV file is empty');
     }
 
-    // Extract headers and validate required columns.
-
     final headers = List<String>.from(fields[0]);
+    
+    // Validate required columns
+    final requiredColumns = ['timestamp', 'systolic', 'diastolic', 'heart_rate'];
+    final missingColumns = requiredColumns.where(
+      (col) => !headers.map((h) => h.trim().toLowerCase()).contains(col.toLowerCase())
+    ).toList();
+    
+    if (missingColumns.isNotEmpty) {
+      if (!context.mounted) return false;
+      const requiredColumnMessage = '''
 
-    // Verify timestamp column exists.
+        Your CSV file must contain these required columns:
 
-    if (!headers.contains('timestamp')) {
-      throw Exception('CSV must contain a timestamp column');
+        - timestamp (e.g. 2025-01-21T23:05:42)
+        - systolic (e.g. 120)
+        - diastolic (e.g. 80)
+        - heart_rate (e.g. 72)
+
+        Optional columns:
+
+        - feeling (e.g. Good)
+        - notes (e.g. After exercise)
+
+        ''';
+
+        showAlert(context, requiredColumnMessage);
+
+      return false;
     }
-
-    // Process each row and create individual JSON files.
 
     bool allSuccess = true;
     for (var i = 1; i < fields.length; i++) {
       try {
         final row = fields[i];
-        if (row.length != headers.length) continue; // Skip malformed rows.
+        if (row.length != headers.length) continue;
 
-        // Create the JSON structure for this row.
-
-        final Map<String, dynamic> jsonData = {
-          'timestamp': '',
-          'responses': <String, dynamic>{},
+        // Create standardized response structure
+        final Map<String, dynamic> responses = {
+          "What's your systolic blood pressure?": 0,
+          "What's your diastolic measurement?": 0,
+          "What's your heart rate?": 0,
+          "How are you feeling?": "",
+          "Any additional notes about your health?": "",
         };
+        
+        String timestamp = "";
 
-        // Process each column.
-
+        // Map CSV columns to response structure
         for (var j = 0; j < headers.length; j++) {
-          final header = headers[j];
+          final header = headers[j].trim().toLowerCase();
           final value = row[j];
 
-          if (header == 'timestamp') {
-            jsonData['timestamp'] = value;
-          } else {
-            // Try to parse numbers if possible.
-
-            if (value is num) {
-              jsonData['responses'][header] = value;
-            } else if (value is String && double.tryParse(value) != null) {
-              jsonData['responses'][header] = double.parse(value);
-            } else {
-              jsonData['responses'][header] = value;
-            }
+          switch (header) {
+            case 'timestamp':
+              timestamp = value.toString();
+            case 'systolic':
+              responses["What's your systolic blood pressure?"] = int.parse(value.toString());
+            case 'diastolic':
+              responses["What's your diastolic measurement?"] = int.parse(value.toString());
+            case 'heart_rate':
+              responses["What's your heart rate?"] = int.parse(value.toString());
+            case 'feeling':
+              responses["How are you feeling?"] = value.toString();
+            case 'notes':
+              responses["Any additional notes about your health?"] = value.toString();
           }
         }
 
-        // Generate filename using current timestamp.
+        final jsonData = {
+          'timestamp': timestamp,
+          'responses': responses,
+        };
 
-        final timestamp =
-            DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+       timestamp =
+            timestamp.replaceAll(RegExp(r'[:.]+'), '-');
         final outputFileName = 'blood_pressure_$timestamp.json.enc.ttl';
 
         // Construct the full path for saving.
@@ -113,14 +139,7 @@ Future<bool> processBpCsvToJson(
         final savePath =
             '${dirPath.replaceFirst('healthpod/data/', '')}/$outputFileName';
 
-        debugPrint('Saving row $i to path: $savePath');
-
-        if (!context.mounted) {
-          debugPrint('Widget is no longer mounted, skipping upload.');
-          return false;
-        }
-
-        // Write the encrypted JSON file to POD.
+        if (!context.mounted) return false;
 
         final result = await writePod(
           savePath,
@@ -132,7 +151,6 @@ Future<bool> processBpCsvToJson(
 
         if (result != SolidFunctionCallStatus.success) {
           allSuccess = false;
-          debugPrint('Failed to save row $i');
         }
       } catch (rowError) {
         debugPrint('Error processing row $i: $rowError');
