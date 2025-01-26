@@ -167,6 +167,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
       // Write record data to file.
 
+      if (!mounted) return;
       await writePod(
         'bp/$filename',
         json.encode(record.toJson()),
