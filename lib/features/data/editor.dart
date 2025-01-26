@@ -80,7 +80,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
     try {
       setState(() {
         isLoading = true;
-        error = null;  // Clear any previous error message.
+        error = null; // Clear any previous error message.
       });
 
       // Get URL of directory containing blood pressure data.
@@ -153,7 +153,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
       final filename =
           'blood_pressure_${record.timestamp.toIso8601String().replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
-      
+
       // Write record data to file.
 
       await writePod(
@@ -193,9 +193,9 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
       final filename =
           'blood_pressure_${record.timestamp.toIso8601String().replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
-      
+
       // Delete the file from the POD.
-      
+
       await deleteFile('bp/$filename');
 
       // Reload the data to reflect the deletion.
@@ -404,8 +404,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         )),
         DataCell(
           Container(
-            constraints:
-                const BoxConstraints(maxWidth: 200), 
+            constraints: const BoxConstraints(maxWidth: 200),
             child: TextField(
               controller: notesController,
               maxLines: null,
@@ -448,7 +447,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         backgroundColor: titleBackgroundColor,
         actions: [
           // Add new record button.
-          
+
           if (!isLoading)
             IconButton(
               icon: const Icon(Icons.add),
