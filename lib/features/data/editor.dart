@@ -216,7 +216,16 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         DataCell(Text(record.diastolic.toString())),
         DataCell(Text(record.heartRate.toString())),
         DataCell(Text(record.feeling)),
-        DataCell(Text(record.notes)),
+        DataCell(
+          Container(
+            constraints: const BoxConstraints(maxWidth: 200),
+            child: Text(
+              record.notes,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
+            ),
+          ),
+        ),
         DataCell(Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -241,9 +250,6 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   /// controller and updates the record on change.
 
   DataRow _buildEditingRow(DataRecord record, int index) {
-    final timestampController = TextEditingController(
-      text: DateFormat('yyyy-MM-dd HH:mm:ss').format(record.timestamp),
-    );
     final systolicController =
         TextEditingController(text: record.systolic.toString());
     final diastolicController =
@@ -254,16 +260,63 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
     return DataRow(
       cells: [
-        DataCell(TextField(
-          controller: timestampController,
-          onChanged: (value) {
-            try {
-              records[index] = record.copyWith(
-                timestamp: DateFormat('yyyy-MM-dd HH:mm:ss').parse(value),
+        DataCell(
+          InkWell(
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: record.timestamp,
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now(),
               );
-            } catch (_) {}
-          },
-        )),
+
+              if (date != null && mounted) {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(record.timestamp),
+                );
+
+                if (time != null && mounted) {
+                  final newTimestamp = DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                    time.hour,
+                    time.minute,
+                  );
+
+                  // Check for duplicate timestamp
+                  if (records.any((r) =>
+                      r.timestamp == newTimestamp &&
+                      records.indexOf(r) != index)) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'A record with this timestamp already exists')),
+                      );
+                    }
+                    return;
+                  }
+
+                  setState(() {
+                    records[index] = record.copyWith(timestamp: newTimestamp);
+                  });
+                }
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                DateFormat('yyyy-MM-dd HH:mm:ss').format(record.timestamp),
+                style: const TextStyle(
+                  decoration: TextDecoration.underline,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+          ),
+        ),
         DataCell(TextField(
           controller: systolicController,
           keyboardType: TextInputType.number,
@@ -305,12 +358,23 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
             });
           },
         )),
-        DataCell(TextField(
-          controller: notesController,
-          onChanged: (value) {
-            records[index] = record.copyWith(notes: value);
-          },
-        )),
+        DataCell(
+          Container(
+            constraints:
+                const BoxConstraints(maxWidth: 200), // Adjust width as needed
+            child: TextField(
+              controller: notesController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+              ),
+              onChanged: (value) {
+                records[index] = record.copyWith(notes: value);
+              },
+            ),
+          ),
+        ),
         DataCell(Row(
           mainAxisSize: MainAxisSize.min,
           children: [
