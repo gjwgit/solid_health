@@ -481,6 +481,7 @@ class _FileServiceState extends State<FileService> {
   ///
   /// Each row of the CSV is processed and stored as a separate encrypted JSON file in the POD.
   /// Files are named using the timestamp from the data.
+
   Future<void> handleCsvImport(String filePath, String dirPath) async {
     if (importInProgress) return;
 
@@ -489,7 +490,8 @@ class _FileServiceState extends State<FileService> {
         importInProgress = true;
       });
 
-      // Process CSV and create individual JSON files for each row
+      // Process CSV and create individual JSON files for each row.
+
       final success = await processBpCsvToJson(filePath, dirPath, context);
 
       if (!mounted) return;
@@ -501,7 +503,8 @@ class _FileServiceState extends State<FileService> {
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh the file browser to show the new files
+        // Refresh the file browser to show the new files.
+
         _browserKey.currentState?.refreshFiles();
       }
     } catch (e) {
