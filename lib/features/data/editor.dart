@@ -153,8 +153,10 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
       if (editingIndex != null) {
         final oldRecord = records[editingIndex!];
-        final oldTimestamp = oldRecord.timestamp.toIso8601String().substring(0, 19);
-        final oldFilename = 'blood_pressure_${oldTimestamp.replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
+        final oldTimestamp =
+            oldRecord.timestamp.toIso8601String().substring(0, 19);
+        final oldFilename =
+            'blood_pressure_${oldTimestamp.replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
         await deleteFile('healthpod/data/bp/$oldFilename');
       }
 
@@ -312,8 +314,6 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
         DataCell(
           InkWell(
             onTap: () async {
-              // Date and time picker logic.
-
               final date = await showDatePicker(
                 context: context,
                 initialDate: record.timestamp,
@@ -328,15 +328,45 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
                 );
 
                 if (time != null && mounted) {
+                  // Show dialog for milliseconds with explicit confirmation
+                  final TextEditingController msController =
+                      TextEditingController();
+                  final milliseconds = await showDialog<int>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Set Milliseconds'),
+                      content: TextField(
+                        controller: msController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter milliseconds (0-999)',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(0),
+                          child: const Text('Skip'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            final ms = int.tryParse(msController.text) ?? 0;
+                            Navigator.of(context).pop(ms.clamp(0, 999));
+                          },
+                          child: const Text('Confirm'),
+                        ),
+                      ],
+                    ),
+                  );
+
                   final newTimestamp = DateTime(
                     date.year,
                     date.month,
                     date.day,
                     time.hour,
                     time.minute,
+                    0, // seconds
+                    milliseconds ?? 0,
                   );
-
-                  // Check for duplicate timestamp.
 
                   if (records.any((r) =>
                       r.timestamp == newTimestamp &&
@@ -344,13 +374,13 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text(
-                                'A record with this timestamp already exists')),
+                          content: Text(
+                              'A record with this timestamp already exists'),
+                        ),
                       );
                     }
                     return;
                   }
-                  // Update the record with the new timestamp.
 
                   setState(() {
                     records[index] = record.copyWith(timestamp: newTimestamp);
@@ -361,7 +391,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
-                DateFormat('yyyy-MM-dd HH:mm:ss').format(record.timestamp),
+                DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(record.timestamp),
                 style: const TextStyle(
                   decoration: TextDecoration.underline,
                   color: Colors.blue,
@@ -370,6 +400,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
             ),
           ),
         ),
+
         // Editable systolic, diastolic, heart rate, feeling, and notes fields.
 
         DataCell(TextField(
