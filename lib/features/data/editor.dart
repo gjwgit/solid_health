@@ -149,6 +149,15 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
   Future<void> saveRecord(DataRecord record) async {
     try {
+      // Delete old file if updating existing record.
+
+      if (editingIndex != null) {
+        final oldRecord = records[editingIndex!];
+        final oldTimestamp = oldRecord.timestamp.toIso8601String().substring(0, 19);
+        final oldFilename = 'blood_pressure_${oldTimestamp.replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
+        await deleteFile('healthpod/data/bp/$oldFilename');
+      }
+
       // Generate a unique filename using timestamp.
 
       final filename =
@@ -191,8 +200,10 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
     try {
       // Generate the filename from the record's timestamp.
 
+      final timestamp = record.timestamp.toIso8601String().substring(0, 19);
+
       final filename =
-          'blood_pressure_${record.timestamp.toIso8601String().replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
+          'blood_pressure_${timestamp.replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
 
       // Delete the file from the POD.
 
