@@ -196,7 +196,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
       // Delete the file from the POD.
 
-      await deleteFile('bp/$filename');
+      await deleteFile('healthpod/data/bp/$filename');
 
       // Reload the data to reflect the deletion.
 
