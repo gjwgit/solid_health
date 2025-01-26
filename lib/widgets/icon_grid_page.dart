@@ -45,6 +45,7 @@ class IconGridPage extends StatelessWidget {
     Icons.vaccines,
     Icons.quiz,
     Icons.bar_chart,
+    Icons.table_chart,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -77,6 +78,7 @@ class IconGridPage extends StatelessWidget {
                   Icons.vaccines,
                   Icons.quiz,
                   Icons.bar_chart,
+                  Icons.table_chart,
                 }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
