@@ -30,6 +30,7 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:healthpod/utils/round_timestamp_to_second.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/show_alert.dart';
@@ -45,6 +46,8 @@ Future<bool> processBpCsvToJson(
   BuildContext context,
 ) async {
   try {
+    // Read and parse CSV file.
+
     final file = File(filePath);
     final input = file.openRead();
     final fields = await input
@@ -56,14 +59,23 @@ Future<bool> processBpCsvToJson(
       throw Exception('CSV file is empty');
     }
 
+    // Extract and validate headers.
+
     final headers = List<String>.from(fields[0]);
-    
-    // Validate required columns
-    final requiredColumns = ['timestamp', 'systolic', 'diastolic', 'heart_rate'];
-    final missingColumns = requiredColumns.where(
-      (col) => !headers.map((h) => h.trim().toLowerCase()).contains(col.toLowerCase())
-    ).toList();
-    
+    final requiredColumns = [
+      'timestamp',
+      'systolic',
+      'diastolic',
+      'heart_rate'
+    ];
+    final missingColumns = requiredColumns
+        .where((col) => !headers
+            .map((h) => h.trim().toLowerCase())
+            .contains(col.toLowerCase()))
+        .toList();
+
+    // Show error if required columns missing.
+
     if (missingColumns.isNotEmpty) {
       if (!context.mounted) return false;
       const requiredColumnMessage = '''
@@ -82,18 +94,25 @@ Future<bool> processBpCsvToJson(
 
         ''';
 
-        showAlert(context, requiredColumnMessage);
-
+      showAlert(context, requiredColumnMessage);
       return false;
     }
 
+    // Track duplicate timestamps after rounding.
+
+    final Set<String> seenTimestamps = {};
+    final List<String> duplicateTimestamps = [];
     bool allSuccess = true;
+
+    // Process each row after headers.
+
     for (var i = 1; i < fields.length; i++) {
       try {
         final row = fields[i];
         if (row.length != headers.length) continue;
 
-        // Create standardized response structure
+        // Initialise response structure.
+
         final Map<String, dynamic> responses = {
           "What's your systolic blood pressure?": 0,
           "What's your diastolic measurement?": 0,
@@ -101,45 +120,55 @@ Future<bool> processBpCsvToJson(
           "How are you feeling?": "",
           "Any additional notes about your health?": "",
         };
-        
+
         String timestamp = "";
 
-        // Map CSV columns to response structure
+        // Map CSV values to response fields.
+
         for (var j = 0; j < headers.length; j++) {
           final header = headers[j].trim().toLowerCase();
           final value = row[j];
 
           switch (header) {
             case 'timestamp':
-              timestamp = value.toString();
+              timestamp = roundTimestampToSecond(value.toString());
+              if (!seenTimestamps.add(timestamp)) {
+                duplicateTimestamps.add(timestamp);
+              }
             case 'systolic':
-              responses["What's your systolic blood pressure?"] = int.parse(value.toString());
+              responses["What's your systolic blood pressure?"] =
+                  int.parse(value.toString());
             case 'diastolic':
-              responses["What's your diastolic measurement?"] = int.parse(value.toString());
+              responses["What's your diastolic measurement?"] =
+                  int.parse(value.toString());
             case 'heart_rate':
-              responses["What's your heart rate?"] = int.parse(value.toString());
+              responses["What's your heart rate?"] =
+                  int.parse(value.toString());
             case 'feeling':
               responses["How are you feeling?"] = value.toString();
             case 'notes':
-              responses["Any additional notes about your health?"] = value.toString();
+              responses["Any additional notes about your health?"] =
+                  value.toString();
           }
         }
+
+        // Prepare JSON data.
 
         final jsonData = {
           'timestamp': timestamp,
           'responses': responses,
         };
 
-       timestamp =
-            timestamp.replaceAll(RegExp(r'[:.]+'), '-');
+        // Create filename-safe timestamp and construct save path.
+
+        timestamp = timestamp.replaceAll(RegExp(r'[:.]+'), '-');
         final outputFileName = 'blood_pressure_$timestamp.json.enc.ttl';
-
-        // Construct the full path for saving.
-
         final savePath =
             '${dirPath.replaceFirst('healthpod/data/', '')}/$outputFileName';
 
         if (!context.mounted) return false;
+
+        // Save encrypted JSON file.
 
         final result = await writePod(
           savePath,
@@ -156,6 +185,14 @@ Future<bool> processBpCsvToJson(
         debugPrint('Error processing row $i: $rowError');
         allSuccess = false;
       }
+    }
+
+    // Warn about duplicate timestamps if any found.
+
+    if (duplicateTimestamps.isNotEmpty) {
+      if (!context.mounted) return allSuccess;
+      showAlert(context,
+          'Warning: Multiple entries found for these timestamps:\n${duplicateTimestamps.join("\n")}\n\nOnly the last entry for each timestamp will be saved.');
     }
 
     return allSuccess;

@@ -503,7 +503,7 @@ class _FileServiceState extends State<FileService> {
         );
         // Refresh the file browser to show the new files
         _browserKey.currentState?.refreshFiles();
-      } 
+      }
     } catch (e) {
       if (!mounted) return;
       showAlert(context, 'Failed to import BP data: ${e.toString()}');
