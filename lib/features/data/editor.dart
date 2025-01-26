@@ -329,7 +329,8 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
                 );
 
                 if (time != null && mounted) {
-                  // Show dialog for milliseconds with explicit confirmation
+                  // Show dialog for milliseconds with explicit confirmation.
+
                   final TextEditingController msController =
                       TextEditingController();
                   final milliseconds = await showDialog<int>(
