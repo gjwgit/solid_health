@@ -45,6 +45,7 @@ class IconGridPage extends StatelessWidget {
     Icons.vaccines,
     Icons.quiz,
     Icons.bar_chart,
+    Icons.table_chart,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -77,6 +78,7 @@ class IconGridPage extends StatelessWidget {
                   Icons.vaccines,
                   Icons.quiz,
                   Icons.bar_chart,
+                  Icons.table_chart,
                 }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
@@ -218,6 +220,22 @@ class IconGridPage extends StatelessWidget {
 
                   - Track progress towards health goals
                   
+                  ''',
+                  child: gestureDetector,
+                ),
+              Icons.table_chart => MarkdownTooltip(
+                  message: '''
+
+                  **Blood Pressure Data Editor:** Edit your blood pressure readings:
+
+                  - View all readings
+
+                  - Add new readings
+
+                  - Edit existing data
+                  
+                  - Delete records
+
                   ''',
                   child: gestureDetector,
                 ),
