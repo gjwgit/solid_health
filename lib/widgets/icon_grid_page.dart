@@ -223,6 +223,22 @@ class IconGridPage extends StatelessWidget {
                   ''',
                   child: gestureDetector,
                 ),
+              Icons.table_chart => MarkdownTooltip(
+                  message: '''
+
+                  **Blood Pressure Data Editor:** Edit your blood pressure readings:
+
+                  - View all readings
+
+                  - Add new readings
+
+                  - Edit existing data
+                  
+                  - Delete records
+
+                  ''',
+                  child: gestureDetector,
+                ),
               _ => gestureDetector,
             };
           }).toList(),
