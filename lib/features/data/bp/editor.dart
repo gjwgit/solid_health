@@ -32,7 +32,7 @@ import 'package:intl/intl.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/features/data/record.dart';
+import 'package:healthpod/features/data/bp/record.dart';
 
 /// Data Editor Page.
 ///
@@ -40,17 +40,17 @@ import 'package:healthpod/features/data/record.dart';
 /// Records are stored in encrypted format in the user's POD storage under the 'bp' directory.
 /// Each record contains timestamp, systolic/diastolic pressure, heart rate, feeling, and notes.
 
-class BPDataEditorPage extends StatefulWidget {
-  const BPDataEditorPage({super.key});
+class BPEditor extends StatefulWidget {
+  const BPEditor({super.key});
 
   @override
-  State<BPDataEditorPage> createState() => _BPDataEditorPageState();
+  State<BPEditor> createState() => _BPEditorState();
 }
 
-class _BPDataEditorPageState extends State<BPDataEditorPage> {
+class _BPEditorState extends State<BPEditor> {
   // List of blood pressure records loaded from POD.
 
-  List<DataRecord> records = [];
+  List<BPRecord> records = [];
 
   // Index of record currently being edited, null if no record is being edited.
 
@@ -73,7 +73,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   /// Loads blood pressure records from POD storage.
   ///
   /// Fetches all .enc.ttl files from the bp directory, decrypts them,
-  /// and parses them into DataRecord objects. Records are sorted by timestamp
+  /// and parses them into BPRecord objects. Records are sorted by timestamp
   /// in descending order (newest first).
 
   Future<void> loadData() async {
@@ -91,7 +91,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
 
       final resources = await getResourcesInContainer(dirUrl);
 
-      final List<DataRecord> loadedRecords = [];
+      final List<BPRecord> loadedRecords = [];
       for (final file in resources.files) {
         // Skip files that don't match expected naming pattern.
 
@@ -115,9 +115,9 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
             content != SolidFunctionCallStatus.notLoggedIn &&
             content != null) {
           try {
-            // Parse JSON content into a `DataRecord`.
+            // Parse JSON content into a `BPRecord`.
             final data = json.decode(content.toString());
-            loadedRecords.add(DataRecord.fromJson(data));
+            loadedRecords.add(BPRecord.fromJson(data));
           } catch (e) {
             debugPrint('Error parsing file $file: $e');
           }
@@ -147,7 +147,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   /// Creates or updates an encrypted file in the bp directory with the record data.
   /// File name is generated from the record's timestamp.
 
-  Future<void> saveRecord(DataRecord record) async {
+  Future<void> saveRecord(BPRecord record) async {
     try {
       // Delete old file if updating existing record.
 
@@ -199,7 +199,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   ///
   /// Removes the encrypted file corresponding to the record from the bp directory.
 
-  Future<void> deleteRecord(DataRecord record) async {
+  Future<void> deleteRecord(BPRecord record) async {
     try {
       // Generate the filename from the record's timestamp.
 
@@ -235,7 +235,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
     setState(() {
       records.insert(
           0,
-          DataRecord(
+          BPRecord(
             timestamp: DateTime.now(),
             systolic: 0,
             diastolic: 0,
@@ -252,7 +252,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   /// Displays formatted timestamp, systolic/diastolic pressure, heart rate,
   /// feeling, and notes as static text. Includes edit and delete action buttons.
 
-  DataRow _buildDisplayRow(DataRecord record, int index) {
+  DataRow _buildDisplayRow(BPRecord record, int index) {
     return DataRow(
       cells: [
         // Timestamp, systolic, diastolic, heart rate, feeling, and notes.
@@ -299,7 +299,7 @@ class _BPDataEditorPageState extends State<BPDataEditorPage> {
   /// a dropdown for feeling selection, and a notes field. Each field has its own
   /// controller and updates the record on change.
 
-  DataRow _buildEditingRow(DataRecord record, int index) {
+  DataRow _buildEditingRow(BPRecord record, int index) {
     final systolicController =
         TextEditingController(text: record.systolic.toString());
     final diastolicController =

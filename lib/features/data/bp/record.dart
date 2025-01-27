@@ -31,7 +31,7 @@ library;
 /// heart rate, subjective feeling, and any additional health notes. Provides JSON
 /// serialization and object copying functionality.
 
-class DataRecord {
+class BPRecord {
   /// When the measurement was taken.
 
   final DateTime timestamp;
@@ -56,7 +56,7 @@ class DataRecord {
 
   final String notes;
 
-  DataRecord({
+  BPRecord({
     required this.timestamp,
     required this.systolic,
     required this.diastolic,
@@ -65,13 +65,13 @@ class DataRecord {
     required this.notes,
   });
 
-  /// Creates a DataRecord from JSON data.
+  /// Creates a BPRecord from JSON data.
   ///
   /// Expects specific survey response format with blood pressure measurements,
   /// heart rate, feeling and notes stored under 'responses' key.
 
-  factory DataRecord.fromJson(Map<String, dynamic> json) {
-    return DataRecord(
+  factory BPRecord.fromJson(Map<String, dynamic> json) {
+    return BPRecord(
       timestamp: DateTime.parse(json['timestamp']),
       systolic: json['responses']["What's your systolic blood pressure?"],
       diastolic: json['responses']["What's your diastolic measurement?"],
@@ -102,7 +102,7 @@ class DataRecord {
   ///
   /// Any field not specified retains its original value.
 
-  DataRecord copyWith({
+  BPRecord copyWith({
     DateTime? timestamp,
     int? systolic,
     int? diastolic,
@@ -110,7 +110,7 @@ class DataRecord {
     String? feeling,
     String? notes,
   }) {
-    return DataRecord(
+    return BPRecord(
       timestamp: timestamp ?? this.timestamp,
       systolic: systolic ?? this.systolic,
       diastolic: diastolic ?? this.diastolic,
