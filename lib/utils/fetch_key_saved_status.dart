@@ -30,6 +30,7 @@ import 'package:solidpod/solidpod.dart'
     show KeyManager, SolidFunctionCallStatus, getEncKeyPath, readPod;
 
 /// This function verifies if an encryption key is available for the user by:
+///
 /// 1. Checking the encrypted key file in the POD
 /// 2. Verifying if a key exists in local storage
 ///

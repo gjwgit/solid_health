@@ -434,6 +434,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
           children: [
             /// Determines optimal column count based on screen width
             /// while preserving logical question sequence for keyboard navigation.
+
             LayoutBuilder(
               builder: (context, constraints) {
                 final optimalCount = constraints.maxWidth > 900

@@ -34,6 +34,7 @@ import 'package:solidpod/solidpod.dart' show getWebId;
 const String appTerms = 'https://solidcommunity.au/predicates/terms#';
 
 /// Serialise key/value pairs [keyValuePairs] in TTL format where
+///
 /// Subject: Web ID
 /// Predicate: Key
 /// Object: Value
@@ -59,6 +60,7 @@ Future<String> genTTLStr(
 }
 
 /// Parse TTL string [ttlStr] and returns the key-value pairs from triples where
+///
 /// Subject: Web ID
 /// Predicate: Key
 /// Object: Value
