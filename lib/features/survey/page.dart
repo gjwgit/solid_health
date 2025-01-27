@@ -46,33 +46,38 @@ import 'package:healthpod/features/survey/question.dart';
 class HealthSurveyPage extends StatelessWidget {
   final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
-      question: "What's your systolic blood pressure?",
+      question: HealthSurveyConstants.systolicBP,
+      fieldName: HealthSurveyConstants.fieldSystolic,
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 70,
       max: 200,
     ),
     HealthSurveyQuestion(
-      question: "What's your diastolic measurement?",
+      question: HealthSurveyConstants.diastolicBP,
+      fieldName: HealthSurveyConstants.fieldDiastolic,
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 40,
       max: 220,
     ),
     HealthSurveyQuestion(
-      question: "What's your heart rate?",
+      question: HealthSurveyConstants.heartRate,
+      fieldName: HealthSurveyConstants.fieldHeartRate,
       type: HealthDataType.number,
       unit: "bpm",
       min: 40,
       max: 220,
     ),
     HealthSurveyQuestion(
-      question: "How are you feeling?",
+      question: HealthSurveyConstants.feeling,
+      fieldName: HealthSurveyConstants.fieldFeeling,
       type: HealthDataType.categorical,
       options: ["Excellent", "Good", "Fair", "Poor"],
     ),
     HealthSurveyQuestion(
-      question: "Any additional notes about your health?",
+      question: HealthSurveyConstants.notes,
+      fieldName: HealthSurveyConstants.fieldNotes,
       type: HealthDataType.text,
       isRequired: false,
     ),

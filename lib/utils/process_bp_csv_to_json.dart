@@ -30,6 +30,7 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:healthpod/constants/survey_constants.dart';
 import 'package:healthpod/utils/round_timestamp_to_second.dart';
 import 'package:solidpod/solidpod.dart';
 
@@ -63,10 +64,10 @@ Future<bool> processBpCsvToJson(
 
     final headers = List<String>.from(fields[0]);
     final requiredColumns = [
-      'timestamp',
-      'systolic',
-      'diastolic',
-      'heart_rate'
+      HealthSurveyConstants.fieldTimestamp,
+      HealthSurveyConstants.fieldSystolic,
+      HealthSurveyConstants.fieldDiastolic,
+      HealthSurveyConstants.fieldHeartRate,
     ];
     final missingColumns = requiredColumns
         .where((col) => !headers
@@ -82,15 +83,15 @@ Future<bool> processBpCsvToJson(
 
         Your CSV file must contain these required columns:
 
-        - timestamp (e.g. 2025-01-21T23:05:42)
-        - systolic (e.g. 120)
-        - diastolic (e.g. 80)
-        - heart_rate (e.g. 72)
+        - ${HealthSurveyConstants.fieldTimestamp}
+        - ${HealthSurveyConstants.fieldSystolic}
+        - ${HealthSurveyConstants.fieldDiastolic}
+        - ${HealthSurveyConstants.heartRate}
 
         Optional columns:
 
-        - feeling (e.g. Good)
-        - notes (e.g. After exercise)
+        - ${HealthSurveyConstants.fieldFeeling}
+        - ${HealthSurveyConstants.fieldNotes}
 
         ''';
 
@@ -114,11 +115,11 @@ Future<bool> processBpCsvToJson(
         // Initialise response structure.
 
         final Map<String, dynamic> responses = {
-          "What's your systolic blood pressure?": 0,
-          "What's your diastolic measurement?": 0,
-          "What's your heart rate?": 0,
-          "How are you feeling?": "",
-          "Any additional notes about your health?": "",
+          HealthSurveyConstants.systolicBP: 0,
+          HealthSurveyConstants.diastolicBP: 0,
+          HealthSurveyConstants.heartRate: 0,
+          HealthSurveyConstants.feeling: "",
+          HealthSurveyConstants.notes: "",
         };
 
         String timestamp = "";
@@ -130,32 +131,31 @@ Future<bool> processBpCsvToJson(
           final value = row[j];
 
           switch (header) {
-            case 'timestamp':
+            case HealthSurveyConstants.fieldTimestamp:
               timestamp = roundTimestampToSecond(value.toString());
               if (!seenTimestamps.add(timestamp)) {
                 duplicateTimestamps.add(timestamp);
               }
-            case 'systolic':
-              responses["What's your systolic blood pressure?"] =
+            case HealthSurveyConstants.fieldSystolic:
+              responses[HealthSurveyConstants.systolicBP] =
                   int.parse(value.toString());
-            case 'diastolic':
-              responses["What's your diastolic measurement?"] =
+            case HealthSurveyConstants.fieldDiastolic:
+              responses[HealthSurveyConstants.diastolicBP] =
                   int.parse(value.toString());
-            case 'heart_rate':
-              responses["What's your heart rate?"] =
+            case HealthSurveyConstants.fieldHeartRate:
+              responses[HealthSurveyConstants.heartRate] =
                   int.parse(value.toString());
-            case 'feeling':
-              responses["How are you feeling?"] = value.toString();
-            case 'notes':
-              responses["Any additional notes about your health?"] =
-                  value.toString();
+            case HealthSurveyConstants.fieldFeeling:
+              responses[HealthSurveyConstants.feeling] = value.toString();
+            case HealthSurveyConstants.fieldNotes:
+              responses[HealthSurveyConstants.notes] = value.toString();
           }
         }
 
         // Prepare JSON data.
 
         final jsonData = {
-          'timestamp': timestamp,
+          HealthSurveyConstants.fieldTimestamp: timestamp,
           'responses': responses,
         };
 
