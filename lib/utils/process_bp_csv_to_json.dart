@@ -86,7 +86,7 @@ Future<bool> processBpCsvToJson(
         - ${HealthSurveyConstants.fieldTimestamp}
         - ${HealthSurveyConstants.fieldSystolic}
         - ${HealthSurveyConstants.fieldDiastolic}
-        - ${HealthSurveyConstants.heartRate}
+        - ${HealthSurveyConstants.fieldHeartRate}
 
         Optional columns:
 
