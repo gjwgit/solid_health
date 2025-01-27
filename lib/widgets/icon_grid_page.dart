@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Monday 2025-01-13 15:13:43 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-01-27 16:22:20 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -44,7 +44,7 @@ class IconGridPage extends StatelessWidget {
     Icons.folder,
     Icons.vaccines,
     Icons.quiz,
-    Icons.bar_chart,
+    Icons.show_chart,
     Icons.table_chart,
     Icons.approval,
     Icons.lightbulb,
@@ -77,7 +77,7 @@ class IconGridPage extends StatelessWidget {
                   Icons.folder,
                   Icons.vaccines,
                   Icons.quiz,
-                  Icons.bar_chart,
+                  Icons.show_chart,
                   Icons.table_chart,
                 }.contains(icon)
                     ? Colors.blue
@@ -137,7 +137,7 @@ class IconGridPage extends StatelessWidget {
                           builder: (context) => HealthSurveyPage()),
                     );
                     break;
-                  case Icons.bar_chart:
+                  case Icons.show_chart:
                     await fetchAndNavigateToVisualisation(context);
                     break;
                   default:
@@ -198,15 +198,15 @@ class IconGridPage extends StatelessWidget {
               Icons.quiz => MarkdownTooltip(
                   message: '''
 
-                  **Health Survey:** Tap here to start the Health Survey. 
-                  This allows you to answer important health-related questions, 
-                  track your responses, and share them securely with your healthcare 
+                  **Health Survey:** Tap here to start the Health Survey.
+                  This allows you to answer important health-related questions,
+                  track your responses, and share them securely with your healthcare
                   provider if needed.
 
                   ''',
                   child: gestureDetector,
                 ),
-              Icons.bar_chart => MarkdownTooltip(
+              Icons.show_chart => MarkdownTooltip(
                   message: '''
 
                   **Data Visualisation:** Tap here to access interactive data
@@ -219,7 +219,7 @@ class IconGridPage extends StatelessWidget {
                   - Generate comprehensive health reports
 
                   - Track progress towards health goals
-                  
+
                   ''',
                   child: gestureDetector,
                 ),
@@ -233,7 +233,7 @@ class IconGridPage extends StatelessWidget {
                   - Add new readings
 
                   - Edit existing data
-                  
+
                   - Delete records
 
                   ''',
