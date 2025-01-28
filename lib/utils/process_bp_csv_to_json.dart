@@ -32,6 +32,9 @@ import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/survey.dart';
+import 'package:healthpod/utils/format_timestamp_for_display.dart';
+import 'package:healthpod/utils/is_valid_timestamp.dart';
+import 'package:healthpod/utils/normalise_timestamp.dart';
 import 'package:healthpod/utils/round_timestamp_to_second.dart';
 import 'package:healthpod/utils/show_alert.dart';
 import 'package:solidpod/solidpod.dart';
@@ -133,8 +136,21 @@ Future<bool> processBpCsvToJson(
           switch (header) {
             case HealthSurveyConstants.fieldTimestamp:
               timestamp = roundTimestampToSecond(value.toString());
+
+              // Parse timestamp and normalise it to include 'T'.
+
+              timestamp = normaliseTimestamp(value.toString());
+
+              // Check if timestamp is valid (i.e. in ISO format with or without 'T').
+
+              if (!isValidTimestamp(timestamp)) {
+                throw FormatException('Invalid timestamp format: $value');
+              }
+
+              // Format duplicatge timestamp for later display.
+
               if (!seenTimestamps.add(timestamp)) {
-                duplicateTimestamps.add(timestamp);
+                duplicateTimestamps.add(formatTimestampForDisplay(timestamp));
               }
             case HealthSurveyConstants.fieldSystolic:
               responses[HealthSurveyConstants.systolicBP] =
