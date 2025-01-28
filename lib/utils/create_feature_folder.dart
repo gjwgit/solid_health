@@ -39,11 +39,11 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
   required String featureName,
   required BuildContext context,
   bool createInitFile = true,
-  void Function(bool)? onProgressChange,
-  void Function()? onSuccess,
+  required void Function(bool) onProgressChange,
+  required void Function() onSuccess,
 }) async {
   try {
-    onProgressChange?.call(true);
+    onProgressChange.call(true);
 
     // Check current resources.
 
@@ -55,7 +55,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     bool existsAsDir = resources.subDirs.contains(featureName);
     if (existsAsDir) {
       debugPrint('Feature folder $featureName already exists as directory');
-      onSuccess?.call();
+      onSuccess.call();
       return SolidFunctionCallStatus.success;
     }
 
@@ -110,7 +110,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
       );
 
       if (initResult == SolidFunctionCallStatus.success) {
-        onSuccess?.call();
+        onSuccess.call();
         return SolidFunctionCallStatus.success;
       }
     }
@@ -120,6 +120,6 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     debugPrint('Error creating feature folder: $e');
     return SolidFunctionCallStatus.fail;
   } finally {
-    onProgressChange?.call(false);
+    onProgressChange.call(false);
   }
 }
