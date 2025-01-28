@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/data/bp/editor.dart';
 import 'package:healthpod/features/survey/page.dart';
 import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
@@ -139,6 +140,14 @@ class IconGridPage extends StatelessWidget {
                     break;
                   case Icons.show_chart:
                     await fetchAndNavigateToVisualisation(context);
+                    break;
+                  case Icons.table_chart:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BPEditor(),
+                      ),
+                    );
                     break;
                   default:
                     showComingSoon(context); // For other features.
