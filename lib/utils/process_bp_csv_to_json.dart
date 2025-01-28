@@ -147,7 +147,7 @@ Future<bool> processBpCsvToJson(
                 throw FormatException('Invalid timestamp format: $value');
               }
 
-              // Format duplicatge timestamp for later display.
+              // Format duplicate timestamp for later display.
 
               if (!seenTimestamps.add(timestamp)) {
                 duplicateTimestamps.add(formatTimestampForDisplay(timestamp));
