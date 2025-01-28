@@ -54,8 +54,7 @@ class BPVisualisation extends StatefulWidget {
   });
 
   @override
-  State<BPVisualisation> createState() =>
-      _BPVisualisationState();
+  State<BPVisualisation> createState() => _BPVisualisationState();
 }
 
 class _BPVisualisationState extends State<BPVisualisation> {

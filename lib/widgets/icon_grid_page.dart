@@ -134,8 +134,7 @@ class IconGridPage extends StatelessWidget {
                   case Icons.quiz:
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => BPSurvey()),
+                      MaterialPageRoute(builder: (context) => BPSurvey()),
                     );
                     break;
                   case Icons.show_chart:
